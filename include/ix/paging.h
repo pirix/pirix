@@ -1,5 +1,4 @@
-#ifndef IX_PAGING_H
-#define IX_PAGING_H
+#pragma once
 
 #define TTE_NP 0x000
 #define TTE_CP 0x001
@@ -25,5 +24,3 @@ void paging_activate_transition_table(unsigned* ttable);
 unsigned paging_map_kernel(unsigned phys);
 void paging_invalidate_tlb();
 void paging_invalidate_tlb_entry(unsigned entry);
-
-#endif

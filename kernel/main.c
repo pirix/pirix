@@ -2,6 +2,7 @@
 #include <ix/irq.h>
 #include <ix/memory.h>
 #include <ix/paging.h>
+#include <ix/kheap.h>
 #include <ix/kprint.h>
 
 void panic() {
@@ -18,13 +19,18 @@ void main() {
     kputs(":: Init Paging\n");
     paging_init();
 
+    kputs(":: Init Heap\n");
+    kheap_init();
+    kprintf("alloc: %p\n", kmalloc(4));
+
+    kputs(":: Load Initrd\n");
     initrd_load();
 
     kputs(":: Init Interrupts\n");
     irq_init();
 
     kputs(":: Start Timer\n");
-    timer_init();
+    //timer_init();
 
     for (;;);
 }

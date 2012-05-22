@@ -1,5 +1,4 @@
-#ifndef IX_FS_H
-#define IX_FS_H
+#pragma once
 
 #define FS_FILE       0x01
 #define FS_DIRECTORY  0x02
@@ -51,5 +50,3 @@ void fs_open(fs_node* node, char read, char write);
 void fs_close(fs_node* node);
 dirent* fs_readdir(fs_node* node, unsigned index);
 fs_node* fs_finddir(fs_node* node, char* name);
-
-#endif

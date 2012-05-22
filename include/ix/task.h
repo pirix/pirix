@@ -1,5 +1,4 @@
-#ifndef IX_TASK_H
-#define IX_TASK_H
+#pragma once
 
 #include <ix/cpu.h>
 #include <ix/paging.h>
@@ -12,5 +11,3 @@ typedef struct task {
 
 task* task_new(void* entry);
 cpu_state* task_schedule(cpu_state* state);
-
-#endif

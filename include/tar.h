@@ -1,5 +1,4 @@
-#ifndef TAR_H
-#define TAR_H
+#pragma once
 
 struct tar_header {
     char filename[100];
@@ -19,5 +18,3 @@ struct tar_header {
     char devminor[8];
     char prefix[155];
 };
-
-#endif
