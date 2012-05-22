@@ -14,7 +14,7 @@
 #define PTE_ADDRESS_MASK 0xfffff000
 
 typedef struct paging_context {
-  unsigned* ttable;
+    unsigned* ttable;
 } paging_context;
 
 void paging_init();

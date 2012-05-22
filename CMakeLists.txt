@@ -15,7 +15,6 @@ set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS)
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
-add_subdirectory(lib)
 add_subdirectory(kernel)
 add_subdirectory(user)
 
@@ -47,8 +46,6 @@ add_executable(ix
   $<TARGET_OBJECTS:kernel>
   initrd.o
 )
-
-target_link_libraries(ix c)
 
 set_target_properties(ix
   PROPERTIES

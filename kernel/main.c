@@ -2,28 +2,29 @@
 #include <ix/irq.h>
 #include <ix/memory.h>
 #include <ix/paging.h>
+#include <ix/kprint.h>
 
 void panic() {
-  serial_puts("\nKernel Panic!\n");
-  for (;;);
+    kputs("\nKernel Panic!\n");
+    for (;;);
 }
 
 void main() {
-  serial_puts("IX VERSION 0.1 BOOTING...\n\n");
+    kputs("IX VERSION 0.1 BOOTING...\n\n");
 
-  serial_puts(":: Init Memory\n");
-  memory_init();
+    kputs(":: Init Memory\n");
+    memory_init();
 
-  serial_puts(":: Init Paging\n");
-  paging_init();
+    kputs(":: Init Paging\n");
+    paging_init();
 
-  initrd_load();
+    initrd_load();
 
-  serial_puts(":: Init Interrupts\n");
-  irq_init();
+    kputs(":: Init Interrupts\n");
+    irq_init();
 
-  serial_puts(":: Start Timer\n");
-  timer_init();
+    kputs(":: Start Timer\n");
+    timer_init();
 
-  for (;;);
+    for (;;);
 }

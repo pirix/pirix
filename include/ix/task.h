@@ -5,9 +5,9 @@
 #include <ix/paging.h>
 
 typedef struct task {
-  struct task* next;
-  cpu_state* state;
-  paging_context* paging_context;
+    struct task* next;
+    cpu_state* state;
+    paging_context* paging_context;
 } task;
 
 task* task_new(void* entry);

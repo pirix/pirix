@@ -15,4 +15,6 @@ add_library(kernel OBJECT
   div.c
   serial.c
   initrd.c
+  string.c
+  kprint.c
 )

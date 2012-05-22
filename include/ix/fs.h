@@ -20,27 +20,27 @@ typedef struct dirent* (readdir_handler)(struct fs_node*, unsigned);
 typedef struct fs_node* (finddir_handler)(struct fs_node*, char *name);
 
 typedef struct fs_node {
-  char name[128];
-  unsigned mask;
-  unsigned uid;
-  unsigned gid;
-  unsigned flags;
-  unsigned length;
-  unsigned impl;
+    char name[128];
+    unsigned mask;
+    unsigned uid;
+    unsigned gid;
+    unsigned flags;
+    unsigned length;
+    unsigned impl;
 
-  read_handler* read;
-  write_handler* write;
-  open_handler* open;
-  close_handler* close;
-  readdir_handler* readdir;
-  finddir_handler* finddir;
+    read_handler* read;
+    write_handler* write;
+    open_handler* open;
+    close_handler* close;
+    readdir_handler* readdir;
+    finddir_handler* finddir;
 
-  struct fs_node* ptr;
+    struct fs_node* ptr;
 } fs_node;
 
 typedef struct dirent {
-  char name[128];
-  unsigned ino;
+    char name[128];
+    unsigned ino;
 } dirent;
 
 extern fs_node* fs_root;
