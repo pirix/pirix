@@ -19,10 +19,6 @@ void main() {
     kputs(":: Init Paging\n");
     paging_init();
 
-    kputs(":: Init Heap\n");
-    kheap_init();
-    kprintf("alloc: %p\n", kmalloc(4));
-
     kputs(":: Load Initrd\n");
     initrd_load();
 
@@ -30,7 +26,7 @@ void main() {
     irq_init();
 
     kputs(":: Start Timer\n");
-    //timer_init();
+    timer_init();
 
     for (;;);
 }

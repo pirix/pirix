@@ -3,27 +3,59 @@
 #include <ix/paging.h>
 #include <string.h>
 
-heap kheap;
+#define BUCKET_COUNT 16
 
-void kheap_init() {
-    memset(&kheap, 0, sizeof(heap));
-    kheap.start = 0;
-    kheap.end = 0;
+typedef struct kheap_block {
+    struct kheap_block* next;
+} kheap_block;
 
-    kheap.state.used_bytes = 0;
-    kheap.state.block_count = 0;
-    kheap.state.vmem_mark = kheap.start + 4096;
+static kheap_block* kheap_bucket[BUCKET_COUNT];
 
+static int kheap_bucket_find(size_t size) {
+    int bucket = BUCKET_COUNT;
+
+    for (int i = 0; i < BUCKET_COUNT; i++) {
+        if (size <= WORD_SIZE*(1 << i)) {
+            bucket = i;
+            break;
+        }
+    }
+
+    return bucket;
+}
+
+static void kheap_slab_create(int bucket) {
     unsigned phys = memory_alloc();
     unsigned virt = paging_map_kernel(phys);
+    unsigned* slab = (unsigned*)virt;
 
-    kheap.state.valid = 1;
+    for (int i = 0; i < PAGE_SIZE/WORD_SIZE; i += (1 << bucket)) {
+        kfree(&slab[i], WORD_SIZE*(1<<bucket));
+    }
 }
 
 void* kmalloc(size_t size) {
-    return 0;
+    int bucket = kheap_bucket_find(size);
+
+    if (bucket > BUCKET_COUNT) return NULL;
+
+    if (!kheap_bucket[bucket]) {
+        kheap_slab_create(bucket);
+    }
+
+    kheap_block* block = kheap_bucket[bucket];
+    kheap_bucket[bucket] = block->next;
+
+    return block;
 }
 
-void kfree(void* addr) {
+void kfree(void* addr, size_t size) {
+    int bucket = kheap_bucket_find(size);
 
+    if (bucket > BUCKET_COUNT) return;
+
+    kheap_block* block = addr;
+
+    block->next = kheap_bucket[bucket];
+    kheap_bucket[bucket] = block;
 }

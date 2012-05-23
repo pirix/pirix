@@ -1,5 +1,7 @@
 #pragma once
 
+#define PAGE_SIZE 4096
+
 #define TTE_NP 0x000
 #define TTE_CP 0x001
 #define TTE_TM 0x003

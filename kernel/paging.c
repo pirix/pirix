@@ -2,7 +2,6 @@
 #include <ix/memory.h>
 #include <string.h>
 
-#define WORD_SIZE (sizeof(unsigned))
 #define KERNEL_PT ((unsigned*)0x00100000)
 
 static paging_context* kernel_context = NULL;

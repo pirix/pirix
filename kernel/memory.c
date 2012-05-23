@@ -1,8 +1,7 @@
+#include <ix/memory.h>
 #include <string.h>
 
 #define BITMAP_SIZE 1024
-#define WORD_SIZE (sizeof(unsigned))
-#define WORD_BITS (WORD_SIZE*8)
 
 static unsigned bitmap[BITMAP_SIZE];
 
