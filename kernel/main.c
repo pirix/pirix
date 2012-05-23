@@ -13,6 +13,8 @@ void panic() {
 void main() {
     kputs("IX VERSION 0.1 BOOTING...\n\n");
 
+    video_init();
+
     kputs(":: Init Memory\n");
     memory_init();
 

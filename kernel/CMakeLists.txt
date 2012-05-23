@@ -13,7 +13,6 @@ add_library(kernel OBJECT
   syscall.c
   fs.c
   div.c
-  serial.c
   initrd.c
   string.c
   kprint.c
