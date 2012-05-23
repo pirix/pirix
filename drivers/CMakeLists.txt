@@ -1,4 +1,4 @@
 add_library(drivers OBJECT
   video/pl110.c
-  serial.c
+  serial/pl011.c
 )
