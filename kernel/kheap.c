@@ -49,6 +49,12 @@ void* kmalloc(size_t size) {
     return block;
 }
 
+void* kcalloc(int count, size_t size) {
+    void* ptr = kmalloc(size);
+    memset(ptr, 0, size*count);
+    return ptr;
+}
+
 void kfree(void* addr, size_t size) {
     int bucket = kheap_bucket_find(size);
 
