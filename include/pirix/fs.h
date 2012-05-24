@@ -23,6 +23,7 @@ typedef struct fs_node {
     unsigned mask;
     unsigned uid;
     unsigned gid;
+    unsigned inode;
     unsigned flags;
     unsigned length;
     unsigned impl;
@@ -31,6 +32,7 @@ typedef struct fs_node {
     write_handler* write;
     open_handler* open;
     close_handler* close;
+
     readdir_handler* readdir;
     finddir_handler* finddir;
 

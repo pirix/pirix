@@ -1,9 +1,28 @@
+#include <pirix/initrd.h>
+#include <pirix/kheap.h>
 #include <tar.h>
 #include <string.h>
 
-extern char _binary_initrd_start;
-extern char _binary_initrd_end;
-extern char _binary_initrd_size;
+extern tar_header _binary_initrd_start;
+static tar_header* initrd_header = &_binary_initrd_start;
+
+static fs_node*  initrd_root;
+static fs_node*  initrd_nodes;
+static unsigned* initrd_files;
+static int       initrd_file_count;
+
+static unsigned initrd_read(fs_node* node, unsigned offset, unsigned size, char* buffer) {
+    char* data = (char*)initrd_files[node->inode];
+
+    if (offset > node->length) return 0;
+
+    if (offset+size > node->length) {
+        size = node->length - offset;
+    }
+
+    memcpy(buffer, data, size);
+    return size;
+}
 
 static long read_octal(char* ptr, int length) {
     long result = 0;
@@ -22,21 +41,45 @@ static long read_octal(char* ptr, int length) {
     return result;
 }
 
-void initrd_load() {
-    char* ptr = &_binary_initrd_start;
+static int initrd_count_files() {
+    int count = 0;
+    tar_header* header = initrd_header;
+    while (header->filename[0]) {
+        header += read_octal(header->size, 12);
+        header += TAR_HEADER_SIZE;
+        count++;
+    }
+    return count;
+}
 
-    struct tar_header* header = (struct tar_header*)ptr;
+fs_node* initrd_load() {
+    // create root directory
+    initrd_root = kcalloc(1, sizeof(fs_node));
+    initrd_root->flags = FS_DIRECTORY;
+    initrd_root->readdir = 0;
+    initrd_root->finddir = 0;
 
-    char filename[10];
-    strncpy(filename, header->filename, 100);
+    initrd_file_count = initrd_count_files();
 
-    long size = read_octal(header->size, 12);
+    // allocate space
+    initrd_nodes = kcalloc(initrd_file_count, sizeof(fs_node));
+    initrd_files = kmalloc(sizeof(unsigned*) * initrd_file_count);
 
-    char checksum[8];
-    strncpy(checksum, header->chksum, 8);
+    tar_header* header = initrd_header;
+    for (int i = 0; i < initrd_file_count; i++) {
+        fs_node* node = initrd_nodes + i;
 
-    char magic[6];
-    strncpy(magic, header->magic, 6);
+        // save a pointer to the actual data
+        initrd_files[i] = (unsigned)header + TAR_HEADER_SIZE;
 
-    char* file = ptr+512;
+        strncpy(node->name, header->filename, 100);
+        node->length = read_octal(header->size, 12);
+        node->inode = i;
+        node->flags = FS_FILE;
+        node->read = &initrd_read;
+
+        header += TAR_HEADER_SIZE + node->length;
+    }
+
+    return initrd_root;
 }

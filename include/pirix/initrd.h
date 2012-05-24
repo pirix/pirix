@@ -1,3 +1,5 @@
 #pragma once
 
-void initrd_load();
+#include <pirix/fs.h>
+
+fs_node* initrd_load();

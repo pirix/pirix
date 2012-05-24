@@ -1,6 +1,8 @@
 #pragma once
 
-struct tar_header {
+#define TAR_HEADER_SIZE 512
+
+typedef struct tar_header {
     char filename[100];
     char mode[8];
     char uid[8];
@@ -17,4 +19,4 @@ struct tar_header {
     char devmajor[8];
     char devminor[8];
     char prefix[155];
-};
+} tar_header;
