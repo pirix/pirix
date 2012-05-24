@@ -27,6 +27,15 @@ task* task_new(void* entry) {
     return new_task;
 }
 
+void task_exit(int retval) {
+    task* t = first_task;
+    while (t->next != current_task) {
+        t = t->next;
+    }
+    t->next = current_task->next;
+    return;
+}
+
 cpu_state* task_schedule(cpu_state* state) {
     if (current_task) {
         current_task->state = state;

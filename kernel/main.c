@@ -1,9 +1,10 @@
+#include <ix/kprint.h>
 #include <ix/task.h>
 #include <ix/irq.h>
 #include <ix/memory.h>
 #include <ix/paging.h>
 #include <ix/kheap.h>
-#include <ix/kprint.h>
+#include <ix/initrd.h>
 
 void panic() {
     kputs("\nKernel Panic!\n");

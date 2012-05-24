@@ -10,4 +10,5 @@ typedef struct task {
 } task;
 
 task* task_new(void* entry);
+void task_exit(int retval);
 cpu_state* task_schedule(cpu_state* state);
