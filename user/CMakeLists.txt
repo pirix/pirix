@@ -1,8 +1,7 @@
-set(CMAKE_ASM_COMPILER arm-elf-ix-as)
-set(CMAKE_ASM_FLAGS "-march=armv6 -mfpu=fpa -mfloat-abi=hard")
+set(CMAKE_C_COMPILER arm-elf-pirix-gcc)
+set(CMAKE_C_FLAGS "-mtune=arm1176jzf-s -march=armv6  -mfpu=fpa -mfloat-abi=hard -Wall -Wextra -std=gnu99")
 
-set(CMAKE_C_COMPILER arm-elf-ix-gcc)
-set(CMAKE_C_FLAGS "-mtune=arm1176jzf-s -mfpu=fpa -mfloat-abi=hard -march=armv6 -ffreestanding -nostartfiles -nostdinc -nodefaultlibs -Wall -Wextra -fno-stack-protector -std=gnu99")
+set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES "")
 
 add_executable(init
   init.c

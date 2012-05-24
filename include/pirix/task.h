@@ -1,7 +1,7 @@
 #pragma once
 
-#include <ix/cpu.h>
-#include <ix/paging.h>
+#include <pirix/cpu.h>
+#include <pirix/paging.h>
 
 typedef struct task {
     struct task* next;

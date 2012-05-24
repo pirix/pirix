@@ -1,4 +1,4 @@
-#include <ix/fs.h>
+#include <pirix/fs.h>
 
 fs_node* fs_root;
 

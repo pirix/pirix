@@ -1,6 +1,6 @@
-#include <ix/syscall.h>
-#include <ix/task.h>
-#include <ix/kprint.h>
+#include <pirix/syscall.h>
+#include <pirix/task.h>
+#include <pirix/kprint.h>
 
 typedef int stat;
 typedef int clock;

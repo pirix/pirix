@@ -1,4 +1,4 @@
-project(ix C)
+project(pirix C)
 cmake_minimum_required(VERSION 2.8)
 
 set(CMAKE_LINKER arm-elf-ld)
@@ -16,6 +16,7 @@ set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS)
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
 add_subdirectory(kernel)
+add_subdirectory(lib)
 add_subdirectory(drivers)
 add_subdirectory(user)
 
@@ -43,13 +44,14 @@ add_custom_command(
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 )
 
-add_executable(ix
+add_executable(pirix
   $<TARGET_OBJECTS:kernel>
+  $<TARGET_OBJECTS:lib>
   $<TARGET_OBJECTS:drivers>
   initrd.o
 )
 
-set_target_properties(ix
+set_target_properties(pirix
   PROPERTIES
   LINK_FLAGS "-T ${CMAKE_SOURCE_DIR}/kernel/link.ld"
   LINKER_LANGUAGE C
@@ -58,13 +60,13 @@ set_target_properties(ix
 add_custom_target(debug)
 add_custom_command(
   TARGET debug
-  DEPENDS ix
-  COMMAND qemu-system-arm -cpu arm1176 -kernel ${CMAKE_BINARY_DIR}/ix -nographic -S -s
+  DEPENDS pirix
+  COMMAND qemu-system-arm -cpu arm1176 -kernel ${CMAKE_BINARY_DIR}/pirix -nographic -S -s
 )
 
 add_custom_target(qemu)
 add_custom_command(
   TARGET qemu
-  DEPENDS ix
-  COMMAND qemu-system-arm -cpu arm1176 -kernel ${CMAKE_BINARY_DIR}/ix -nographic
+  DEPENDS pirix
+  COMMAND qemu-system-arm -cpu arm1176 -kernel ${CMAKE_BINARY_DIR}/pirix -nographic
 )

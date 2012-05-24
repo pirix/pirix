@@ -1,4 +1,4 @@
-#include <ix/irq.h>
+#include <pirix/irq.h>
 
 static unsigned int* ic_regs = (unsigned int*)0x14000000;
 static irq_handler* irq_handlers[32];

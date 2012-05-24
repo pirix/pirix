@@ -1,4 +1,4 @@
-#include <ix/kprint.h>
+#include <pirix/kprint.h>
 #include <stdarg.h>
 
 void kprintf(const char* fmt, ...) {

@@ -1,5 +1,5 @@
-#include <ix/irq.h>
-#include <ix/task.h>
+#include <pirix/irq.h>
+#include <pirix/task.h>
 
 static unsigned* timers[] = {
     (unsigned*)0x13000000,

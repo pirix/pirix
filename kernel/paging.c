@@ -1,5 +1,5 @@
-#include <ix/paging.h>
-#include <ix/memory.h>
+#include <pirix/paging.h>
+#include <pirix/memory.h>
 #include <string.h>
 
 #define KERNEL_PT ((unsigned*)0x00100000)

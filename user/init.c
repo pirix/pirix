@@ -1,5 +1,6 @@
-void _start() {
-    int a = 5;
-    int b = 10;
+#include <stdio.h>
+
+int main(int argc, char* argv[]) {
+    puts("init");
     for (;;);
 }

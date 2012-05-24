@@ -1,5 +1,5 @@
-#include <ix/task.h>
-#include <ix/kheap.h>
+#include <pirix/task.h>
+#include <pirix/kheap.h>
 
 #define STACK_SIZE 4096
 

@@ -14,6 +14,5 @@ add_library(kernel OBJECT
   fs.c
   div.c
   initrd.c
-  string.c
   kprint.c
 )

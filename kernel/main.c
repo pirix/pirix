@@ -1,10 +1,10 @@
-#include <ix/kprint.h>
-#include <ix/task.h>
-#include <ix/irq.h>
-#include <ix/memory.h>
-#include <ix/paging.h>
-#include <ix/kheap.h>
-#include <ix/initrd.h>
+#include <pirix/kprint.h>
+#include <pirix/task.h>
+#include <pirix/irq.h>
+#include <pirix/memory.h>
+#include <pirix/paging.h>
+#include <pirix/kheap.h>
+#include <pirix/initrd.h>
 
 void panic() {
     kputs("\nKernel Panic!\n");
@@ -12,7 +12,7 @@ void panic() {
 }
 
 void main() {
-    kputs("IX VERSION 0.1 BOOTING...\n\n");
+    kputs("PIRIX VERSION 0.1 BOOTING...\n\n");
 
     video_init();
 
