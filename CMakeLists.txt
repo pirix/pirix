@@ -16,8 +16,8 @@ set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS)
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
 add_subdirectory(kernel)
-add_subdirectory(lib)
 add_subdirectory(drivers)
+add_subdirectory(lib)
 add_subdirectory(user)
 
 set(INITRD_FILES

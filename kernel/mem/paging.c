@@ -80,7 +80,7 @@ void paging_activate_context(paging_context* context) {
     paging_invalidate_tlb();
 }
 
-void paging_init() {
+int paging_init() {
     kernel_context = paging_create_context();
 
     for (unsigned addr = 0; addr < 0x20000000; addr += 0x1000) {
@@ -89,4 +89,6 @@ void paging_init() {
 
     paging_activate_context(kernel_context);
     paging_enable();
+
+    return 0;
 }

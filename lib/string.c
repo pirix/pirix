@@ -50,8 +50,8 @@ char* strncat(char* dest, const char* src, size_t num) {
 }
 
 int strcmp(const char* str1, const char* str2) {
-    for (int i = 0; str1 && str2; i++) {
-        if (str1 != str2) return i;
+    for (int i = 0; *str1 && *str2; i++) {
+        if (*(str1++) != *(str2++)) return i;
     }
     return 0;
 }

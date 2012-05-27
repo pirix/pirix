@@ -5,8 +5,9 @@
 
 static unsigned bitmap[BITMAP_SIZE];
 
-void memory_init(void) {
+int memory_init() {
     memset(bitmap+16, 0xff, (BITMAP_SIZE-16)*WORD_SIZE);
+    return 0;
 }
 
 unsigned memory_alloc(void) {

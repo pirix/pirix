@@ -14,7 +14,7 @@ typedef struct pl110_mmio {
     unsigned control;
 } pl110_mmio;
 
-void video_init() {
+int video_init() {
     pl110_mmio* plio = (pl110_mmio*)PL110_IOBASE;
 
     plio->tim0 = 0x3f1f3f9c;
@@ -22,4 +22,6 @@ void video_init() {
     plio->upbase = 0x200000;
 
     plio->control = 0x1829;
+
+    return 0;
 }

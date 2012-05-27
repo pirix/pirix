@@ -1,18 +1,18 @@
 add_library(kernel OBJECT
   init.s
   main.c
-  paging.c
-  paging.s
-  memory.c
-  kheap.c
-  irq.s
-  irq.c
-  timer.c
-  task.c
-  syscall.s
-  syscall.c
-  fs.c
-  div.c
-  initrd.c
-  kprint.c
+  mem/paging.c
+  mem/paging.s
+  mem/memory.c
+  mem/kheap.c
+  dev/irq.s
+  dev/irq.c
+  dev/timer.c
+  sys/task.c
+  sys/syscall.s
+  sys/syscall.c
+  sys/kprint.c
+  fs/fs.c
+  fs/file.c
+  fs/initrd.c
 )

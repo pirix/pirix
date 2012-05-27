@@ -18,7 +18,7 @@ typedef struct paging_context {
     unsigned* ttable;
 } paging_context;
 
-void paging_init();
+int paging_init();
 void paging_enable();
 paging_context* paging_create_context();
 void paging_activate_context(paging_context* context);

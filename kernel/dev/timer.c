@@ -19,7 +19,7 @@ cpu_state* schedule_timer(cpu_state* state) {
     return task_schedule(state);
 }
 
-void timer_init() {
+int timer_init() {
     /*
     // initialize the clock timer
     timers[0][0] = (10000 + 128) / 256;
@@ -31,4 +31,6 @@ void timer_init() {
     timers[1][0] = (10000 + 128) / 256;
     timers[1][2] = 0xea;
     irq_register(6, &schedule_timer);
+
+    return 0;
 }

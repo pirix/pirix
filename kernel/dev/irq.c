@@ -3,10 +3,11 @@
 static unsigned int* ic_regs = (unsigned int*)0x14000000;
 static irq_handler* irq_handlers[32];
 
-void irq_init() {
+int irq_init() {
     // unmap all irqs
     ic_regs[3] = 0xffffffff;
     irq_enable();
+    return 0;
 }
 
 void irq_register(unsigned irq, irq_handler* handler) {
