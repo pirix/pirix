@@ -28,7 +28,7 @@ following commands:
     sudo make gcc-install
 
     make newlib-make
-    make newlib-install
+    sudo make newlib-install
 
 Now you are ready to compile the kernel. πrix uses cmake and it's
 better to run and out-of-source build to keep the source directory
