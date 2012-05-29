@@ -1,13 +1,13 @@
 project(pirix C)
 cmake_minimum_required(VERSION 2.8)
 
-set(CMAKE_LINKER arm-elf-ld)
+set(CMAKE_LINKER arm-elf-pirix-ld)
 
-set(CMAKE_ASM_COMPILER arm-elf-as)
+set(CMAKE_ASM_COMPILER arm-elf-pirix-as)
 set(CMAKE_ASM_FLAGS "-march=armv6 -mfpu=fpa -mfloat-abi=hard")
 enable_language(ASM)
 
-set(CMAKE_C_COMPILER arm-elf-gcc)
+set(CMAKE_C_COMPILER arm-elf-pirix-gcc)
 set(CMAKE_C_FLAGS "-mtune=arm1176jzf-s -mfpu=fpa -mfloat-abi=hard -march=armv6 -ffreestanding -nostartfiles -nostdinc -nodefaultlibs -Wall -Wextra -fno-stack-protector -std=gnu99")
 
 set(CMAKE_C_SKIP_RPATH ON)

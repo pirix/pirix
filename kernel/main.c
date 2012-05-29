@@ -33,11 +33,6 @@ void main() {
     init("irqs", &irq_init);
     init("timer", &timer_init);
 
-    fs_node* f = fs_dir_read(fs_root, "user/init");
-    char buff[2000];
-    elf_init(fs_read(f, );
-    kputs("p");
-
     kputs("\nReady.");
 
     for (;;);
