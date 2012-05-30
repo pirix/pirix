@@ -1,4 +1,5 @@
 project(pirix C)
+set(VERSION 0.1)
 cmake_minimum_required(VERSION 2.8)
 
 set(CMAKE_LINKER arm-elf-pirix-ld)
@@ -70,3 +71,10 @@ add_custom_command(
   DEPENDS pirix
   COMMAND qemu-system-arm -cpu arm1176 -kernel ${CMAKE_BINARY_DIR}/pirix -nographic
 )
+
+###### DOXYGEN
+find_package(Doxygen)
+if(DOXYGEN_FOUND)
+    configure_file(${CMAKE_SOURCE_DIR}/doc/Doxyfile.in ${CMAKE_BINARY_DIR}/Doxyfile)
+    add_custom_target(doxygen ${DOXYGEN_EXECUTABLE} ${CMAKE_BINARY_DIR}/Doxyfile)
+endif(DOXYGEN_FOUND)
