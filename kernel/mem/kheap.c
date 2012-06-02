@@ -29,7 +29,7 @@ static void kheap_slab_create(int bucket) {
     unsigned virt = paging_map_kernel(phys);
     unsigned* slab = (unsigned*)virt;
 
-    for (int i = 0; i < PAGE_SIZE/WORD_SIZE; i += (1 << bucket)) {
+    for (unsigned i = 0; i < PAGE_SIZE/WORD_SIZE; i += (1 << bucket)) {
         kfree(&slab[i], WORD_SIZE*(1<<bucket));
     }
 }

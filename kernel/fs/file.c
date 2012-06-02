@@ -41,7 +41,6 @@ unsigned file_write(unsigned fd, char* buff, size_t size) {
 
 void file_close(unsigned fd) {
     file* f = files_open[fd];
-    fs_close(f->node);
     files_open[fd] = 0;
     kfree(f, sizeof(file));
 }

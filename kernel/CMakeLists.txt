@@ -15,4 +15,5 @@ add_library(kernel OBJECT
   fs/fs.c
   fs/file.c
   fs/initrd.c
+  fs/ramfs.c
 )
