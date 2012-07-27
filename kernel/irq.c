@@ -1,6 +1,6 @@
 #include <pirix/irq.h>
 
-static unsigned int* ic_regs = (unsigned int*)0x14000000;
+static unsigned* ic_regs = (unsigned*)0x14000000;
 static irq_handler* irq_handlers[32];
 
 int irq_init() {
@@ -16,6 +16,13 @@ void irq_register(unsigned irq, irq_handler* handler) {
 
     irq_handlers[irq] = handler;
     ic_regs[2] |= 1 << irq;
+}
+
+void irq_unregister(unsigned irq) {
+    if (irq >= 32) return;
+
+    irq_handlers[irq] = 0;
+    ic_regs[2] &= ~(1 << irq);
 }
 
 cpu_state* irq_handle(cpu_state* state) {

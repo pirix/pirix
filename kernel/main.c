@@ -1,12 +1,9 @@
 #include <pirix/kprint.h>
-#include <pirix/video.h>
 #include <pirix/timer.h>
 #include <pirix/irq.h>
 #include <pirix/memory.h>
 #include <pirix/paging.h>
-#include <pirix/fs.h>
-#include <pirix/initrd.h>
-#include <elf.h>
+#include <pirix/boot.h>
 
 void panic(const char* text) {
     kputs("\n\nKERNEL PANIC!\n");
@@ -23,13 +20,19 @@ static void init(const char* name, int (*handler)()) {
 }
 
 void main() {
+    gpio_init();
+
+    serial_init();
+
+    gpio_toggle(16, 1);
+
     kputs("PIRIX VERSION 0.1 BOOTING...\n\n");
 
-    init("video", &video_init);
     init("memory", &memory_init);
     init("paging", &paging_init);
-    init("filesystem", &fs_init);
-    init("initrd", &initrd_init);
+
+    for (;;);
+
     init("irqs", &irq_init);
     init("timer", &timer_init);
 

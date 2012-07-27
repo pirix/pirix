@@ -1,4 +1,4 @@
-add_library(lib OBJECT
+add_library(util STATIC
   string.c
   div.c
 )

@@ -1,19 +1,20 @@
-add_library(kernel OBJECT
+add_executable(kernel
   init.s
   main.c
-  mem/paging.c
-  mem/paging.s
-  mem/memory.c
-  mem/kheap.c
-  dev/irq.s
-  dev/irq.c
-  dev/timer.c
-  sys/task.c
-  sys/syscall.s
-  sys/syscall.c
-  sys/kprint.c
-  fs/fs.c
-  fs/file.c
-  fs/initrd.c
-  fs/ramfs.c
+  paging.c
+  memory.c
+  kheap.c
+  irq.c
+  timer.c
+  task.c
+  syscall.c
+  kprint.c
+  ../drivers/serial/bcm2835.c
+  gpio.c
+)
+
+target_link_libraries(kernel util)
+
+set_target_properties(kernel PROPERTIES
+  LINK_FLAGS "-T ${CMAKE_SOURCE_DIR}/tools/kernel.ld"
 )

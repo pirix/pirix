@@ -1,8 +1,9 @@
 OUTPUT_ARCH("arm")
 
+ENTRY(main)
+
 SECTIONS {
-   .text 0x00000000 : AT(0x00000000) {
-        *(.init)
+    .text 0x40000000 : AT(0x40000000) {
         *(.text)
     }
     .data ALIGN(4096) : {

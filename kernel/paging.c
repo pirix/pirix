@@ -2,7 +2,7 @@
 #include <pirix/memory.h>
 #include <string.h>
 
-#define KERNEL_PT ((unsigned*)0x00100000)
+#define KERNEL_PT ((unsigned*)0x00008000)
 
 static paging_context* kernel_context = NULL;
 
