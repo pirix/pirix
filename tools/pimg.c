@@ -23,6 +23,11 @@ static char strtab[] = {
     '.', 's', 't', 'r', 't', 'a', 'b', '\0',
 };
 
+#define STR_TEXT 1
+#define STR_DATA 7
+#define STR_RODATA 13
+#define STR_BSS 21
+
 void align_size(unsigned* size, unsigned align) {
     if (align == 0) return;
 
@@ -75,19 +80,6 @@ unsigned image_appendscn(Elf* image, Elf_Scn* source, int name) {
     offset += tgt_shdr->sh_size;
 
     return tgt_shdr->sh_offset;
-}
-
-unsigned image_appendelf(Elf* image, Elf* elf) {
-    unsigned start = image_appendscn(image, elf_findscn(elf, ".text"), 1);
-    image_appendscn(image, elf_findscn(elf, ".data"), 7);
-    image_appendscn(image, elf_findscn(elf, ".rodata"), 13);
-    image_appendscn(image, elf_findscn(elf, ".bss"), 21);
-    return start;
-}
-
-unsigned image_appendfile(Elf* image, int fd) {
-    Elf* elf = elf_begin(fd, ELF_C_READ, NULL);
-    return image_appendelf(image, elf);
 }
 
 Elf_Scn* image_strtab(Elf* image) {
@@ -201,7 +193,12 @@ int main(int argc, char** argv) {
 
     elf_flagelf(image, ELF_C_SET, ELF_F_LAYOUT);
 
-    image_appendfile(image, kernel_fd);
+    Elf* kernel_elf = elf_begin(kernel_fd, ELF_C_READ, NULL);
+    image_appendscn(image, elf_findscn(kernel_elf, ".init"), STR_TEXT);
+    image_appendscn(image, elf_findscn(kernel_elf, ".text"), STR_TEXT);
+    image_appendscn(image, elf_findscn(kernel_elf, ".data"), STR_DATA);
+    image_appendscn(image, elf_findscn(kernel_elf, ".rodata"), STR_RODATA);
+    image_appendscn(image, elf_findscn(kernel_elf, ".bss"), STR_BSS);
 
     //boothdr_create(image);
 

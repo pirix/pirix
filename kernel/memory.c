@@ -6,11 +6,12 @@
 static unsigned bitmap[BITMAP_SIZE];
 
 int memory_init() {
-    memset(bitmap+16, 0xff, (BITMAP_SIZE-16)*WORD_SIZE);
+    memset(bitmap, 0, sizeof(unsigned[8]));
+    memset(bitmap+8, 0xff, sizeof(unsigned[BITMAP_SIZE-8]));
     return 0;
 }
 
-unsigned memory_alloc(void) {
+unsigned memory_alloc() {
     for (unsigned i = 0; i < BITMAP_SIZE; i++) {
         // skip this element if full
         if (!bitmap[i]) continue;

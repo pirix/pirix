@@ -29,10 +29,10 @@ void main() {
     kputs("PIRIX VERSION 0.1 BOOTING...\n\n");
 
     init("memory", &memory_init);
-    init("paging", &paging_init);
 
     for (;;);
 
+    init("paging", &paging_init);
     init("irqs", &irq_init);
     init("timer", &timer_init);
 

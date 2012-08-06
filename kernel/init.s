@@ -4,22 +4,93 @@
 .extern syscall
 
 .section .init
-    b start
+    b loader
     b .
-    b swi_handler
+    b loader/*swi_handler*/
     b .
     b .
     b .
-    b irq_handler
+    b loader/*irq_handler*/
     b .
+
+loader:
+    /* deactive llcache */
+    mrc p15, 0, r0, c1, c0
+    bic r0, #0x1000
+    bic r0, #0x0004
+    mcr p15, 0, r0, c1, c0
+
+    /* invalidate caches and tld */
+    mov r0, #0
+    mcr p15, 0, r2, c7, c7
+    mcr p15, 0, r2, c8, c7
+
+    /* set domains to client modus */
+    mov r0, #0x55
+    orr r0, r0, r0, lsl #8
+    orr r0, r0, r0, lsl #1
+    mcr p15, 0, r0, c3, c0
+
+    /* set translation table base control register */
+    mrc p15, 0, r0, c2, c0, 2
+    mov r0, #0x1
+    mcr p15, 0, r0, c2, c0, 2
+
+    /* set ttbs */
+    ldr r0, [pc, #tt0_addr - 8 - .]
+    mcr p15, 0, r0, c2, c0, 0
+    ldr r0, [pc, #tt1_addr - 8 - .]
+    mcr p15, 0, r0, c2, c0, 1
+
+    /* enable paging */
+    mrc p15, 0, r0, c1, c0
+    orr r0, #0x1
+    mcr p15, 0, r0, c1, c0
+
+    /* jump to start */
+    ldr r0, [pc, #start_addr - 8 - .]
+    bx r0
+
+start_addr:
+    .4byte start
+
+tt0_addr:
+    .4byte tt0
+
+tt1_addr:
+    .4byte tt1
+
+.balign 0x4000, 0
+tt0:
+    /* identity mapping for the first 2 GB */
+    .equ addr, 0
+    .rept 2048
+      .4byte addr | 0x2
+      .equ addr, addr + 0x00100000
+    .endr
+
+.balign 0x4000, 0
+tt1:
+    /* map 4MB starting at 0x0 to 0xC0000000 */
+    .space 0x3000
+    .4byte 0x00000002
+    .4byte 0x00100002
+    .4byte 0x00200002
+    .4byte 0x00300002
+    .space 0x0ff0
 
 .section .text
 start:
-    ldr r13, [r15, #kernel_stack_addr - 8 - .]
-    mov r0, r13
+    /* initialize kernel stack */
+    ldr sp, [pc, #kernel_stack_addr - 8 - .]
+
+    /* initialize irq stack */
+    mov r0, sp
     msr cpsr_ctl, #0xd2
-    add r13, r0, #8192
+    add sp, r0, #8192
     msr cpsr_ctl, #0xd3
+
+    /* call the kernel main routine*/
     bl main
     b .
 
@@ -86,18 +157,6 @@ irq_disable:
 
 .global paging_enable
 paging_enable:
-    /* set all domains to client modus */
-    mov r0, #0x55
-    orr r0, r0, r0, lsl #8
-    orr r0, r0, r0, lsl #16
-    mcr p15, 0, r0, c3, c0
-
-    /* deactive cache */
-    mrc p15, 0, r0, c1, c0
-    bic r0, #0x0004
-    bic r0, #0x1000
-    mcr p15, 0, r0, c1, c0
-
     /* activate paging */
     mrc p15, 0, r0, c1, c0
     orr r0, #0x00000001
@@ -128,5 +187,7 @@ kernel_stack_addr:
     .4byte kernel_stack
 
 .section .bss
+    .space 8192
+irq_stack:
     .space 8192
 kernel_stack:

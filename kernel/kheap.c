@@ -26,10 +26,11 @@ static int kheap_bucket_find(size_t size) {
 
 static void kheap_slab_create(int bucket) {
     unsigned phys = memory_alloc();
-    unsigned virt = paging_map_kernel(phys);
+    //unsigned virt = paging_map_kernel(phys);
+    unsigned virt = phys;
     unsigned* slab = (unsigned*)virt;
 
-    for (unsigned i = 0; i < PAGE_SIZE/WORD_SIZE; i += (1 << bucket)) {
+    for (unsigned i = 0; i < 4096/WORD_SIZE; i += (1 << bucket)) {
         kfree(&slab[i], WORD_SIZE*(1<<bucket));
     }
 }
