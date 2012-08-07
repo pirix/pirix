@@ -2,35 +2,21 @@
 #include <pirix/task.h>
 
 static unsigned* timers[] = {
-    (unsigned*)0x13000000,
-    (unsigned*)0x13000100,
-    (unsigned*)0x13000200
+    (unsigned*)0x2000B400,
 };
 
-static int clock;
-
-cpu_state* schedule_timer(cpu_state* state) {
-    timers[1][3] = 42;
-    return task_schedule(state);
-}
-
-cpu_state* clock_timer(cpu_state* state) {
-    timers[2][3] = 42;
-    clock++;
-    kprintf("%i\n", clock);
+cpu_state* timer_tick(cpu_state* state) {
+    // clear interrupt
+    timers[0][3] = 42;
+    kputs("tick\n");
     return state;
 }
 
 int timer_init() {
     // initialize the schedule timer
-    timers[1][0] = (10000 + 128) / 256;
-    timers[1][2] = 0xea;
-    irq_register(6, &schedule_timer);
+    timers[0][2] = 0b1010100000;
 
-    // initialize the clock timer
-    timers[2][0] = 1000000;
-    timers[2][2] = 0xe2;
-    irq_register(7, &clock_timer);
+    irq_register(64, &timer_tick);
 
     return 0;
 }

@@ -3,6 +3,7 @@
 #include <string.h>
 
 static paging_context* kernel_context = NULL;
+extern unsigned* tt1;
 
 int paging_map(paging_context* context, unsigned virt, unsigned phys, unsigned access) {
     return 0;

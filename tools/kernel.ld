@@ -26,7 +26,9 @@ SECTIONS {
     }
 
     .bss ALIGN(0x1000) : AT(ADDR(.bss) - KERNEL_VIRT) ALIGN(0x1000) {
+        __bss_start__ = .;
         *(.bss)
+        __bss_end__ = .;
     }
 
     kernel_end = . - KERNEL_VIRT;

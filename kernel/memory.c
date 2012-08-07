@@ -6,7 +6,6 @@
 static unsigned bitmap[BITMAP_SIZE];
 
 int memory_init() {
-    memset(bitmap, 0, sizeof(unsigned[8]));
     memset(bitmap+8, 0xff, sizeof(unsigned[BITMAP_SIZE-8]));
     return 0;
 }

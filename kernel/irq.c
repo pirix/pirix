@@ -1,43 +1,77 @@
 #include <pirix/irq.h>
 
-static unsigned* ic_regs = (unsigned*)0x14000000;
-static irq_handler* irq_handlers[32];
+static irq_handler* irq_handlers[72];
+static unsigned* irq_base = (unsigned*)0x2000B200;
+
+#define IRQB_PENDING 0
+#define IRQ1_PENDING 1
+#define IRQ2_PENDING 2
+#define FIQ_CONTROL 3
+#define IRQ1_ENABLE 4
+#define IRQ2_ENABLE 5
+#define IRQB_ENABLE 6
+#define IRQ1_DISABLE 7
+#define IRQ2_DISABLE 8
+#define IRQB_DISABLE 9
 
 int irq_init() {
-    // unmap all irqs
-    ic_regs[3] = 0xffffffff;
+    // disable all irqs
+    irq_base[IRQ1_DISABLE] = 0xffffffff;
+    irq_base[IRQ2_DISABLE] = 0xffffffff;
+    irq_base[IRQB_DISABLE] = 0xff;
+
     irq_enable();
     return 0;
 }
 
 void irq_register(unsigned irq, irq_handler* handler) {
-    if (irq >= 32) return;
+    if (irq > 71) return;
     if (irq_handlers[irq]) return;
 
     irq_handlers[irq] = handler;
-    ic_regs[2] |= 1 << irq;
+
+    if (irq < 32) {
+        irq_base[IRQ1_ENABLE] |= 1 << irq;
+    }
+    else if (irq < 64) {
+        irq_base[IRQ2_ENABLE] |= 1 << (irq-32);
+    }
+    else {
+        irq_base[IRQB_ENABLE] |= 1 << (irq-64);
+    }
 }
 
 void irq_unregister(unsigned irq) {
-    if (irq >= 32) return;
+    if (irq > 71) return;
 
     irq_handlers[irq] = 0;
-    ic_regs[2] &= ~(1 << irq);
+
+    if (irq < 32) {
+        irq_base[IRQ1_DISABLE] |= 1 << irq;
+    }
+    else if (irq < 64) {
+        irq_base[IRQ2_DISABLE] |= 1 << (irq-32);
+    }
+    else {
+        irq_base[IRQB_DISABLE] |= 1 << (irq-64);
+    }
 }
 
 cpu_state* irq_handle(cpu_state* state) {
-    unsigned irq = 0;
-    unsigned status = ic_regs[0];
+    unsigned pending = irq_base[IRQB_PENDING];
 
-    while (status) {
-      if (status & 1) {
-          if (irq_handlers[irq]) {
-              state = irq_handlers[irq](state);
-          }
-      }
+    if (pending & (1 << 9)) {
+        // IRQ2 PENDING
+    }
 
-      irq++;
-      status >>= 1;
+    if (pending & (1 << 8)) {
+        // IRQ1 PENDING
+    }
+
+    for (int i = 0; i < 8; i++) {
+        if ((pending & (1 << i)) && irq_handlers[64+i]) {
+            state = irq_handlers[64+i](state);
+        }
     }
 
     return state;

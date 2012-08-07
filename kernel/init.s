@@ -1,18 +1,10 @@
 .arm
 .extern main
+.extern panic
 .extern irq_handle
 .extern syscall
 
 .section .init
-    b loader
-    b .
-    b loader/*swi_handler*/
-    b .
-    b .
-    b .
-    b loader/*irq_handler*/
-    b .
-
 loader:
     /* deactive llcache */
     mrc p15, 0, r0, c1, c0
@@ -80,15 +72,45 @@ tt1:
     .space 0x0ff0
 
 .section .text
-start:
-    /* initialize kernel stack */
-    ldr sp, [pc, #kernel_stack_addr - 8 - .]
+.balign 0x10
+vectors:
+    b start
+    b exc_handler
+    b swi_handler
+    b exc_handler
+    b exc_handler
+    b .
+    b irq_handler
+    b .
 
-    /* initialize irq stack */
-    mov r0, sp
+start:
+    /* set exception vectors base addr */
+    ldr r0, =vectors
+    mcr p15, 0, r0, c12, c0, 0
+
+    /* initialize exception stack */
+    ldr r0, =exc_stack
+    msr cpsr_ctl, #0xd7 /* abort mode */
+    mov sp, r0
+    msr cpsr_ctl, #0xdb /* undefined mode */
+    mov sp, r0
+
+    /* irq stack */
     msr cpsr_ctl, #0xd2
-    add sp, r0, #8192
+    ldr sp, =irq_stack
+
+    /* supervisor mode */
     msr cpsr_ctl, #0xd3
+    ldr sp, =kernel_stack
+
+    /* fill .bss with zeros */
+    ldr r1, =__bss_start__
+    ldr r2, =__bss_end__
+    mov r3, #0
+1:
+    cmp r1, r2
+    stmltia r1!, {r3}
+    blt 1b
 
     /* call the kernel main routine*/
     bl main
@@ -141,6 +163,10 @@ irq_handler:
     /* jump back */
     movs r15, r14
 
+exc_handler:
+    bl panic
+    b .
+
 .global irq_enable
 irq_enable:
     mrs r0, cpsr
@@ -182,11 +208,9 @@ paging_activate_transition_table:
     mcr p15, 0, r0, c2, c0, 0
     bx lr
 
-/* kernel stack */
-kernel_stack_addr:
-    .4byte kernel_stack
-
 .section .bss
+    .space 8192
+exc_stack:
     .space 8192
 irq_stack:
     .space 8192

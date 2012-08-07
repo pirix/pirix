@@ -5,10 +5,9 @@
 #include <pirix/paging.h>
 #include <pirix/boot.h>
 
-void panic(const char* text) {
+void panic() {
     kputs("\n\nKERNEL PANIC!\n");
-    kputs(text);
-    kputs("\nPlease reboot the system.");
+    kputs("Please reboot the system.");
     for (;;);
 }
 
@@ -29,9 +28,6 @@ void main() {
     kputs("PIRIX VERSION 0.1 BOOTING...\n\n");
 
     init("memory", &memory_init);
-
-    for (;;);
-
     init("paging", &paging_init);
     init("irqs", &irq_init);
     init("timer", &timer_init);
