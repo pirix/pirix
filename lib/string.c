@@ -1,4 +1,3 @@
-#include <pirix/kheap.h>
 #include <string.h>
 
 void* memcpy(void* dest, const void* src, size_t num) {
@@ -33,13 +32,6 @@ char* strncpy(char* dest, const char* src, size_t num) {
     char* rdest = dest;
     while (num-- && *src) *(dest++) = *(src++);
     return rdest;
-}
-
-char* strdup(const char* src) {
-    size_t len = strlen(src)+1;
-    char* new = kmalloc(sizeof(char)*len);
-    memcpy(new, src, len);
-    return new;
 }
 
 char* strcat(char* dest, const char* src) {

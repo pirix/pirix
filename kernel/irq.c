@@ -1,7 +1,7 @@
-#include <pirix/irq.h>
+#include <kernel/irq.h>
 
 static irq_handler* irq_handlers[72];
-static unsigned* irq_base = (unsigned*)0x2000B200;
+static unsigned* irq_base = (unsigned*)0x9000B200;
 
 #define IRQB_PENDING 0
 #define IRQ1_PENDING 1
@@ -58,6 +58,8 @@ void irq_unregister(unsigned irq) {
 }
 
 cpu_state* irq_handle(cpu_state* state) {
+    irq_disable();
+
     unsigned pending = irq_base[IRQB_PENDING];
 
     if (pending & (1 << 9)) {

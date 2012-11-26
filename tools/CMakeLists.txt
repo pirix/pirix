@@ -1,4 +1,4 @@
-include_directories(${CMAKE_SOURCE_DIR}/include/pirix)
+include_directories(${CMAKE_SOURCE_DIR}/include/kernel)
 set(CMAKE_C_FLAGS "-std=gnu99")
 
 add_executable(pimg pimg.c)

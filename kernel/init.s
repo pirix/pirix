@@ -3,6 +3,41 @@
 .extern panic
 .extern irq_handle
 .extern syscall
+.extern exception
+
+.macro push_cpu_state
+    push {r0 - r12, r14}
+
+    msr cpsr_ctl, #0xd3
+    mrs r1, spsr
+    mov r2, r13
+    mov r3, r14
+    msr cpsr_ctl, #0xd2
+    mrs r0, spsr
+    push {r0 - r3}
+
+    stmdb r13, {r13, r14}^
+    sub r13, #8
+
+    mov r0, r13
+.endm
+
+.macro pop_cpu_state
+    mov r13, r0
+
+    ldmia r13, {r13, r14}^
+    add r13, #8
+
+    pop {r0 - r3}
+    msr spsr_all, r0
+    msr cpsr_ctl, #0xd3
+    msr spsr_all, r1
+    mov r13, r2
+    mov r14, r3
+    msr cpsr_all, #0xd2
+
+    pop {r0 - r12, r14}
+.endm
 
 .section .init
 loader:
@@ -29,47 +64,55 @@ loader:
     mcr p15, 0, r0, c2, c0, 2
 
     /* set ttbs */
-    ldr r0, [pc, #tt0_addr - 8 - .]
+    ldr r0, =tt0
     mcr p15, 0, r0, c2, c0, 0
-    ldr r0, [pc, #tt1_addr - 8 - .]
+    ldr r0, =tt1
     mcr p15, 0, r0, c2, c0, 1
 
     /* enable paging */
     mrc p15, 0, r0, c1, c0
     orr r0, #0x1
+    orr r0, #0x800000
     mcr p15, 0, r0, c1, c0
 
     /* jump to start */
-    ldr r0, [pc, #start_addr - 8 - .]
-    bx r0
+    ldr r15, =start
 
-start_addr:
-    .4byte start
-
-tt0_addr:
-    .4byte tt0
-
-tt1_addr:
-    .4byte tt1
+.pool
 
 .balign 0x4000, 0
+.global tt0
 tt0:
     /* identity mapping for the first 2 GB */
     .equ addr, 0
     .rept 2048
-      .4byte addr | 0x2
+      .4byte addr | 0x402
       .equ addr, addr + 0x00100000
     .endr
 
 .balign 0x4000, 0
+.global tt1
 tt1:
-    /* map 4MB starting at 0x0 to 0xC0000000 */
-    .space 0x3000
-    .4byte 0x00000002
-    .4byte 0x00100002
-    .4byte 0x00200002
-    .4byte 0x00300002
-    .space 0x0ff0
+    .space 0x2000
+    /* map the whole RAM to 0x80000000 */
+    .equ addr, 0
+    .rept 256
+      .4byte addr | 0x402
+      .equ addr, addr + 0x00100000
+    .endr
+
+    /* map periphals to 0x90000000 */
+    .equ addr, 0x20000000
+    .rept 16
+      .4byte addr | 0x402
+      .equ addr, addr + 0x00100000
+    .endr
+
+    .space 0xbc0
+
+    /* map 1MB starting at 0x0 to 0xC0000000 */
+    .4byte 0x00000402
+    .space 0x0ffc
 
 .section .text
 .balign 0x10
@@ -117,54 +160,30 @@ start:
     b .
 
 swi_handler:
-    ldr r4, [r14, #-4]
+    stmfd sp!, {r4-r12,lr}
+
+    ldr r4, [lr, #-4]
     and r4, #0xffffff
     push {r4}
+
     bl syscall
-    pop {r14}
-    movs r15, r14
+
+    pop {r4}
+    ldmfd sp!, {r4-r12,pc}^
 
 irq_handler:
     sub r14, #4
 
-    /* backup registers */
-    push {r0 - r12, r14}
-
-    msr cpsr_ctl, #0xd3
-    mrs r1, spsr
-    mov r2, r13
-    mov r3, r14
-    msr cpsr_ctl, #0xd2
-    mrs r0, spsr
-    push {r0 - r3}
-
-    stmdb r13, {r13, r14}^
-    sub r13, #8
-
-    /* call interrupt handler */
-    mov r0, r13
+    push_cpu_state
     bl irq_handle
-    mov r13, r0
-
-    ldmia r13, {r13, r14}^
-    add r13, #8
-
-    pop {r0 - r3}
-    msr spsr_all, r0
-    msr cpsr_ctl, #0xd3
-    msr spsr_all, r1
-    mov r13, r2
-    mov r14, r3
-    msr cpsr_all, #0xd2
-
-    /* restore registers */
-    pop {r0 - r12, r14}
+    pop_cpu_state
 
     /* jump back */
     movs r15, r14
 
 exc_handler:
-    bl panic
+    push_cpu_state
+    bl exception
     b .
 
 .global irq_enable
@@ -181,17 +200,6 @@ irq_disable:
     msr cpsr_ctl, r0
     bx lr
 
-.global paging_enable
-paging_enable:
-    /* activate paging */
-    mrc p15, 0, r0, c1, c0
-    orr r0, #0x00000001
-    bic r0, #0x00800000
-    mcr p15, 0, r0, c1, c0
-    mov r0, #0
-    mcr p15, 0, r0, c7, c5, 4
-    bx lr
-
 .global paging_invalidate_tlb
 paging_invalidate_tlb:
     mov r0, #0
@@ -203,10 +211,12 @@ paging_invalidate_tlb_entry:
     mcr p15, 0, r0, c8, c7, 1
     bx lr
 
-.global paging_activate_transition_table
-paging_activate_transition_table:
+.global paging_set_transition_table
+paging_set_transition_table:
     mcr p15, 0, r0, c2, c0, 0
     bx lr
+
+.pool
 
 .section .bss
     .space 8192

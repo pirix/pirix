@@ -1,13 +1,9 @@
-#include <pirix/ipc.h>
+#include <kernel/ipc.h>
 
 void receive() {
 
 }
 
 void send() {
-
-}
-
-void notify() {
 
 }

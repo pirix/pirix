@@ -11,15 +11,17 @@ add_subdirectory(tools)
 set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_CROSSCOMPILING TRUE)
 set(ARCH armv6)
+set(CPU arm1176jzf-s)
 
 set(CMAKE_LINKER arm-elf-ld)
 
 set(CMAKE_ASM_COMPILER arm-elf-as)
-set(CMAKE_ASM_FLAGS "-march=${ARCH} -mfpu=vfp -mfloat-abi=softfp")
+set(CMAKE_ASM_FLAGS "-march=${ARCH} -mfpu=fpa -mcpu=${CPU} -march=armv6")
 enable_language(ASM)
 
 set(CMAKE_C_COMPILER arm-elf-gcc)
-set(CMAKE_C_FLAGS "-mfpu=vfp -mfloat-abi=softfp -march=${ARCH} -mtune=arm1176jzf-s -ffreestanding -nostartfiles -nostdinc -nodefaultlibs -Wall -Wextra -fno-stack-protector -std=gnu99")
+
+set(CMAKE_C_FLAGS "-mcpu=${CPU} -mtune=${CPU} -mfpu=fpa -mfloat-abi=softfp -ffreestanding -nostartfiles -nostdinc -nodefaultlibs -Wall -Wextra -fno-stack-protector -std=gnu99")
 
 set(CMAKE_OBJCOPY arm-elf-objcopy)
 
@@ -35,6 +37,7 @@ macro(USER_EXECUTABLE name)
   set_target_properties(${name} PROPERTIES
     LINK_FLAGS "-T ${CMAKE_SOURCE_DIR}/tools/user.ld"
   )
+  target_link_libraries(${name} system)
 endmacro()
 
 ###### subdirectories
@@ -52,7 +55,7 @@ add_custom_command(
   DEPENDS kernel
   DEPENDS boot
   DEPENDS pimg
-  COMMAND ./tools/pimg -k kernel/kernel -o pirix.img
+  COMMAND ./tools/pimg -k kernel/kernel servers/vfs servers/devmgr -o pirix.img
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 )
 

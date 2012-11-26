@@ -1,15 +1,15 @@
-static unsigned* uart_enables = (unsigned*)0x20215004;
-static unsigned* uart_io = (unsigned*)0x20215040;
-static unsigned* uart_ier = (unsigned*)0x20215044;
-static unsigned* uart_iir = (unsigned*)0x20215048;
-static unsigned* uart_lcr = (unsigned*)0x2021504c;
-static unsigned* uart_mcr = (unsigned*)0x20215050;
-static unsigned* uart_lsr = (unsigned*)0x20215054;
-static unsigned* uart_msr = (unsigned*)0x20215058;
-static unsigned* uart_scratch = (unsigned*)0x2021505c;
-static unsigned* uart_cntl = (unsigned*)0x20215060;
-static unsigned* uart_stat = (unsigned*)0x20215064;
-static unsigned* uart_baud = (unsigned*)0x20215068;
+static unsigned* uart_enables = (unsigned*)0x90215004;
+static unsigned* uart_io = (unsigned*)0x90215040;
+static unsigned* uart_ier = (unsigned*)0x90215044;
+static unsigned* uart_iir = (unsigned*)0x90215048;
+static unsigned* uart_lcr = (unsigned*)0x9021504c;
+static unsigned* uart_mcr = (unsigned*)0x90215050;
+static unsigned* uart_lsr = (unsigned*)0x90215054;
+static unsigned* uart_msr = (unsigned*)0x90215058;
+static unsigned* uart_scratch = (unsigned*)0x9021505c;
+static unsigned* uart_cntl = (unsigned*)0x90215060;
+static unsigned* uart_stat = (unsigned*)0x90215064;
+static unsigned* uart_baud = (unsigned*)0x90215068;
 
 void serial_init() {
     *uart_enables = 1;

@@ -1,18 +1,24 @@
 OUTPUT_ARCH("arm")
 
-ENTRY(main)
+ENTRY(_start)
 
 SECTIONS {
-    .text 0x40000000 : AT(0x40000000) {
-        *(.text)
+    .text 0x8000 : AT(0x8000) {
+        *(.init)
+        *(.text*)
+        *(.fini)
     }
-    .data ALIGN(4096) : {
-        *(.data)
+    .data : {
+        *(.data*)
+        *(.ctors)
+        *(.dtors)
+        *(.jcr)
     }
-    .rodata ALIGN(4096) : {
-        *(.rodata)
+    .rodata : {
+        *(.rodata*)
+        *(.eh_frame)
     }
-    .bss ALIGN(4096) : {
+    .bss : {
         *(.bss)
     }
 }

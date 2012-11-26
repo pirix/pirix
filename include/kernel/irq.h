@@ -1,6 +1,6 @@
 #pragma once
 
-#include <pirix/cpu.h>
+#include <kernel/cpu.h>
 
 typedef cpu_state* (irq_handler)(cpu_state*);
 

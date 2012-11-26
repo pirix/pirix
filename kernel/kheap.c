@@ -1,6 +1,6 @@
-#include <pirix/kheap.h>
-#include <pirix/memory.h>
-#include <pirix/paging.h>
+#include <kernel/kheap.h>
+#include <kernel/memory.h>
+#include <kernel/paging.h>
 #include <string.h>
 
 #define BUCKET_COUNT 16
@@ -26,8 +26,7 @@ static int kheap_bucket_find(size_t size) {
 
 static void kheap_slab_create(int bucket) {
     unsigned phys = memory_alloc();
-    //unsigned virt = paging_map_kernel(phys);
-    unsigned virt = phys;
+    unsigned virt = paging_map_kernel(phys);
     unsigned* slab = (unsigned*)virt;
 
     for (unsigned i = 0; i < 4096/WORD_SIZE; i += (1 << bucket)) {

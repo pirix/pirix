@@ -1,7 +1,7 @@
-static unsigned* gpfsel1 = (unsigned*)0x20200004;
-static unsigned* gpset0 = (unsigned*)0x2020001C;
-static unsigned* gpclr0 = (unsigned*)0x20200028;
-static unsigned* gppud = (unsigned*)0x20200094;
+static unsigned* gpfsel1 = (unsigned*)0x90200004;
+static unsigned* gpset0 = (unsigned*)0x9020001C;
+static unsigned* gpclr0 = (unsigned*)0x90200028;
+static unsigned* gppud = (unsigned*)0x90200094;
 
 void gpio_init() {
     unsigned sel = *gpfsel1;

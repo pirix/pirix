@@ -1,4 +1,4 @@
-#include <pirix/kprint.h>
+#include <kernel/kprint.h>
 #include <stdarg.h>
 
 void kprintf(const char* fmt, ...) {
@@ -18,6 +18,10 @@ void kprintf(const char* fmt, ...) {
                kputs("0x");
                kputn(va_arg(ap, unsigned), 16);
                break;
+
+           case 'b':
+               kputs("0b");
+               kputn(va_arg(ap, unsigned), 2);
 
            case 's':
                kputs(va_arg(ap, const char*));
@@ -40,7 +44,7 @@ void kputs(const char* str) {
     serial_puts(str);
 }
 
-void kputn(long value, unsigned radix) {
+void kputn(unsigned long value, unsigned radix) {
     char buffer[65];
     char* ptr = buffer;
     const char* const chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
