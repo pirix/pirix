@@ -61,28 +61,21 @@ add_subdirectory(lib)
 
 ###### IMAGES
 
-add_custom_target(image)
-add_custom_command(
-  TARGET image
+add_custom_target(image
   DEPENDS kernel
-  DEPENDS boot
   DEPENDS pimg
   COMMAND ./tools/pimg -k kernel/kernel servers/vfs servers/devmgr -o pirix.img
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 )
 
 ###### QEMU
-add_custom_target(debug)
-add_custom_command(
-  TARGET debug
+add_custom_target(debug
   DEPENDS image
   COMMAND qemu-system-arm -cpu arm1176 -kernel pirix.img -nographic -S -s
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 )
 
-add_custom_target(qemu)
-add_custom_command(
-  TARGET qemu
+add_custom_target(qemu
   DEPENDS image
   COMMAND qemu-system-arm -cpu arm1176 -kernel pirix.img -nographic
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
