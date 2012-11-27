@@ -7,7 +7,6 @@
 #include <kernel/boot.h>
 
 void panic() {
-    gpio_toggle(16, 0);
     kputs("\n\nKERNEL PANIC!\n");
     kputs("Please reboot the system.");
     for (;;);
@@ -53,18 +52,14 @@ static int modules_init() {
         // map stack
         paging_map(context, 0x7ffff000, memory_alloc(), PTE_PERM_USER);
 
-        process* p = process_create((void*)mod->entry, context);
+        process_create((void*)mod->entry, context);
     }
 
     return 0;
 }
 
 void main() {
-    gpio_init();
     serial_init();
-
-    // enable OK LED
-    gpio_toggle(16, 1);
 
     kputs("PIRIX VERSION 0.1 BOOTING...\n\n");
 

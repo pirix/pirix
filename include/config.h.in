@@ -1,0 +1,9 @@
+#pragma once
+
+#define RBPI 1
+#define QEMU 2
+
+#define PLATFORM @PLATFORM@
+#define VERSION @VERSION@
+
+#include "config/@PLATFORM_LOWER@.h"

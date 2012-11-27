@@ -4,18 +4,30 @@ cmake_minimum_required(VERSION 2.8)
 
 ###### general
 
+set(ARCH armv6)
+set(CPU arm1176jzf-s)
+
+if(NOT PLATFORM)
+  set(PLATFORM RBPI)
+endif(NOT PLATFORM)
+
+string(TOLOWER ${PLATFORM} PLATFORM_LOWER)
+
+configure_file(
+  ${CMAKE_SOURCE_DIR}/include/config.h.in
+  ${CMAKE_SOURCE_DIR}/include/config.h
+)
+
 add_subdirectory(tools)
 
 ###### compiler options
 
 set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_CROSSCOMPILING TRUE)
-set(ARCH armv6)
-set(CPU arm1176jzf-s)
 
 set(CMAKE_LINKER arm-elf-ld)
 
-set(CMAKE_ASM_COMPILER arm-elf-as)
+set(CMAKE_ASM_COMPILER arm-elf-gcc)
 set(CMAKE_ASM_FLAGS "-march=${ARCH} -mfpu=fpa -mcpu=${CPU} -march=armv6")
 enable_language(ASM)
 

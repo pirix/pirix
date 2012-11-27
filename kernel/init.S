@@ -1,3 +1,5 @@
+#include <config.h>
+
 .arm
 .extern main
 .extern panic
@@ -101,14 +103,24 @@ tt1:
       .equ addr, addr + 0x00100000
     .endr
 
-    /* map periphals to 0x90000000 */
+/* map periphals to 0x90000000 */
+#if PLATFORM == RBPI
     .equ addr, 0x20000000
     .rept 16
       .4byte addr | 0x402
       .equ addr, addr + 0x00100000
     .endr
-
     .space 0xbc0
+#elif PLATFORM == QEMU
+    .equ addr, 0x10000000
+    .rept 256
+      .4byte addr | 0x402
+      .equ addr, addr + 0x00100000
+    .endr
+    .space 0x800
+#else
+    .space 0xfff
+#endif
 
     /* map 1MB starting at 0x0 to 0xC0000000 */
     .4byte 0x00000402
