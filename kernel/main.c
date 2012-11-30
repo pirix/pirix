@@ -5,6 +5,7 @@
 #include <kernel/paging.h>
 #include <kernel/process.h>
 #include <kernel/boot.h>
+#include <config.h>
 
 void panic() {
     kputs("\n\nKERNEL PANIC!\n");
@@ -61,7 +62,8 @@ static int modules_init() {
 void main() {
     serial_init();
 
-    kputs("PIRIX VERSION 0.1 BOOTING...\n\n");
+    kputs("PIRIX VERSION " VERSION " BOOTING...\n");
+    kputs(PLATFORM_NAME " " BUILD_TYPE " build (" BUILD_TIME ")\n\n");
 
     init("memory", &memory_init);
     init("paging", &paging_init);

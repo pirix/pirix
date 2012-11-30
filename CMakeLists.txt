@@ -13,6 +13,10 @@ endif(NOT PLATFORM)
 
 string(TOLOWER ${PLATFORM} PLATFORM_LOWER)
 
+if(NOT CMAKE_BUILD_TYPE)
+   set(CMAKE_BUILD_TYPE Debug)
+endif(NOT CMAKE_BUILD_TYPE)
+
 configure_file(
   ${CMAKE_SOURCE_DIR}/include/config.h.in
   ${CMAKE_SOURCE_DIR}/include/config.h

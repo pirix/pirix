@@ -4,6 +4,9 @@
 #define QEMU 2
 
 #define PLATFORM @PLATFORM@
-#define VERSION @VERSION@
+#define VERSION "@VERSION@"
+
+#define BUILD_TYPE "@CMAKE_BUILD_TYPE@"
+#define BUILD_TIME __DATE__ ", " __TIME__
 
 #include "config/@PLATFORM_LOWER@.h"
