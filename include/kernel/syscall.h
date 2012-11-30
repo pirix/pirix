@@ -12,6 +12,7 @@
 #define SYS_GETPID   0x14
 #define SYS_ISATTY   0x15
 #define SYS_EXECVE   0x16
+#define SYS_YIELD    0x17
 
 // IPC
 #define SYS_SEND     0x30
@@ -30,13 +31,3 @@
 
 // Memory
 #define SYS_SBRK     0x60
-
-#ifndef __ASSEMBLER__
-void sys_log(const char*);
-void sys_exit(int status);
-void sys_kill(int pid, int sig);
-void sys_wait();
-int sys_getpid();
-void sys_send(int target, int message);
-void sys_recv();
-#endif

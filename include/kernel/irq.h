@@ -1,6 +1,6 @@
 #pragma once
 
-#include <kernel/cpu.h>
+#include "cpu.h"
 
 typedef cpu_state* (irq_handler)(cpu_state*);
 

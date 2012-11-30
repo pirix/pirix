@@ -198,6 +198,11 @@ exc_handler:
     bl exception
     b .
 
+.global task_switch
+task_switch:
+    pop_cpu_state
+    movs r15, r14
+
 .global irq_enable
 irq_enable:
     mrs r0, cpsr

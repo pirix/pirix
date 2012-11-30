@@ -1,6 +1,8 @@
+#include <kernel/scheduler.h>
 #include <kernel/syscall.h>
 #include <kernel/process.h>
 #include <kernel/kprint.h>
+#include <kernel/ipc.h>
 
 int syscall(int a, int b, int c, int d, int id) {
     switch (id) {
@@ -21,17 +23,22 @@ int syscall(int a, int b, int c, int d, int id) {
         return -1;
 
     case SYS_WAIT:
-        process_wait();
         return 0;
 
     case SYS_FORK:
         return -1;
 
     case SYS_GETPID: {
-        process* p = process_get_current();
-        if (p) return p->pid;
+        thread* t = scheduler_current();
+        if (t && t->process) {
+            return t->process->pid;
+        }
         else return -1;
     }
+
+    case SYS_YIELD:
+        scheduler_switch();
+        return 0;
 
     case SYS_ISATTY:
         return 1;
@@ -80,8 +87,9 @@ int syscall(int a, int b, int c, int d, int id) {
         return 0;
 
     case SYS_SBRK: {
-        process* p = process_get_current();
-        if (!p) return 0;
+        thread* t = scheduler_current();
+        if (!(t && t->process)) return 0;
+        process* p = t->process;
 
         if (a == 0) {
             return p->heap.start + p->heap.size;

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "cpu.h"
+
 typedef struct process process;
 
 typedef enum thread_status {
@@ -14,6 +16,7 @@ typedef struct thread {
     thread_status status;
     cpu_state* state;
     process* process;
+    struct thread* next;
 } thread;
 
 thread* thread_new(void* entry);

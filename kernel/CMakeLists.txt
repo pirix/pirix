@@ -24,6 +24,8 @@ add_executable(kernel
   thread.c
   syscall.c
   kprint.c
+  ipc.c
+  scheduler.c
   ${PLATFORM_SRC}
 )
 

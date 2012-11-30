@@ -3,6 +3,11 @@
 
 static irq_handler* irq_handlers[IRQ_COUNT];
 
+void irq_setup();
+void irq_allow(unsigned irq);
+void irq_disallow(unsigned irq);
+unsigned irq_find();
+
 int irq_init() {
     irq_setup();
     irq_enable();
