@@ -37,7 +37,7 @@ enable_language(ASM)
 
 set(CMAKE_C_COMPILER arm-elf-gcc)
 
-set(CMAKE_C_FLAGS "-mcpu=${CPU} -mtune=${CPU} -mfpu=fpa -mfloat-abi=softfp -ffreestanding -nostartfiles -nostdinc -nodefaultlibs -Wall -Wextra -fno-stack-protector -std=gnu99")
+set(CMAKE_C_FLAGS "-mcpu=${CPU} -mtune=${CPU} -mfpu=fpa -mfloat-abi=softfp -ffreestanding -nostartfiles -nostdinc -nodefaultlibs -Wall -fno-stack-protector -std=gnu99")
 
 set(CMAKE_OBJCOPY arm-elf-objcopy)
 

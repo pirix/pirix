@@ -2,6 +2,9 @@
 #include <kernel/process.h>
 #include <kernel/kheap.h>
 
+// task switch routine in init.S
+void task_switch(cpu_state* state);
+
 static thread* current_thread = 0;
 
 static thread* queue_head = 0;

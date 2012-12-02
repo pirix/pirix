@@ -11,7 +11,7 @@ process* process_new(paging_context* context) {
     new_process->pid = pid_counter++;
     new_process->paging_context = context;
 
-    new_process->heap.start = 0x100000;
+    new_process->heap.start = (unsigned*)0x100000;
     new_process->heap.size = 0;
     new_process->heap.used = 0;
 

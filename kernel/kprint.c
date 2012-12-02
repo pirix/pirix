@@ -44,7 +44,7 @@ void kputs(const char* str) {
     serial_puts(str);
 }
 
-void kputn(unsigned long value, unsigned radix) {
+void kputn(long value, unsigned radix) {
     char buffer[65];
     char* ptr = buffer;
     const char* const chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
