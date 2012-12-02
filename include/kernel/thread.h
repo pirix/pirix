@@ -19,5 +19,15 @@ typedef struct thread {
     struct thread* next;
 } thread;
 
+/**
+ * Create a new thread.
+ * @param entry entry point
+ * @memberof thread
+ */
 thread* thread_new(void* entry);
+
+/**
+ * Delete a thread.
+ * @memberof thread
+ */
 void thread_delete(thread* self);
