@@ -21,16 +21,6 @@ void scheduler_enqueue_thread(thread* new_thread) {
     }
 }
 
-void scheduler_switch() {
-    // @todo: save state of current_thread
-    current_thread = scheduler_dequeue_thread();
-    task_switch(current_thread->state);
-}
-
-thread* scheduler_current() {
-    return current_thread;
-}
-
 thread* scheduler_dequeue_thread() {
     if (queue_head) {
         thread* t = queue_head;
@@ -40,14 +30,23 @@ thread* scheduler_dequeue_thread() {
     return 0;
 }
 
+thread* scheduler_current() {
+    return current_thread;
+}
+
+void scheduler_switch() {
+    task_switch(current_thread->state);
+}
+
 cpu_state* scheduler_schedule(cpu_state* state) {
     if (current_thread) {
-        scheduler_enqueue_thread(current_thread);
         current_thread->state = state;
+        if (current_thread->status == RUNNABLE) {
+            scheduler_enqueue_thread(current_thread);
+        }
     }
 
     current_thread = scheduler_dequeue_thread();
-
     if (!current_thread) return state;
 
     paging_activate_context(current_thread->process->paging_context);

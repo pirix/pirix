@@ -49,4 +49,8 @@ void process_kill(int pid, int sig) {
 }
 
 void process_exit(int retval) {
+    thread* thread = scheduler_current();
+    process* self = thread->process;
+    thread->status = FINISHED;
+    scheduler_switch();
 }

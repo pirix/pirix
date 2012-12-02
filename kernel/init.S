@@ -4,6 +4,7 @@
 .extern main
 .extern panic
 .extern irq_handle
+.extern scheduler_schedule
 .extern syscall
 .extern exception
 
@@ -200,8 +201,17 @@ exc_handler:
 
 .global task_switch
 task_switch:
+    push_cpu_state
+
+    /* set r15 to .ret */
+    ldr r1, =.ret
+    str r1, [r0, #76]
+
+    bl scheduler_schedule
     pop_cpu_state
     movs r15, r14
+.ret:
+    bx lr
 
 .global irq_enable
 irq_enable:

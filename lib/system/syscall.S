@@ -79,3 +79,8 @@ sys_unlink:
 sys_wait:
     swi #SYS_WAIT
     bx lr
+
+.global sys_yield
+sys_yield:
+    swi #SYS_YIELD
+    bx lr
