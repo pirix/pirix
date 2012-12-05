@@ -50,7 +50,7 @@ cpu_state* scheduler_schedule(cpu_state* state) {
     }
 
     current_thread = scheduler_dequeue_thread();
-    if (!current_thread) return state;
+    if (!current_thread) panic("no process left");
 
     paging_activate_context(current_thread->process->paging_context);
 

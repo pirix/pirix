@@ -44,17 +44,13 @@ void kputs(const char* str) {
     serial_puts(str);
 }
 
-void kputn(long value, unsigned radix) {
+void kputn(unsigned long value, unsigned radix) {
     char buffer[65];
     char* ptr = buffer;
     const char* const chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     unsigned long temp;
     unsigned long digits;
 
-    if (value < 0) {
-        kputc('-');
-        value = -value;
-    }
     if (radix < 2 || radix > 36) return;
 
     temp = value;

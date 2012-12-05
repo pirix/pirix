@@ -80,6 +80,16 @@ sys_wait:
     swi #SYS_WAIT
     bx lr
 
+.global sys_send
+sys_send:
+    swi #SYS_SEND
+    bx lr
+
+.global sys_recv
+sys_recv:
+    swi #SYS_RECV
+    bx lr
+
 .global sys_yield
 sys_yield:
     swi #SYS_YIELD

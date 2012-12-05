@@ -1,3 +1,3 @@
 #pragma once
 
-void panic();
+void panic(const char* cause);

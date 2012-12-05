@@ -4,12 +4,14 @@
 #include <kernel/memory.h>
 #include <kernel/paging.h>
 #include <kernel/process.h>
+#include <kernel/scheduler.h>
 #include <kernel/boot.h>
 #include <config.h>
 
-void panic() {
-    kputs("\n\nKERNEL PANIC!\n");
-    kputs("Please reboot the system.");
+void panic(const char* cause) {
+    kputs("\n\nKERNEL PANIC!");
+    if (cause) kprintf(" (%s)", cause);
+    kputs("\nPlease reboot the system.");
     for (;;);
 }
 
@@ -22,7 +24,7 @@ void exception(cpu_state* state) {
     kprintf("usr_r13: %p\t usr_r14: %p\n", state->usr_r13, state->usr_r14);
     kprintf("svc_r13: %p\t svc_r14: %p\n", state->svc_r13, state->svc_r14);
     kprintf("r15: %p\n", state->r15);
-    panic();
+    panic(0);
 }
 
 static void init(const char* name, int (*handler)()) {

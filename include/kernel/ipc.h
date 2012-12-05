@@ -1,8 +1,11 @@
 #pragma once
 
-typedef struct msg {
+typedef struct message {
     int src;
     int dst;
     int op;
     int data;
-} msg;
+} message;
+
+void ipc_send(message* msg);
+void ipc_recv(message* msg);

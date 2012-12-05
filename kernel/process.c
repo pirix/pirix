@@ -30,11 +30,6 @@ process* process_create(void* entry, paging_context* context) {
     return new_process;
 }
 
-void process_add_thread(process* self, thread* thread) {
-    self->thread = thread;
-    thread->process = self;
-}
-
 process* process_get(int pid) {
     process* p = first_process;
     while (p != 0) {
@@ -42,6 +37,11 @@ process* process_get(int pid) {
         p = p->next;
     }
     return 0;
+}
+
+void process_add_thread(process* self, thread* thread) {
+    self->thread = thread;
+    thread->process = self;
 }
 
 void process_kill(int pid, int sig) {

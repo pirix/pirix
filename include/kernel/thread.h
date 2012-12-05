@@ -7,6 +7,7 @@ typedef struct process process;
 typedef enum thread_status {
     RUNNABLE,
     WAITING,
+    RECEIVING,
     FINISHED,
 } thread_status;
 

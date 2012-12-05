@@ -36,6 +36,13 @@ process* process_new(paging_context* context);
 process* process_create(void* entry, paging_context* context);
 
 /**
+ * Get a process.
+ * @param pid process id
+ * @memberof process
+ */
+process* process_get(int pid);
+
+/**
  * Add a thread to a process.
  * @memberof process
  */
