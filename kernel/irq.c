@@ -31,6 +31,7 @@ void irq_unregister(unsigned irq) {
 
 cpu_state* irq_handle(cpu_state* state) {
     irq_disable();
+
     unsigned irq = irq_find();
 
     if (irq_handlers[irq]) {

@@ -1,6 +1,7 @@
 #include <config.h>
 
 .arm
+.arch armv6
 .extern main
 .extern panic
 .extern irq_handle
@@ -8,39 +9,12 @@
 .extern syscall
 .extern exception
 
-.macro push_cpu_state
-    push {r0 - r12, r14}
-
-    msr cpsr_ctl, #0xd3
-    mrs r1, spsr
-    mov r2, r13
-    mov r3, r14
-    msr cpsr_ctl, #0xd2
-    mrs r0, spsr
-    push {r0 - r3}
-
-    stmdb r13, {r13, r14}^
-    sub r13, #8
-
-    mov r0, r13
-.endm
-
-.macro pop_cpu_state
-    mov r13, r0
-
-    ldmia r13, {r13, r14}^
-    add r13, #8
-
-    pop {r0 - r3}
-    msr spsr_all, r0
-    msr cpsr_ctl, #0xd3
-    msr spsr_all, r1
-    mov r13, r2
-    mov r14, r3
-    msr cpsr_all, #0xd2
-
-    pop {r0 - r12, r14}
-.endm
+#define USR_MODE 16
+#define FIQ_MODE 17
+#define IRQ_MODE 18
+#define SVC_MODE 19
+#define ABT_MODE 23
+#define UND_MODE 27
 
 .section .init
 loader:
@@ -144,19 +118,14 @@ start:
     ldr r0, =vectors
     mcr p15, 0, r0, c12, c0, 0
 
-    /* initialize exception stack */
+    /* initialize stacks */
+    cps ABT_MODE
     ldr r0, =exc_stack
-    msr cpsr_ctl, #0xd7 /* abort mode */
-    mov sp, r0
-    msr cpsr_ctl, #0xdb /* undefined mode */
-    mov sp, r0
-
-    /* irq stack */
-    msr cpsr_ctl, #0xd2
+    cps UND_MODE
+    ldr r0, =exc_stack
+    cps IRQ_MODE
     ldr sp, =irq_stack
-
-    /* supervisor mode */
-    msr cpsr_ctl, #0xd3
+    cps #SVC_MODE
     ldr sp, =kernel_stack
 
     /* fill .bss with zeros */
@@ -168,7 +137,7 @@ start:
     stmltia r1!, {r3}
     blt 1b
 
-    /* call the kernel main routine*/
+    /* call the kernel main routine */
     bl main
     b .
 
@@ -185,46 +154,78 @@ swi_handler:
     ldmfd sp!, {r4-r12,pc}^
 
 irq_handler:
-    sub r14, #4
+    sub lr, #4
 
-    push_cpu_state
+    srsdb sp!, #SVC_MODE
+    cps #SVC_MODE
+
+    push {r0-r12}
+    mrs r0, cpsr
+    push {r0, r14}
+    stmdb r13, {r13, r14}^
+    sub r13, #8
+
+    mov r0, r13
     bl irq_handle
-    pop_cpu_state
+    mov r13, r0
 
-    /* jump back */
-    movs r15, r14
+    ldmia r13, {r13, r14}^
+    add r13, #8
+    pop {r0, r14}
+    msr cpsr, r0
+    pop {r0-r12}
+
+    rfeia r13!
 
 exc_handler:
-    push_cpu_state
+    srsdb sp!, #SVC_MODE
+    cps #SVC_MODE
+
+    push {r0-r12}
+    mrs r0, cpsr
+    push {r0, r14}
+    stmdb r13, {r13, r14}^
+    sub r13, #8
+
+    mov r0, r13
     bl exception
     b .
 
 .global task_switch
 task_switch:
-    push_cpu_state
+    mrs r4, cpsr
+    msr spsr, r14
+    ldr r14, =.ret
+    srsdb sp!, #SVC_MODE
 
-    /* set r15 to .ret */
-    ldr r1, =.ret
-    str r1, [r0, #76]
+    push {r0-r12}
+    mrs r0, cpsr
+    push {r0, r14}
+    stmdb r13, {r13, r14}^
+    sub r13, #8
 
+    mov r0, r13
     bl scheduler_schedule
-    pop_cpu_state
-    movs r15, r14
+    mov r13, r0
+
+    ldmia r13, {r13, r14}^
+    add r13, #8
+    pop {r0, r14}
+    msr cpsr, r0
+    pop {r0-r12}
+
+    rfeia r13!
 .ret:
     bx lr
 
 .global irq_enable
 irq_enable:
-    mrs r0, cpsr
-    bic r0, #0x80
-    msr cpsr_ctl, r0
+    cpsie if
     bx lr
 
 .global irq_disable
 irq_disable:
-    mrs r0, cpsr
-    orr r0, #0x80
-    msr cpsr_ctl, r0
+    cpsid if
     bx lr
 
 .global paging_invalidate_tlb

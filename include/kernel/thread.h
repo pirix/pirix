@@ -12,7 +12,6 @@ typedef enum thread_status {
 } thread_status;
 
 typedef struct thread {
-    unsigned* irq_stack;
     unsigned* svc_stack;
     thread_status status;
     cpu_state* state;

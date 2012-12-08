@@ -17,13 +17,14 @@ void panic(const char* cause) {
 
 void exception(cpu_state* state) {
     kputs("\n\nEXCEPTION!\n");
-    kprintf("r01: %p\t r02: %p\t r03: %p\n", state->r1, state->r2, state->r3);
-    kprintf("r04: %p\t r05: %p\t r06: %p\n", state->r4, state->r5, state->r6);
-    kprintf("r07: %p\t r08: %p\t r09: %p\n", state->r7, state->r8, state->r9);
-    kprintf("r10: %p\t r11: %p\t r12: %p\n", state->r10, state->r11, state->r12);
+    kprintf("r00: %p\t r01: %p\t r02: %p\n", state->r0, state->r1, state->r2);
+    kprintf("r03: %p\t r04: %p\t r05: %p\n", state->r3, state->r4, state->r5);
+    kprintf("r06: %p\t r07: %p\t r08: %p\n", state->r6, state->r7, state->r8);
+    kprintf("r09: %p\t r10: %p\t r11: %p\n", state->r9, state->r10, state->r11);
+    kprintf("r12: %p\n", state->r12);
     kprintf("usr_r13: %p\t usr_r14: %p\n", state->usr_r13, state->usr_r14);
-    kprintf("svc_r13: %p\t svc_r14: %p\n", state->svc_r13, state->svc_r14);
-    kprintf("r15: %p\n", state->r15);
+    kprintf("svc_r14: %p\t r15: %p\n", state->svc_r14, state->r15);
+    kprintf("spsr: %p\t cpsr: %p\n", state->spsr, state->cpsr);
     panic(0);
 }
 
@@ -67,11 +68,11 @@ void main() {
     kputs("PIRIX VERSION " VERSION " BOOTING...\n");
     kputs(PLATFORM_NAME " " BUILD_TYPE " build (" BUILD_TIME ")\n\n");
 
-    init("memory", &memory_init);
-    init("paging", &paging_init);
+    init("memory ", &memory_init);
+    init("paging ", &paging_init);
     init("modules", &modules_init);
-    init("irqs", &irq_init);
-    init("timer", &timer_init);
+    init("irqs   ", &irq_init);
+    init("timer  ", &timer_init);
 
     for (;;);
 }
