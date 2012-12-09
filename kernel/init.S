@@ -193,10 +193,9 @@ exc_handler:
 
 .global task_switch
 task_switch:
-    mrs r4, cpsr
-    msr spsr, r14
-    ldr r14, =.ret
-    srsdb sp!, #SVC_MODE
+    ldr r0, =.ret
+    mrs r1, cpsr
+    push {r0, r1}
 
     push {r0-r12}
     mrs r0, cpsr
