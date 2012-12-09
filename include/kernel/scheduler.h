@@ -11,7 +11,7 @@ void scheduler_switch();
 /**
  * Return the current thread.
  */
-thread* scheduler_current();
+thread* scheduler_current_thread();
 
 /**
  * Adds a thread to the end of the queue.

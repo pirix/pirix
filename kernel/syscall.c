@@ -9,10 +9,11 @@ int syscall(int a, int b, int c, int d, int id) {
     case SYS_REBOOT:
         return 0;
 
-    case SYS_LOG:
-        kputs((char*)a);
-        kputc('\n');
+    case SYS_LOG: {
+        thread* t = scheduler_current_thread();
+        kprintf("[%i] %s\n", t->process->pid, (char*)a);
         return 0;
+    }
 
     case SYS_EXIT:
         process_exit(a);
@@ -29,7 +30,7 @@ int syscall(int a, int b, int c, int d, int id) {
         return -1;
 
     case SYS_GETPID: {
-        thread* t = scheduler_current();
+        thread* t = scheduler_current_thread();
         if (t && t->process) {
             return t->process->pid;
         }
@@ -53,11 +54,11 @@ int syscall(int a, int b, int c, int d, int id) {
         return -1;
 
     case SYS_SEND:
-        ipc_send(a);
+        ipc_send((message*)a);
         return 0;
 
     case SYS_RECV:
-        ipc_recv(a);
+        ipc_recv((message*)a);
         return 0;
 
     case SYS_CLOSE:
@@ -89,23 +90,9 @@ int syscall(int a, int b, int c, int d, int id) {
         return 0;
 
     case SYS_SBRK: {
-        thread* t = scheduler_current();
+        thread* t = scheduler_current_thread();
         if (!(t && t->process)) return 0;
-        process* p = t->process;
-
-        if (a == 0) {
-            return p->heap.start + p->heap.size;
-        }
-
-        while (a > p->heap.size - p->heap.used) {
-            unsigned phys = memory_alloc();
-            unsigned virt = p->heap.start + p->heap.size;
-            paging_map(p->paging_context, virt, phys, PTE_PERM_USER);
-            p->heap.size += 0x1000;
-        }
-
-        p->heap.used += a;
-        return (int)p->heap.start;
+        return (int)process_sbrk(t->process, (unsigned)a);
     }
 
     default:

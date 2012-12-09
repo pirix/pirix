@@ -3,6 +3,7 @@
 #include "cpu.h"
 
 typedef struct process process;
+typedef struct message message;
 
 typedef enum thread_status {
     RUNNABLE,
@@ -16,6 +17,7 @@ typedef struct thread {
     thread_status status;
     cpu_state* state;
     process* process;
+    message* msg;
     struct thread* next;
 } thread;
 

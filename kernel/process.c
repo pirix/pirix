@@ -1,5 +1,6 @@
 #include <kernel/process.h>
 #include <kernel/scheduler.h>
+#include <kernel/memory.h>
 #include <kernel/kheap.h>
 
 static process* first_process = 0;
@@ -44,12 +45,28 @@ void process_add_thread(process* self, thread* thread) {
     thread->process = self;
 }
 
+unsigned* process_sbrk(process* self, unsigned incr) {
+    if (incr == 0) {
+        return self->heap.start + self->heap.size;
+    }
+
+    while (incr > self->heap.size - self->heap.used) {
+        unsigned phys = memory_alloc();
+        unsigned virt = (unsigned)self->heap.start + self->heap.size;
+        paging_map(self->paging_context, virt, phys, PTE_PERM_USER);
+        self->heap.size += 0x1000;
+    }
+
+    self->heap.used += incr;
+    return self->heap.start;
+}
+
 void process_kill(int pid, int sig) {
     return;
 }
 
 void process_exit(int retval) {
-    thread* thread = scheduler_current();
+    thread* thread = scheduler_current_thread();
     process* self = thread->process;
     thread->status = FINISHED;
     scheduler_switch();

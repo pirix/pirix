@@ -33,7 +33,7 @@ thread* scheduler_dequeue_thread() {
     return 0;
 }
 
-thread* scheduler_current() {
+thread* scheduler_current_thread() {
     return current_thread;
 }
 

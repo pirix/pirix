@@ -49,6 +49,12 @@ process* process_get(int pid);
 void process_add_thread(process* self, thread* thread);
 
 /**
+ * Increase the heap size of a process.
+ * @memberof process
+ */
+unsigned* process_sbrk(process* self, unsigned incr);
+
+/**
  * Exit the current process.
  * @param retval exit code
  * @memberof process
