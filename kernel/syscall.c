@@ -3,6 +3,8 @@
 #include <kernel/process.h>
 #include <kernel/kprint.h>
 #include <kernel/ipc.h>
+#include <kernel/timer.h>
+#include <sys/sysinfo.h>
 
 int syscall(int a, int b, int c, int d, int id) {
     switch (id) {
@@ -93,6 +95,12 @@ int syscall(int a, int b, int c, int d, int id) {
         thread* t = scheduler_current_thread();
         if (!(t && t->process)) return 0;
         return (int)process_sbrk(t->process, (unsigned)a);
+    }
+
+    case SYS_SYSINFO: {
+        sysinfo* info = (sysinfo*)a;
+        info->uptime = timer_uptime();
+        return 0;
     }
 
     default:

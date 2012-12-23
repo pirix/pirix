@@ -11,6 +11,10 @@ static cpu_state* timer_tick(cpu_state* state) {
     return scheduler_schedule(state);
 }
 
+long timer_uptime() {
+    return clock;
+}
+
 int timer_init() {
     timer_setup();
     irq_register(TIMER_IRQ, &timer_tick);

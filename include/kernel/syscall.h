@@ -3,6 +3,7 @@
 // System
 #define SYS_REBOOT   0x00
 #define SYS_LOG      0x01
+#define SYS_SYSINFO  0x02
 
 // Processes
 #define SYS_EXIT     0x10

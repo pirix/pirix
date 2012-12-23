@@ -10,6 +10,11 @@ sys_log:
     swi #SYS_LOG
     bx lr
 
+.global sys_sysinfo
+sys_sysinfo:
+    swi #SYS_SYSINFO
+    bx lr
+
 .global sys_execve
 sys_execve:
     swi #SYS_EXECVE
