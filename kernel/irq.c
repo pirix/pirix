@@ -1,4 +1,4 @@
-#include <kernel/irq.h>
+#include <pirix/irq.h>
 #include <config.h>
 
 static irq_handler* irq_handlers[IRQ_COUNT];

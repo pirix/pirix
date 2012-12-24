@@ -1,4 +1,4 @@
-#include <kernel/memory.h>
+#include <pirix/memory.h>
 #include <string.h>
 
 #define BITMAP_SIZE 1024

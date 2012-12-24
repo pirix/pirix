@@ -1,6 +1,6 @@
-#include <kernel/scheduler.h>
-#include <kernel/process.h>
-#include <kernel/kheap.h>
+#include <pirix/scheduler.h>
+#include <pirix/process.h>
+#include <pirix/kheap.h>
 
 // task switch routine in init.S
 void task_switch(cpu_state* state);

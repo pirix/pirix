@@ -1,7 +1,7 @@
-#include <kernel/process.h>
-#include <kernel/scheduler.h>
-#include <kernel/memory.h>
-#include <kernel/kheap.h>
+#include <pirix/process.h>
+#include <pirix/scheduler.h>
+#include <pirix/memory.h>
+#include <pirix/kheap.h>
 
 static process* first_process = 0;
 

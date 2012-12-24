@@ -1,5 +1,5 @@
-#include <kernel/paging.h>
-#include <kernel/memory.h>
+#include <pirix/paging.h>
+#include <pirix/memory.h>
 #include <string.h>
 
 static paging_context* kernel_context = NULL;

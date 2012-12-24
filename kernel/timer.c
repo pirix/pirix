@@ -1,18 +1,25 @@
-#include <kernel/irq.h>
-#include <kernel/scheduler.h>
-#include <kernel/timer.h>
+#include <pirix/irq.h>
+#include <pirix/scheduler.h>
+#include <pirix/timer.h>
 #include <config.h>
 
-static unsigned clock;
+static unsigned ticks;
+static unsigned subticks;
 
 static cpu_state* timer_tick(cpu_state* state) {
     timer_clear();
-    clock++;
+
+    if (!subticks) {
+        subticks = TIMER_FREQ;
+        ticks++;
+    }
+    else subticks--;
+
     return scheduler_schedule(state);
 }
 
 long timer_uptime() {
-    return clock;
+    return ticks;
 }
 
 int timer_init() {

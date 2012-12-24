@@ -1,9 +1,9 @@
-#include <kernel/scheduler.h>
-#include <kernel/syscall.h>
-#include <kernel/process.h>
-#include <kernel/kprint.h>
-#include <kernel/ipc.h>
-#include <kernel/timer.h>
+#include <pirix/scheduler.h>
+#include <pirix/syscall.h>
+#include <pirix/process.h>
+#include <pirix/kprint.h>
+#include <pirix/ipc.h>
+#include <pirix/timer.h>
 #include <sys/sysinfo.h>
 
 int syscall(int a, int b, int c, int d, int id) {

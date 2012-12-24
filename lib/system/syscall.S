@@ -1,4 +1,4 @@
-#include <kernel/syscall.h>
+#include <pirix/syscall.h>
 
 .macro define_syscall name, id
 .global \name

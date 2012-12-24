@@ -1,7 +1,7 @@
-#include <kernel/irq.h>
-#include <kernel/ipc.h>
-#include <kernel/scheduler.h>
-#include <kernel/process.h>
+#include <pirix/irq.h>
+#include <pirix/ipc.h>
+#include <pirix/scheduler.h>
+#include <pirix/process.h>
 #include <string.h>
 
 void ipc_send(message* msg) {

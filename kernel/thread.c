@@ -1,6 +1,6 @@
-#include <kernel/cpu.h>
-#include <kernel/thread.h>
-#include <kernel/kheap.h>
+#include <pirix/cpu.h>
+#include <pirix/thread.h>
+#include <pirix/kheap.h>
 #include <string.h>
 
 #define STACK_SIZE 1024

@@ -1,11 +1,11 @@
-#include <kernel/kprint.h>
-#include <kernel/timer.h>
-#include <kernel/irq.h>
-#include <kernel/memory.h>
-#include <kernel/paging.h>
-#include <kernel/process.h>
-#include <kernel/scheduler.h>
-#include <kernel/boot.h>
+#include <pirix/kprint.h>
+#include <pirix/timer.h>
+#include <pirix/irq.h>
+#include <pirix/memory.h>
+#include <pirix/paging.h>
+#include <pirix/process.h>
+#include <pirix/scheduler.h>
+#include <pirix/boot.h>
 #include <config.h>
 
 void panic(const char* cause) {

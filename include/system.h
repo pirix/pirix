@@ -1,4 +1,4 @@
-#include "kernel/ipc.h"
+#include "pirix/ipc.h"
 
 typedef struct sysinfo sysinfo;
 

@@ -1,6 +1,6 @@
-#include <kernel/kheap.h>
-#include <kernel/memory.h>
-#include <kernel/paging.h>
+#include <pirix/kheap.h>
+#include <pirix/memory.h>
+#include <pirix/paging.h>
 #include <string.h>
 
 #define BUCKET_COUNT 16
