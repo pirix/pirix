@@ -3,8 +3,15 @@ add_library(util STATIC
   div.c
 )
 
-add_library(system STATIC
-  system/syscall.S
+add_library(pirix STATIC
+  pirix/syscall.S
+  pirix/libgloss.c
 )
+set_source_files_properties(pirix/syscall.S PROPERTIES LANGUAGE C)
 
-set_source_files_properties(system/syscall.S PROPERTIES LANGUAGE C)
+add_library(crt0 STATIC
+  crt0.S
+)
+set_target_properties(crt0 PROPERTIES PREFIX "" SUFFIX ".o")
+
+set_source_files_properties(crt0.S PROPERTIES LANGUAGE C)

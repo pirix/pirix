@@ -29,7 +29,7 @@ add_executable(kernel
   ${PLATFORM_SRC}
 )
 
-target_link_libraries(kernel util system)
+target_link_libraries(kernel util)
 
 set_source_files_properties(init.S PROPERTIES LANGUAGE C)
 

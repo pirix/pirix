@@ -29,17 +29,17 @@ add_subdirectory(tools)
 set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_CROSSCOMPILING TRUE)
 
-set(CMAKE_LINKER arm-elf-ld)
+set(CMAKE_LINKER arm-elf-pirix-ld)
 
-set(CMAKE_ASM_COMPILER arm-elf-gcc)
+set(CMAKE_ASM_COMPILER arm-elf-pirix-gcc)
 set(CMAKE_ASM_FLAGS "-march=${ARCH} -mfpu=fpa -mcpu=${CPU} -march=armv6")
 enable_language(ASM)
 
-set(CMAKE_C_COMPILER arm-elf-gcc)
+set(CMAKE_C_COMPILER arm-elf-pirix-gcc)
 
-set(CMAKE_C_FLAGS "-mcpu=${CPU} -mtune=${CPU} -mfpu=fpa -mfloat-abi=softfp -ffreestanding -nostartfiles -nostdinc -nodefaultlibs -Wall -fno-stack-protector -std=gnu99")
+set(CMAKE_C_FLAGS "-mcpu=${CPU} -mtune=${CPU} -mfpu=fpa -mfloat-abi=softfp -ffreestanding -nostartfiles -nodefaultlibs -Wall -fno-stack-protector -std=gnu99")
 
-set(CMAKE_OBJCOPY arm-elf-objcopy)
+set(CMAKE_OBJCOPY arm-elf-pirix-objcopy)
 
 set(CMAKE_C_SKIP_RPATH ON)
 set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS)
@@ -52,15 +52,17 @@ macro(USER_EXECUTABLE name)
   add_executable(${name} ${ARGN})
   set_target_properties(${name} PROPERTIES
     LINK_FLAGS "-T ${CMAKE_SOURCE_DIR}/tools/user.ld"
+    DEPENDS pirix
+    DEPENDS crt0
   )
-  target_link_libraries(${name} system)
+  target_link_libraries(${name} pirix)
 endmacro()
 
 ###### subdirectories
 
 add_subdirectory(kernel)
-add_subdirectory(servers)
 add_subdirectory(lib)
+add_subdirectory(servers)
 
 ###### IMAGES
 

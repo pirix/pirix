@@ -1,3 +1,4 @@
+#include <pirix/kernel.h>
 #include <pirix/scheduler.h>
 #include <pirix/process.h>
 #include <pirix/kheap.h>
