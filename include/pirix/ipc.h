@@ -3,7 +3,7 @@
 typedef struct message {
     int src;
     int dst;
-    int op;
+    int tag;
     int data;
 } message;
 

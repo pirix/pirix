@@ -4,7 +4,7 @@
 
 typedef cpu_state* (irq_handler)(cpu_state*);
 
-int irq_init();
+void irq_init();
 void irq_enable();
 void irq_disable();
 
