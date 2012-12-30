@@ -22,8 +22,7 @@ long timer_uptime() {
     return ticks;
 }
 
-int timer_init() {
+void timer_init() {
     timer_setup();
     irq_register(TIMER_IRQ, &timer_tick);
-    return 0;
 }

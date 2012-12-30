@@ -3,6 +3,8 @@
 #include "cpu.h"
 #include "thread.h"
 
+void scheduler_init();
+
 /**
  * Switch to the next thread immediately.
  */

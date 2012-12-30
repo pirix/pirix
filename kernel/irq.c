@@ -8,10 +8,9 @@ void irq_allow(unsigned irq);
 void irq_disallow(unsigned irq);
 unsigned irq_find();
 
-int irq_init() {
+void irq_init() {
     irq_setup();
     irq_enable();
-    return 0;
 }
 
 void irq_register(unsigned irq, irq_handler* handler) {

@@ -28,19 +28,12 @@ void exception(cpu_state* state) {
     panic(0);
 }
 
-static void init(const char* name, int (*handler)()) {
-    kprintf(":: %s", name);
-    int res = handler();
-    if (res) kputs("\t[fail]\n");
-    else kputs("\t[ok]\n");
-}
-
-static int modules_init() {
+static void modules_init() {
     extern unsigned* kernel_end;
     boot_header* boothdr = (boot_header*)&kernel_end;
 
     if (boothdr->module_count > BOOT_MAX_MODULES) {
-        return 1;
+        panic("too many modules");
     }
 
     for (unsigned int i = 0; i < boothdr->module_count; i++) {
@@ -58,8 +51,6 @@ static int modules_init() {
 
         process_create((void*)mod->entry, context);
     }
-
-    return 0;
 }
 
 void main() {
@@ -68,11 +59,12 @@ void main() {
     kputs("PIRIX VERSION " VERSION " BOOTING...\n");
     kputs(PLATFORM_NAME " " BUILD_TYPE " build (" BUILD_TIME ")\n\n");
 
-    init("memory ", &memory_init);
-    init("paging ", &paging_init);
-    init("modules", &modules_init);
-    init("irqs   ", &irq_init);
-    init("timer  ", &timer_init);
+    memory_init();
+    paging_init();
+    scheduler_init();
+    modules_init();
+    irq_init();
+    timer_init();
 
     for (;;);
 }

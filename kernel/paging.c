@@ -45,8 +45,7 @@ void paging_activate_context(paging_context* context) {
     paging_invalidate_tlb();
 }
 
-int paging_init() {
+void paging_init() {
     extern unsigned* tt1;
     kernel_context = tt1;
-    return 0;
 }

@@ -243,6 +243,10 @@ paging_set_transition_table:
     mcr p15, 0, r0, c2, c0, 0
     bx lr
 
+.global idle
+idle:
+    b .
+
 .pool
 
 .section .bss

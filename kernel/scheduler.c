@@ -7,9 +7,18 @@
 void task_switch(cpu_state* state);
 
 static thread* current_thread = 0;
+static thread* idle_thread = 0;
 
 static thread* queue_head = 0;
 static thread* queue_tail = 0;
+
+void scheduler_init() {
+    // create idle thread in system mode
+    extern void idle();
+    idle_thread = thread_new(&idle);
+    idle_thread->state->spsr = 0x5F;
+    idle_thread->state->usr_r13 = 0x0;
+}
 
 void scheduler_enqueue_thread(thread* new_thread) {
     new_thread->next = 0;
@@ -51,7 +60,10 @@ cpu_state* scheduler_schedule(cpu_state* state) {
     }
 
     current_thread = scheduler_dequeue_thread();
-    if (!current_thread) panic("no process left");
+
+    if (!current_thread) {
+        return idle_thread->state;
+    }
 
     paging_activate_context(current_thread->process->paging_context);
 
