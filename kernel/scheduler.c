@@ -17,7 +17,6 @@ void scheduler_init() {
     extern void idle();
     idle_thread = thread_new(&idle);
     idle_thread->state->spsr = 0x5F;
-    idle_thread->state->usr_r13 = 0x0;
 }
 
 void scheduler_enqueue_thread(thread* new_thread) {
@@ -65,7 +64,7 @@ cpu_state* scheduler_schedule(cpu_state* state) {
         return idle_thread->state;
     }
 
-    paging_activate_context(current_thread->process->paging_context);
+    paging_activate_context(current_thread->process->context);
 
     return current_thread->state;
 }

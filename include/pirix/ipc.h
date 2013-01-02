@@ -2,10 +2,10 @@
 
 typedef struct message {
     int src;
-    int dst;
     int tag;
     int data;
 } message;
 
-void ipc_send(message* msg);
-void ipc_recv(message* msg);
+int ipc_send(int dest, message* msg);
+int ipc_recv(message* msg);
+int ipc_call(int dest, message* msg);

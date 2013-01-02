@@ -46,9 +46,6 @@ static void modules_init() {
             paging_map(context, 0x8000+i, mod->addr+i, PTE_PERM_USER);
         }
 
-        // map stack
-        paging_map(context, 0x7ffff000, memory_alloc(), PTE_PERM_USER);
-
         process_create((void*)mod->entry, context);
     }
 }

@@ -27,4 +27,5 @@ define_syscall sys_unlink,  #SYS_UNLINK
 define_syscall sys_wait,    #SYS_WAIT
 define_syscall sys_send,    #SYS_SEND
 define_syscall sys_recv,    #SYS_RECV
+define_syscall sys_call,    #SYS_CALL
 define_syscall sys_yield,   #SYS_YIELD

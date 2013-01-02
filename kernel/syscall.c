@@ -56,12 +56,13 @@ int syscall(int a, int b, int c, int d, int id) {
         return -1;
 
     case SYS_SEND:
-        ipc_send((message*)a);
-        return 0;
+        return ipc_send((int)a, (message*)b);
 
     case SYS_RECV:
-        ipc_recv((message*)a);
-        return 0;
+        return ipc_recv((message*)a);
+
+    case SYS_CALL:
+        return ipc_call((int)a, (message*)b);
 
     case SYS_CLOSE:
         return -1;

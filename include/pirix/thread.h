@@ -14,6 +14,7 @@ typedef enum thread_status {
 
 typedef struct thread {
     unsigned* svc_stack;
+    unsigned* thr_stack;
     thread_status status;
     cpu_state* state;
     process* process;
@@ -27,6 +28,13 @@ typedef struct thread {
  * @memberof thread
  */
 thread* thread_new(void* entry);
+
+
+/**
+ * Initialize the stack of a thread.
+ * @memberof thread
+ */
+void thread_init_stack(thread* self, unsigned index);
 
 /**
  * Delete a thread.

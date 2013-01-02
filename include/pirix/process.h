@@ -3,6 +3,8 @@
 #include "paging.h"
 #include "thread.h"
 
+#define MAX_THREADS 10
+
 typedef struct heap {
     unsigned* start;
     unsigned size;
@@ -13,8 +15,8 @@ typedef struct process {
     int pid;
     int flags;
     heap heap;
-    thread* thread;
-    paging_context* paging_context;
+    thread* threads[MAX_THREADS];
+    paging_context* context;
     struct process* next;
 } process;
 
@@ -47,6 +49,12 @@ process* process_get(int pid);
  * @memberof process
  */
 void process_add_thread(process* self, thread* thread);
+
+/**
+ * Remove a thread from a process.
+ * @memberof process
+ */
+void process_remove_thread(process* self, thread* thread);
 
 /**
  * Increase the heap size of a process.
