@@ -5,7 +5,7 @@
 
 static process* first_process = 0;
 
-int pid_counter = 0;
+int pid_counter = 1;
 
 process* process_new(paging_context* context) {
     process* new_process = kmalloc(sizeof(process));

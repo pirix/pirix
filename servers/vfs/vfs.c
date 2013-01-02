@@ -4,6 +4,16 @@
 #include "vnode.h"
 #include <stdio.h>
 
+int vfs_mount(unsigned point, unsigned pid) {
+    sys_log("mount!");
+
+    vnode* v = vnode_get_free();
+    v->fs_pid = pid;
+    v->inode = point;
+
+    return 0;
+}
+
 void handle(message* msg) {
     switch (msg->tag) {
     case VFS_OPEN:
@@ -11,6 +21,7 @@ void handle(message* msg) {
     case VFS_CLOSE:
         break;
     case VFS_MOUNT:
+        vfs_mount(1, msg->src);
         break;
     case VFS_UMOUNT:
         break;
@@ -19,12 +30,12 @@ void handle(message* msg) {
 
 int main(int argc, char* argv[]) {
     sys_log("virtual file system started.");
-    vnode_init(100);
+    vnode_init_cache(100);
 
     message msg;
 
     while (1) {
-        sys_recv(&msg);
+        sys_recv(ANY_PID, &msg);
         handle(&msg);
     }
 

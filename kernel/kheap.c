@@ -50,8 +50,8 @@ void* kmalloc(size_t size) {
 }
 
 void* kcalloc(int count, size_t size) {
-    void* ptr = kmalloc(size);
-    memset(ptr, 0, size*count);
+    void* ptr = kmalloc(count*size);
+    memset(ptr, 0, count*size);
     return ptr;
 }
 

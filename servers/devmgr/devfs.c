@@ -7,7 +7,7 @@ void devfs_register() {
         .tag = VFS_MOUNT,
         .data = 23
     };
-    sys_call(0, &msg);
+    sys_send(VFS_PID, &msg);
 }
 
 void devfs_run() {
@@ -15,6 +15,6 @@ void devfs_run() {
 
     message msg;
     while (1) {
-        sys_recv(&msg);
+        sys_recv(ANY_PID, &msg);
     }
 }
