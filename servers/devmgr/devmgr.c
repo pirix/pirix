@@ -1,4 +1,4 @@
-#include "pirix.h"
+#include <pirix.h>
 #include "devfs.h"
 
 int main(int argc, const char* argv[]) {

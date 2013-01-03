@@ -1,6 +1,6 @@
 #pragma once
 
-typedef unsigned size_t;
+#include <sys/types.h>
 
 void kheap_init();
 void* kmalloc(size_t size);

@@ -1,8 +1,8 @@
-#include "pirix.h"
-#include "pirix/ipc.h"
+#include <pirix.h>
+#include <pirix/ipc.h>
+#include <stdio.h>
 #include "vfs.h"
 #include "vnode.h"
-#include <stdio.h>
 
 int vfs_mount(unsigned point, unsigned pid) {
     sys_log("mount!");
