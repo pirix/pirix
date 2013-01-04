@@ -142,16 +142,11 @@ start:
     b .
 
 swi_handler:
-    stmfd sp!, {r4-r12,lr}
-
-    ldr r4, [lr, #-4]
-    and r4, #0xffffff
-    push {r4}
-
+    stmfd sp!, {r4-r11,lr}
+    push {r12}
     bl syscall
-
-    pop {r4}
-    ldmfd sp!, {r4-r12,pc}^
+    pop {r12}
+    ldmfd sp!, {r4-r11,pc}^
 
 irq_handler:
     sub lr, #4

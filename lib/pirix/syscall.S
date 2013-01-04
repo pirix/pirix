@@ -3,7 +3,8 @@
 .macro define_syscall name, id
 .global \name
 \name:
-    swi \id
+    mov r12, \id
+    swi #0
     bx lr
 .endm
 
