@@ -16,12 +16,12 @@ int ipc_send(int dst, message* msg) {
                 thread* t = p->threads[i];
 
                 if (!t) continue;
-                if (t->status != RECEIVING) continue;
+                if (t->state != STATE_RECV) continue;
                 if (t->msg->src != ANY_PID && t->msg->src != msg->src) continue;
 
                 memcpy(p->threads[i]->msg, msg, sizeof(message));
-                p->threads[i]->status = RUNNABLE;
-                scheduler_enqueue_thread(p->threads[i]);
+
+                thread_unblock(p->threads[i]);
                 return 0;
             }
         }
@@ -38,7 +38,8 @@ int ipc_recv(int src, message* msg) {
     message tmp_msg;
     t->msg = &tmp_msg;
     t->msg->src = src;
-    t->status = RECEIVING;
+
+    thread_block(t, STATE_RECV);
 
     scheduler_switch();
     memcpy(msg, &tmp_msg, sizeof(message));

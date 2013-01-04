@@ -5,18 +5,18 @@
 typedef struct process process;
 typedef struct message message;
 
-typedef enum thread_status {
-    RUNNABLE,
-    WAITING,
-    RECEIVING,
-    FINISHED,
-} thread_status;
+typedef enum thread_state {
+    STATE_READY,
+    STATE_WAIT,
+    STATE_RECV,
+    STATE_DEAD,
+} thread_state;
 
 typedef struct thread {
     unsigned* svc_stack;
     unsigned* thr_stack;
-    thread_status status;
-    cpu_state* state;
+    thread_state state;
+    cpu_state* registers;
     process* process;
     message* msg;
     struct thread* next;
@@ -31,10 +31,26 @@ thread* thread_new(void* entry);
 
 
 /**
- * Initialize the stack of a thread.
+ * Set the stack of a thread.
  * @memberof thread
  */
-void thread_init_stack(thread* self, unsigned index);
+void thread_set_stack(thread* self, unsigned* addr);
+
+/**
+ * Block a thread by changing its state. The thread has to be removed
+ * from the scheduler queue before.
+ * @param state the blocking state
+ * @memberof thread
+ */
+void thread_block(thread* self, thread_state state);
+
+
+/**
+ * Change the state of a thread to READY and add it to the scheduler
+ * queue.
+ * @memberof thread
+ */
+void thread_unblock(thread* self);
 
 /**
  * Delete a thread.

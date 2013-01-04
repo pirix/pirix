@@ -24,8 +24,12 @@ process* process_new(paging_context* context) {
 }
 
 process* process_create(void* entry, paging_context* context) {
-    process* new_process = process_new(context);
     thread* new_thread = thread_new(entry);
+    unsigned stack = memory_alloc();
+    paging_map(context, 0x7ffff000, stack, PTE_PERM_USER);
+    thread_set_stack(new_thread, (unsigned*)0x80000000);
+
+    process* new_process = process_new(context);
     process_add_thread(new_process, new_thread);
     scheduler_enqueue_thread(new_thread);
     return new_process;
@@ -45,7 +49,6 @@ void process_add_thread(process* self, thread* thread) {
         if (!self->threads[i]) {
             self->threads[i] = thread;
             thread->process = self;
-            thread_init_stack(thread, i);
             return;
         }
     }
@@ -84,6 +87,6 @@ void process_kill(int pid, int sig) {
 void process_exit(int retval) {
     thread* thread = scheduler_current_thread();
     process* self = thread->process;
-    thread->status = FINISHED;
+    thread_block(thread, STATE_DEAD);
     scheduler_switch();
 }

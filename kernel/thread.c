@@ -12,33 +12,32 @@
 thread* thread_new(void* entry) {
     unsigned* svc_stack = kmalloc(SVC_STACK*sizeof(unsigned));
 
-    cpu_state* new_state = (cpu_state*)(svc_stack + SVC_STACK) - 1;
+    cpu_state* regs = (cpu_state*)(svc_stack + SVC_STACK) - 1;
 
-    *new_state = (cpu_state) {
+    *regs = (cpu_state) {
         .spsr = 0x50, // user mode
         .r15 = (unsigned)entry
     };
 
     thread* new_thread = kmalloc(sizeof(thread));
-    new_thread->status = RUNNABLE;
-    new_thread->state = new_state;
+    new_thread->state = STATE_READY;
+    new_thread->registers = regs;
     new_thread->svc_stack = svc_stack;
 
     return new_thread;
 }
 
-void thread_init_stack(thread* self, unsigned index) {
-    unsigned stack_start = 0x80000000 - (index+1)*THR_STACK*0x1000;
-    unsigned stack_end = stack_start + THR_STACK*0x1000;
+void thread_set_stack(thread* self, unsigned* addr) {
+    self->registers->usr_r13 = addr;
+}
 
-    for (unsigned addr = stack_start; addr < stack_end; addr += 0x1000) {
-        unsigned virt = addr;
-        unsigned phys = memory_alloc();
-        paging_map(self->process->context, virt, phys, PTE_PERM_USER);
-    }
+void thread_block(thread* self, thread_state state) {
+    self->state = state;
+}
 
-    self->state->usr_r13 = stack_end;
-    self->thr_stack = (unsigned*)stack_start;
+void thread_unblock(thread* self) {
+    self->state = STATE_READY;
+    scheduler_enqueue_thread(self);
 }
 
 void thread_delete(thread* self) {

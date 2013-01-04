@@ -16,7 +16,7 @@ void scheduler_init() {
     // create idle thread in system mode
     extern void idle();
     idle_thread = thread_new(&idle);
-    idle_thread->state->spsr = 0x5F;
+    idle_thread->registers->spsr = 0x5F;
 }
 
 void scheduler_enqueue_thread(thread* new_thread) {
@@ -47,13 +47,13 @@ thread* scheduler_current_thread() {
 }
 
 void scheduler_switch() {
-    task_switch(current_thread->state);
+    task_switch(current_thread->registers);
 }
 
-cpu_state* scheduler_schedule(cpu_state* state) {
+cpu_state* scheduler_schedule(cpu_state* registers) {
     if (current_thread) {
-        current_thread->state = state;
-        if (current_thread->status == RUNNABLE) {
+        current_thread->registers = registers;
+        if (current_thread->state == STATE_READY) {
             scheduler_enqueue_thread(current_thread);
         }
     }
@@ -61,10 +61,10 @@ cpu_state* scheduler_schedule(cpu_state* state) {
     current_thread = scheduler_dequeue_thread();
 
     if (!current_thread) {
-        return idle_thread->state;
+        return idle_thread->registers;
     }
 
     paging_activate_context(current_thread->process->context);
 
-    return current_thread->state;
+    return current_thread->registers;
 }
