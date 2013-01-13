@@ -12,16 +12,16 @@ int ipc_send(int dst, message* msg) {
         process* p = process_get(dst);
 
         if (p) {
-            for (int i = 0; i < MAX_THREADS; i++) {
-                thread* t = p->threads[i];
+            for (int i = 0; i < p->threads.bounds; i++) {
+                thread* t = vector_get(&p->threads, i);
 
                 if (!t) continue;
                 if (t->state != STATE_RECV) continue;
                 if (t->msg->src != ANY_PID && t->msg->src != msg->src) continue;
 
-                memcpy(p->threads[i]->msg, msg, sizeof(message));
+                memcpy(t->msg, msg, sizeof(message));
 
-                thread_unblock(p->threads[i]);
+                thread_unblock(t);
                 return 0;
             }
         }

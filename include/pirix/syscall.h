@@ -18,7 +18,8 @@
 // IPC
 #define SYS_SEND     0x30
 #define SYS_RECV     0x31
-#define SYS_CALL     0x32
+#define SYS_REPLY    0x32
+#define SYS_CALL     0x33
 
 // Filesystem
 #define SYS_CLOSE    0x40

@@ -13,6 +13,7 @@ typedef enum thread_state {
 } thread_state;
 
 typedef struct thread {
+    int tid;
     unsigned* svc_stack;
     unsigned* thr_stack;
     thread_state state;

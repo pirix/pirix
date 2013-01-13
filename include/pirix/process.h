@@ -1,9 +1,8 @@
 #pragma once
 
+#include "vector.h"
 #include "paging.h"
 #include "thread.h"
-
-#define MAX_THREADS 10
 
 typedef struct heap {
     unsigned* start;
@@ -15,7 +14,7 @@ typedef struct process {
     int pid;
     int flags;
     heap heap;
-    thread* threads[MAX_THREADS];
+    vector threads;
     paging_context* context;
     struct process* next;
 } process;

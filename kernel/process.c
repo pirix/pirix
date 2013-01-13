@@ -20,6 +20,8 @@ process* process_new(paging_context* context) {
     new_process->next = first_process;
     first_process = new_process;
 
+    vector_init(&new_process->threads);
+
     return new_process;
 }
 
@@ -45,23 +47,13 @@ process* process_get(int pid) {
 }
 
 void process_add_thread(process* self, thread* thread) {
-    for (int i = 0; i < MAX_THREADS; i++) {
-        if (!self->threads[i]) {
-            self->threads[i] = thread;
-            thread->process = self;
-            return;
-        }
-    }
+    int tid = vector_add(&self->threads, thread);
+    thread->tid = tid;
+    thread->process = self;
 }
 
 void process_remove_thread(process* self, thread* thread) {
-    for (int i = 0; i < MAX_THREADS; i++) {
-        if (self->threads[i] == thread) {
-            self->threads[i] = 0;
-            thread->process = 0;
-            return;
-        }
-    }
+    vector_set(&self->threads, thread->tid, 0);
 }
 
 unsigned* process_sbrk(process* self, unsigned incr) {

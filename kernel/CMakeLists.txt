@@ -13,7 +13,8 @@ elseif(PLATFORM STREQUAL QEMU)
 endif(PLATFORM STREQUAL RBPI)
 
 add_executable(kernel
-  init.S
+  arm/init.S
+  arm/div.c
   main.c
   paging.c
   memory.c
@@ -26,10 +27,10 @@ add_executable(kernel
   kprint.c
   ipc.c
   scheduler.c
+  string.c
+  vector.c
   ${PLATFORM_SRC}
 )
-
-target_link_libraries(kernel util)
 
 set_source_files_properties(init.S PROPERTIES LANGUAGE C)
 

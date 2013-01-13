@@ -1,8 +1,3 @@
-add_library(util STATIC
-  string.c
-  div.c
-)
-
 add_library(pirix STATIC
   pirix/syscall.S
   pirix/libgloss.c
