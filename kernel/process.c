@@ -4,25 +4,27 @@
 #include <pirix/kheap.h>
 #include <string.h>
 
-static process* first_process = 0;
-int pid_counter = 1;
+static vector processes;
+
+void process_init() {
+    vector_init(&processes);
+}
 
 process* process_new(paging_context* context) {
-    process* new_process = kmalloc(sizeof(process));
-    new_process->pid = pid_counter++;
-    new_process->context = context;
+    process* self = kmalloc(sizeof(process));
 
-    new_process->heap.start = (unsigned*)0x100000;
-    new_process->heap.size = 0;
-    new_process->heap.used = 0;
+    self->context = context;
 
-    // prepend to process list
-    new_process->next = first_process;
-    first_process = new_process;
+    int pid = vector_add(&processes, self);
+    self->pid = pid;
 
-    vector_init(&new_process->threads);
+    self->heap.start = (unsigned*)0x100000;
+    self->heap.size = 0;
+    self->heap.used = 0;
 
-    return new_process;
+    vector_init(&self->threads);
+
+    return self;
 }
 
 process* process_create(void* entry, paging_context* context) {
@@ -31,19 +33,14 @@ process* process_create(void* entry, paging_context* context) {
     paging_map(context, 0x7ffff000, stack, PTE_PERM_USER);
     thread_set_stack(new_thread, (unsigned*)0x80000000);
 
-    process* new_process = process_new(context);
-    process_add_thread(new_process, new_thread);
+    process* self = process_new(context);
+    process_add_thread(self, new_thread);
     scheduler_enqueue_thread(new_thread);
-    return new_process;
+    return self;
 }
 
 process* process_get(int pid) {
-    process* p = first_process;
-    while (p != 0) {
-        if (p->pid == pid) return p;
-        p = p->next;
-    }
-    return 0;
+    return vector_get(&processes, pid);
 }
 
 void process_add_thread(process* self, thread* thread) {

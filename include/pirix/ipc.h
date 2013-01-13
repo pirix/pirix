@@ -1,7 +1,7 @@
 #pragma once
 
-#define ANY_PID 0
-#define VFS_PID 1
+#define ANY_PID -1
+#define VFS_PID 0
 
 typedef struct message {
     int src;

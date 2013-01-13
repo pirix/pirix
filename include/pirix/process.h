@@ -16,8 +16,12 @@ typedef struct process {
     heap heap;
     vector threads;
     paging_context* context;
-    struct process* next;
 } process;
+
+/**
+ * Initialize processing.
+ */
+void process_init();
 
 /**
  * Create an empty process.

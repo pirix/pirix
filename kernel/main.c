@@ -58,6 +58,7 @@ void main() {
 
     memory_init();
     paging_init();
+    process_init();
     scheduler_init();
     modules_init();
     irq_init();
