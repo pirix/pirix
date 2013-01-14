@@ -25,7 +25,9 @@ int vector_add(vector* self, void* value) {
             return i;
         }
     }
-    return -1;
+
+    vector_resize(self);
+    return vector_add(self, value);
 }
 
 void vector_set(vector* self, int index, void* value) {
