@@ -1,5 +1,15 @@
 #include <pirix/vector.h>
 #include <pirix/kheap.h>
+#include <string.h>
+
+static void vector_resize(vector* self) {
+    void** tmp = kmalloc(self->bounds*2*sizeof(void*));
+    memcpy(tmp, self->content, self->bounds*sizeof(void*));
+    memset(tmp+self->bounds, 0, self->bounds*sizeof(void*));
+    kfree(self->content, self->bounds*sizeof(void*));
+    self->content = tmp;
+    self->bounds *= 2;
+}
 
 void vector_init(vector* self) {
     self->content = kcalloc(8, sizeof(void*));
