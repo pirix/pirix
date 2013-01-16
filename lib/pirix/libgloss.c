@@ -1,12 +1,10 @@
 #include <sys/stat.h>
+#include <sys/time.h>
 #include <errno.h>
 #include "pirix.h"
 
 #undef errno
 extern int errno;
-
-char *__env[1] = { 0 };
-char **environ = __env;
 
 void _exit(int status) {
     sys_exit(status);
@@ -81,5 +79,9 @@ int _lseek(int file, int offset, int whence) {
 
 int _times(int buf) {
     errno = ENOSYS;
+    return -1;
+}
+
+int _gettimeofday(struct timeval* p, void* z){
     return -1;
 }
