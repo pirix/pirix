@@ -37,3 +37,5 @@ set_source_files_properties(init.S PROPERTIES LANGUAGE C)
 set_target_properties(kernel PROPERTIES
   LINK_FLAGS "-T ${CMAKE_SOURCE_DIR}/tools/kernel.ld"
 )
+
+install(TARGETS kernel RUNTIME DESTINATION bin)
