@@ -11,24 +11,18 @@ So far, the following features are more or less stable:
     - memory management with paging
     - interrupt handling
     - multitasking
-    - filesystem
 
 ## Building
 
 In order to build πrix you have to install the system-specific
-toolchain. A Makefile with the necessary patches is available on
-https://github.com/7h0ma5/pirix-toolchain/. To compile and install the
+toolchain. A script to build the toolchain is available on
+https://github.com/pirix/pirix-toolchain/. To compile and install the
 toolchain, switch to the pirix-toolchain directory and run the
 following commands:
 
-    make binutils-make
-    sudo make binutils-install
-
-    make gcc-make
-    sudo make gcc-install
-
-    make newlib-make
-    sudo make newlib-install
+    $ ./prepare.sh
+    $ ./build.sh
+    # ./install.sh
 
 Now you are ready to compile the kernel. πrix uses cmake and it's
 better to run and out-of-source build to keep the source directory
