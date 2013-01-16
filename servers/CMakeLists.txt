@@ -12,3 +12,5 @@ user_executable(devmgr
   devmgr/devmgr.c
   devmgr/devfs.c
 )
+
+install(TARGETS vfs devmgr RUNTIME DESTINATION bin)

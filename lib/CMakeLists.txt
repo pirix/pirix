@@ -10,3 +10,5 @@ add_library(crt0 STATIC
 set_target_properties(crt0 PROPERTIES PREFIX "" SUFFIX ".o")
 
 set_source_files_properties(crt0.S PROPERTIES LANGUAGE C)
+
+install(TARGETS pirix crt0 ARCHIVE DESTINATION lib)
