@@ -68,7 +68,7 @@ add_subdirectory(servers)
 
 add_custom_target(image ALL
   DEPENDS kernel
-  DEPENDS pimg
+  DEPENDS pimg vfs devmgr
   COMMAND ./tools/pimg -k kernel/kernel servers/vfs servers/devmgr -o pirix.img
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 )
