@@ -55,14 +55,20 @@ int syscall(int a, int b, int c, int d, int id) {
     case SYS_UNLINK:
         return -1;
 
+    case SYS_LISTEN:
+        return ipc_listen();
+
+    case SYS_CONNECT:
+        return ipc_connect((int)a);
+
     case SYS_SEND:
         return ipc_send((int)a, (message*)b);
 
     case SYS_RECV:
-        return ipc_recv((int)a, (message*)b);
+        return ipc_recv((message*)a);
 
-    case SYS_CALL:
-        return ipc_call((int)a, (message*)b);
+    case SYS_REPLY:
+        return ipc_reply((int)a, (message*)b);
 
     case SYS_CLOSE:
         return -1;

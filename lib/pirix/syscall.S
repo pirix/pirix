@@ -26,7 +26,9 @@ define_syscall sys_read,    #SYS_READ
 define_syscall sys_write,   #SYS_WRITE
 define_syscall sys_unlink,  #SYS_UNLINK
 define_syscall sys_wait,    #SYS_WAIT
+define_syscall sys_listen,  #SYS_LISTEN
+define_syscall sys_connect, #SYS_CONNECT
 define_syscall sys_send,    #SYS_SEND
 define_syscall sys_recv,    #SYS_RECV
-define_syscall sys_call,    #SYS_CALL
+define_syscall sys_reply,   #SYS_REPLY
 define_syscall sys_yield,   #SYS_YIELD

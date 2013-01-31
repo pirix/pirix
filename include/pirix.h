@@ -25,6 +25,8 @@ int sys_execve(char* name, char** argc, char** env);
 int sys_lseek(int fd, int ptr, int dir);
 int sys_fstat(int fd, int st);
 
-int sys_send(int dst, message* msg);
-int sys_recv(int src, message* msg);
-int sys_call(int dst, message* msg);
+int sys_listen();
+int sys_connect(int pid);
+int sys_send(int cid, message* msg);
+int sys_recv(message* msg);
+int sys_reply(int cid, message* msg);

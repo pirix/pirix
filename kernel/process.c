@@ -14,15 +14,17 @@ process* process_new(paging_context* context) {
     process* self = kmalloc(sizeof(process));
 
     self->context = context;
-
-    int pid = vector_add(&processes, self);
-    self->pid = pid;
+    self->chan = 0;
 
     self->heap.start = (unsigned*)0x100000;
     self->heap.size = 0;
     self->heap.used = 0;
 
     vector_init(&self->threads);
+    vector_init(&self->fds);
+
+    int pid = vector_add(&processes, self);
+    self->pid = pid;
 
     return self;
 }

@@ -1,7 +1,9 @@
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <errno.h>
-#include "pirix.h"
+#include <pirix.h>
+#include <pirix/ipc.h>
+#include <vfs/vfs.h>
 
 #undef errno
 extern int errno;
@@ -40,7 +42,14 @@ int _sbrk(int incr) {
 }
 
 int _open(char* name, int flags, ...) {
-    return sys_open(name, flags);
+    int fd = sys_connect(VFS_PID);
+
+    message msg;
+    msg.tag = VFS_OPEN;
+
+    int res = sys_send(fd, &msg);
+
+    return res < 0 ? res : fd;
 }
 
 int _read(int file, char* buf, int len) {

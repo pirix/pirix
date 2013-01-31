@@ -16,10 +16,11 @@
 #define SYS_YIELD    0x17
 
 // IPC
-#define SYS_SEND     0x30
-#define SYS_RECV     0x31
-#define SYS_REPLY    0x32
-#define SYS_CALL     0x33
+#define SYS_LISTEN   0x30
+#define SYS_CONNECT  0x31
+#define SYS_SEND     0x32
+#define SYS_RECV     0x33
+#define SYS_REPLY    0x34
 
 // Filesystem
 #define SYS_CLOSE    0x40

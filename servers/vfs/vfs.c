@@ -14,29 +14,33 @@ int vfs_mount(unsigned point, unsigned pid) {
     return 0;
 }
 
-void handle(message* msg) {
+void handle(int cid, message* msg) {
     switch (msg->tag) {
     case VFS_OPEN:
         break;
     case VFS_CLOSE:
         break;
     case VFS_MOUNT:
-        vfs_mount(1, msg->src);
         break;
     case VFS_UMOUNT:
         break;
     }
+
+    message rmsg;
+    rmsg.tag = 123;
+    sys_reply(cid, &rmsg);
 }
 
 int main(int argc, char* argv[]) {
     sys_log("virtual file system started.");
     vnode_init_cache(100);
 
-    message msg;
+    sys_listen();
 
     while (1) {
-        sys_recv(ANY_PID, &msg);
-        handle(&msg);
+        message msg;
+        int cid = sys_recv(&msg);
+        handle(cid, &msg);
     }
 
     return 0;

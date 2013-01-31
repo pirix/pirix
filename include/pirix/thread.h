@@ -19,7 +19,6 @@ typedef struct thread {
     thread_state state;
     cpu_state* registers;
     process* process;
-    message* msg;
     struct thread* next;
 } thread;
 
@@ -44,7 +43,6 @@ void thread_set_stack(thread* self, unsigned* addr);
  * @memberof thread
  */
 void thread_block(thread* self, thread_state state);
-
 
 /**
  * Change the state of a thread to READY and add it to the scheduler

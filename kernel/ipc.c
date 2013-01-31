@@ -2,52 +2,71 @@
 #include <pirix/ipc.h>
 #include <pirix/scheduler.h>
 #include <pirix/process.h>
+#include <pirix/kheap.h>
 #include <string.h>
 
-int ipc_send(int dst, message* msg) {
-    thread* src = scheduler_current_thread();
-    msg->src = src->process->pid;
+int ipc_listen() {
+    process* proc = scheduler_current_thread()->process;
 
-    while (1) {
-        process* p = process_get(dst);
+    if (proc->chan) return -1;
 
-        if (p) {
-            for (int i = 0; i < p->threads.bounds; i++) {
-                thread* t = vector_get(&p->threads, i);
+    channel* chan = kmalloc(sizeof(channel));
+    chan->proc = proc;
 
-                if (!t) continue;
-                if (t->state != STATE_RECV) continue;
-                if (t->msg->src != ANY_PID && t->msg->src != msg->src) continue;
-
-                memcpy(t->msg, msg, sizeof(message));
-
-                thread_unblock(t);
-                return 0;
-            }
-        }
-
-        scheduler_switch();
-    }
+    proc->chan = chan;
 
     return 0;
 }
 
-int ipc_recv(int src, message* msg) {
-    thread* t = scheduler_current_thread();
+int ipc_connect(int pid) {
+    thread* thrd = scheduler_current_thread();
+    process* proc = thrd->process;
+    process* dest = process_get(pid);
 
-    message tmp_msg;
-    t->msg = &tmp_msg;
-    t->msg->src = src;
+    if (!dest->chan) return -1;
+
+    connect* conn = kmalloc(sizeof(connect));
+    int cid = vector_add(&proc->fds, conn);
+    conn->chan = dest->chan;
+    conn->cid = cid;
+
+    kprintf("connected!\n");
+
+    return cid;
+}
+
+int ipc_send(int cid, message* msg) {
+    thread* thrd = scheduler_current_thread();
+    process* proc = thrd->process;
+    connect* conn = vector_get(&proc->fds, cid);
+
+    if (!conn) return -1;
+
+    memcpy(&conn->chan->msg, msg, sizeof(message));
+
+    kprintf("sent!\n");
+
+    thread_block(thrd, STATE_RECV);
+
+    scheduler_switch();
+
+    kprintf("got reply!\n");
+
+    return 0;
+}
+
+int ipc_recv(message* msg) {
+    thread* t = scheduler_current_thread();
 
     thread_block(t, STATE_RECV);
 
     scheduler_switch();
-    memcpy(msg, &tmp_msg, sizeof(message));
+
     return 0;
 }
 
-int ipc_call(int dst, message* msg) {
-    int res = ipc_send(dst, msg);
-    if (res != 0) return res;
-    return ipc_recv(dst, msg);
+int ipc_reply(int cid, message* msg) {
+    kprintf("reply!");
+
+    return 0;
 }

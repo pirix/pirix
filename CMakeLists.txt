@@ -44,7 +44,10 @@ set(CMAKE_OBJCOPY arm-elf-pirix-objcopy)
 set(CMAKE_C_SKIP_RPATH ON)
 set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS)
 
-include_directories(${CMAKE_SOURCE_DIR}/include)
+include_directories(
+  ${CMAKE_SOURCE_DIR}/include
+  ${CMAKE_SOURCE_DIR}/servers
+)
 
 ###### user executable
 

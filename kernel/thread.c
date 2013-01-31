@@ -4,10 +4,10 @@
 #include <pirix/kheap.h>
 #include <pirix/paging.h>
 #include <pirix/memory.h>
+#include <pirix/scheduler.h>
 #include <string.h>
 
 #define SVC_STACK 1024
-#define THR_STACK 2
 
 thread* thread_new(void* entry) {
     unsigned* svc_stack = kmalloc(SVC_STACK*sizeof(unsigned));
@@ -28,7 +28,7 @@ thread* thread_new(void* entry) {
 }
 
 void thread_set_stack(thread* self, unsigned* addr) {
-    self->registers->usr_r13 = addr;
+    self->registers->usr_r13 = (unsigned)addr;
 }
 
 void thread_block(thread* self, thread_state state) {

@@ -3,6 +3,7 @@
 #include "vector.h"
 #include "paging.h"
 #include "thread.h"
+#include "ipc.h"
 
 typedef struct heap {
     unsigned* start;
@@ -15,6 +16,8 @@ typedef struct process {
     int flags;
     heap heap;
     vector threads;
+    vector fds;
+    channel* chan;
     paging_context* context;
 } process;
 
