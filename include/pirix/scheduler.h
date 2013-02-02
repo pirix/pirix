@@ -1,6 +1,6 @@
 #pragma once
 
-#include "cpu.h"
+#include <arch.h>
 #include "thread.h"
 
 void scheduler_init();
@@ -32,7 +32,7 @@ thread* scheduler_dequeue_thread();
  * Do the scheduling. Saves the given state for the current thread and
  * returns the state of the next thread.
  *
- * @param state the state of the current thread
- * @return state of the thread to run next
+ * @param regs the registers of the current thread
+ * @return registers of the thread to run next
  */
-cpu_state* scheduler_schedule(cpu_state* state);
+registers* scheduler_schedule(registers* regs);

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "cpu.h"
+#include <arch.h>
 
 typedef struct process process;
 typedef struct message message;
@@ -17,7 +17,7 @@ typedef struct thread {
     unsigned* svc_stack;
     unsigned* thr_stack;
     thread_state state;
-    cpu_state* registers;
+    registers* regs;
     process* process;
     struct thread* next;
 } thread;

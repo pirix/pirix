@@ -1,3 +1,5 @@
+#include <arch/arm.h>
+
 static unsigned* irq_base = (unsigned*)0x94000000;
 
 void irq_setup() {
@@ -12,7 +14,7 @@ void irq_disallow(unsigned irq) {
     // todo
 }
 
-unsigned irq_find() {
+unsigned irq_find(registers* regs) {
     unsigned status = irq_base[0];
 
     for (int i = 0; i < 32; i++) {

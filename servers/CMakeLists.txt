@@ -1,4 +1,4 @@
-set(CMAKE_C_FLAGS "-mcpu=${CPU} -mtune=${CPU} -mfpu=fpa -mfloat-abi=softfp -Wall -std=gnu99")
+set(CMAKE_C_FLAGS "-Wall -fno-stack-protector -std=gnu99")
 
 link_directories(${CMAKE_BINARY_DIR}/lib)
 

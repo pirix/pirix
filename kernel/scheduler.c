@@ -4,7 +4,7 @@
 #include <pirix/kheap.h>
 
 // task switch routine in init.S
-void task_switch(cpu_state* state);
+void task_switch(registers* regs);
 
 static thread* current_thread = 0;
 static thread* idle_thread = 0;
@@ -16,7 +16,8 @@ void scheduler_init() {
     // create idle thread in system mode
     extern void idle();
     idle_thread = thread_new(&idle);
-    idle_thread->registers->spsr = 0x5F;
+    // @todo !!!
+    //idle_thread->regs->spsr = 0x5F;
 }
 
 void scheduler_enqueue_thread(thread* new_thread) {
@@ -47,12 +48,12 @@ thread* scheduler_current_thread() {
 }
 
 void scheduler_switch() {
-    task_switch(current_thread->registers);
+    task_switch(current_thread->regs);
 }
 
-cpu_state* scheduler_schedule(cpu_state* registers) {
+registers* scheduler_schedule(registers* regs) {
     if (current_thread) {
-        current_thread->registers = registers;
+        current_thread->regs = regs;
         if (current_thread->state == STATE_READY) {
             scheduler_enqueue_thread(current_thread);
         }
@@ -61,10 +62,10 @@ cpu_state* scheduler_schedule(cpu_state* registers) {
     current_thread = scheduler_dequeue_thread();
 
     if (!current_thread) {
-        return idle_thread->registers;
+        return idle_thread->regs;
     }
 
     paging_activate_context(current_thread->process->context);
 
-    return current_thread->registers;
+    return current_thread->regs;
 }

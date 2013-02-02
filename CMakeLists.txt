@@ -2,13 +2,18 @@ project(pirix C)
 set(VERSION 0.1)
 cmake_minimum_required(VERSION 2.8)
 
+add_subdirectory(tools)
+
 ###### general
 
-set(ARCH armv6)
-set(CPU arm1176jzf-s)
+if(NOT ARCH)
+  set(ARCH arm)
+endif(NOT ARCH)
+
+include(tools/${ARCH}-config.cmake)
 
 if(NOT PLATFORM)
-  set(PLATFORM RBPI)
+  set(PLATFORM ${ARCH})
 endif(NOT PLATFORM)
 
 string(TOLOWER ${PLATFORM} PLATFORM_LOWER)
@@ -19,27 +24,22 @@ endif(NOT CMAKE_BUILD_TYPE)
 
 configure_file(
   ${CMAKE_SOURCE_DIR}/include/config.h.in
-  ${CMAKE_SOURCE_DIR}/include/config.h
+  ${CMAKE_BINARY_DIR}/include/config.h
 )
 
-add_subdirectory(tools)
+configure_file(
+  ${CMAKE_SOURCE_DIR}/include/arch.h.in
+  ${CMAKE_BINARY_DIR}/include/arch.h
+)
+
+include_directories(${CMAKE_BINARY_DIR}/include/)
 
 ###### compiler options
 
 set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_CROSSCOMPILING TRUE)
 
-set(CMAKE_LINKER arm-elf-pirix-ld)
-
-set(CMAKE_ASM_COMPILER arm-elf-pirix-gcc)
-set(CMAKE_ASM_FLAGS "-march=${ARCH} -mfpu=fpa -mcpu=${CPU} -march=armv6")
 enable_language(ASM)
-
-set(CMAKE_C_COMPILER arm-elf-pirix-gcc)
-
-set(CMAKE_C_FLAGS "-mcpu=${CPU} -mtune=${CPU} -mfpu=fpa -mfloat-abi=softfp -ffreestanding -nostartfiles -nodefaultlibs -Wall -fno-stack-protector -std=gnu99")
-
-set(CMAKE_OBJCOPY arm-elf-pirix-objcopy)
 
 set(CMAKE_C_SKIP_RPATH ON)
 set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS)
@@ -76,19 +76,6 @@ add_custom_target(image ALL
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 )
 install(FILES ${CMAKE_BINARY_DIR}/pirix.img DESTINATION boot)
-
-###### QEMU
-add_custom_target(debug
-  DEPENDS image
-  COMMAND qemu-system-arm -cpu arm1176 -kernel pirix.img -nographic -S -s
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-)
-
-add_custom_target(qemu
-  DEPENDS image
-  COMMAND qemu-system-arm -cpu arm1176 -kernel pirix.img -nographic
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-)
 
 ###### DOXYGEN
 find_package(Doxygen)

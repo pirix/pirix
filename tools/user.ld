@@ -1,5 +1,3 @@
-OUTPUT_ARCH("arm")
-
 ENTRY(_start)
 
 SECTIONS {

@@ -6,7 +6,7 @@
 static unsigned ticks;
 static unsigned subticks;
 
-static cpu_state* timer_tick(cpu_state* state) {
+static registers* timer_tick(registers* regs) {
     timer_clear();
 
     if (!subticks) {
@@ -15,7 +15,7 @@ static cpu_state* timer_tick(cpu_state* state) {
     }
     else subticks--;
 
-    return scheduler_schedule(state);
+    return scheduler_schedule(regs);
 }
 
 long timer_uptime() {

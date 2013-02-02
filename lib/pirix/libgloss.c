@@ -41,6 +41,10 @@ int _sbrk(int incr) {
     return sys_sbrk(incr);
 }
 
+int sbrk(int incr) {
+    return sys_sbrk(incr);
+}
+
 int _open(char* name, int flags, ...) {
     int fd = sys_connect(VFS_PID);
 

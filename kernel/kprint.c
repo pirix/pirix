@@ -46,7 +46,9 @@ void kputc(char c) {
 }
 
 void kputs(const char* str) {
-    serial_puts(str);
+    while (*str) {
+        kputc(*str++);
+    }
 }
 
 void kputn(unsigned long value, unsigned radix) {

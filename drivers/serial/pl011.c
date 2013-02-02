@@ -11,9 +11,3 @@ void serial_putc(char c) {
     while (*fr & SERIAL_BUFFER_FULL);
     *dr = c;
 }
-
-void serial_puts(const char* str) {
-    while (*str) {
-        serial_putc(*str++);
-    }
-}

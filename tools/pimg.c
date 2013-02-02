@@ -6,9 +6,7 @@
 #include <libelf.h>
 #include <boot.h>
 
-#define ENTRY_ADDR 0x8000
-
-static unsigned offset = ENTRY_ADDR;
+static unsigned offset = 0x1000;
 static boot_header* boothdr;
 static Elf_Scn* boothdr_scn;
 
@@ -67,7 +65,6 @@ unsigned image_appendscn(Elf* image, Elf_Scn* source, int name) {
 
     align_size(&offset, tgt_shdr->sh_addralign);
     tgt_shdr->sh_offset = offset;
-    tgt_shdr->sh_addr = offset;
     offset += tgt_shdr->sh_size;
 
     return tgt_shdr->sh_offset;
@@ -179,24 +176,21 @@ int main(int argc, char** argv) {
     }
 
     Elf* image = elf_begin(image_fd, ELF_C_WRITE, NULL);
+    Elf* kernel_elf = elf_begin(kernel_fd, ELF_C_READ, NULL);
 
-    // createelf header
+    Elf32_Ehdr* kernel_ehdr = elf32_getehdr(kernel_elf);
     Elf32_Ehdr* ehdr = elf32_newehdr(image);
-    ehdr->e_ident[EI_DATA] = ELFDATA2LSB;
-    ehdr->e_ident[EI_OSABI] = ELFOSABI_ARM;
-    ehdr->e_machine = EM_ARM;
+
+    memcpy(ehdr, kernel_ehdr, sizeof(Elf32_Ehdr));
     ehdr->e_type = ET_EXEC;
     ehdr->e_version = EV_CURRENT;
     ehdr->e_shstrndx = 0;
-    ehdr->e_flags = EF_ARM_HASENTRY;
-    ehdr->e_entry = ENTRY_ADDR;
     ehdr->e_phoff = elf32_fsize(ELF_T_EHDR, 1, EV_CURRENT);
     ehdr->e_shentsize = elf32_fsize(ELF_T_SHDR, 1, EV_CURRENT);
     align_size(&ehdr->e_phoff, 4);
 
     elf_flagelf(image, ELF_C_SET, ELF_F_LAYOUT);
 
-    Elf* kernel_elf = elf_begin(kernel_fd, ELF_C_READ, NULL);
     image_appendscn(image, elf_findscn(kernel_elf, ".init"), STR_TEXT);
     image_appendscn(image, elf_findscn(kernel_elf, ".text"), STR_TEXT);
     image_appendscn(image, elf_findscn(kernel_elf, ".data"), STR_DATA);
@@ -207,8 +201,8 @@ int main(int argc, char** argv) {
     Elf32_Phdr* phdr = elf32_newphdr(image, 1);
     phdr->p_type = PT_LOAD;
     phdr->p_offset = elf32_getshdr(elf_getscn(image, 1))->sh_offset;
-    phdr->p_paddr = ENTRY_ADDR;
-    phdr->p_vaddr = ENTRY_ADDR;
+    phdr->p_paddr = ehdr->e_entry;
+    phdr->p_vaddr = ehdr->e_entry;
     phdr->p_align = 0x8000;
     phdr->p_flags = PF_R | PF_W | PF_X;
 

@@ -32,7 +32,7 @@ process* process_new(paging_context* context) {
 process* process_create(void* entry, paging_context* context) {
     thread* new_thread = thread_new(entry);
     unsigned stack = memory_alloc();
-    paging_map(context, 0x7ffff000, stack, PTE_PERM_USER);
+    paging_map(context, 0x7ffff000, stack, PAGE_PERM_USER);
     thread_set_stack(new_thread, (unsigned*)0x80000000);
 
     process* self = process_new(context);
@@ -63,7 +63,7 @@ unsigned* process_sbrk(process* self, unsigned incr) {
     while (incr > self->heap.size - self->heap.used) {
         unsigned phys = memory_alloc();
         unsigned virt = (unsigned)self->heap.start + self->heap.size;
-        paging_map(self->context, virt, phys, PTE_PERM_USER);
+        paging_map(self->context, virt, phys, PAGE_PERM_USER);
         self->heap.size += 0x1000;
     }
 

@@ -10,13 +10,31 @@ elseif(PLATFORM STREQUAL QEMU)
     ../drivers/timer/icp.c
     ../drivers/irq/icp.c
   )
+elseif(PLATFORM STREQUAL i386)
+  set(PLATFORM_SRC
+    ../drivers/serial/i386.c
+    ../drivers/timer/i386.c
+    ../drivers/irq/i386.c
+  )
 endif(PLATFORM STREQUAL RBPI)
 
+if(ARCH STREQUAL arm)
+  set(ARCH_SRC
+    arm/init.S
+    arm/paging.c
+    arm/div.c
+  )
+elseif(ARCH STREQUAL i386)
+  set(ARCH_SRC
+    i386/init.S
+    i386/irq.S
+    i386/gdt.S
+    i386/paging.c
+  )
+endif(ARCH STREQUAL arm)
+
 add_executable(kernel
-  arm/init.S
-  arm/div.c
   main.c
-  paging.c
   memory.c
   kheap.c
   irq.c
@@ -29,13 +47,12 @@ add_executable(kernel
   scheduler.c
   string.c
   vector.c
+  ${ARCH_SRC}
   ${PLATFORM_SRC}
 )
 
-set_source_files_properties(init.S PROPERTIES LANGUAGE C)
-
 set_target_properties(kernel PROPERTIES
-  LINK_FLAGS "-T ${CMAKE_SOURCE_DIR}/tools/kernel.ld"
+  LINK_FLAGS "-T ${CMAKE_CURRENT_SOURCE_DIR}/${ARCH}/link.ld"
 )
 
 install(TARGETS kernel RUNTIME DESTINATION bin)

@@ -1,4 +1,5 @@
 #include <pirix/irq.h>
+#include <arch.h>
 #include <config.h>
 
 static irq_handler* irq_handlers[IRQ_COUNT];
@@ -6,7 +7,7 @@ static irq_handler* irq_handlers[IRQ_COUNT];
 void irq_setup();
 void irq_allow(unsigned irq);
 void irq_disallow(unsigned irq);
-unsigned irq_find();
+unsigned irq_find(registers* regs);
 
 void irq_init() {
     irq_setup();
@@ -28,14 +29,14 @@ void irq_unregister(unsigned irq) {
     irq_disallow(irq);
 }
 
-cpu_state* irq_handle(cpu_state* state) {
-    irq_disable();
+registers* irq_handle(registers* regs) {
+    unsigned irq = irq_find(regs);
 
-    unsigned irq = irq_find();
+    kprintf("interrupt %i\n", irq);
 
     if (irq_handlers[irq]) {
-        state = irq_handlers[irq](state);
+        regs = irq_handlers[irq](regs);
     }
 
-    return state;
+    return regs;
 }
