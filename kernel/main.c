@@ -33,7 +33,7 @@ static void modules_init() {
 
         kprintf("loading %s...\n", mod->name);
 
-        paging_context* context = paging_create_context();
+        paging_context context = paging_create_context();
 
         // map memory
         for (unsigned i = 0; i < mod->size; i += 0x1000) {

@@ -27,9 +27,9 @@ void paging_set_transition_table(unsigned* ttable);
 void paging_invalidate_tlb();
 void paging_invalidate_tlb_entry(unsigned entry);
 
-static paging_context* kernel_context = NULL;
+static paging_context kernel_context = NULL;
 
-int paging_map(paging_context* context, unsigned virt, unsigned phys, unsigned access) {
+int paging_map(paging_context context, unsigned virt, unsigned phys, unsigned access) {
     switch(access) {
         case PAGE_PERM_USER:
             access = PTE_PERM_USER;
@@ -69,14 +69,14 @@ unsigned paging_map_kernel(unsigned phys) {
     return 0x80000000 + phys;
 }
 
-paging_context* paging_create_context() {
-    paging_context* context = (paging_context*)memory_alloc_aligned(2, 2);
-    paging_context* kcontext = (paging_context*)paging_map_kernel((unsigned)context);
+paging_context paging_create_context() {
+    paging_context context = (paging_context)memory_alloc_aligned(2, 2);
+    paging_context kcontext = (paging_context)paging_map_kernel((unsigned)context);
     memset(kcontext, 0, 2048*WORD_SIZE);
     return kcontext;
 }
 
-void paging_activate_context(paging_context* context) {
+void paging_activate_context(paging_context context) {
     paging_set_transition_table(context);
     paging_invalidate_tlb();
 }

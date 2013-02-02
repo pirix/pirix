@@ -32,8 +32,6 @@ void irq_unregister(unsigned irq) {
 registers* irq_handle(registers* regs) {
     unsigned irq = irq_find(regs);
 
-    kprintf("interrupt %i\n", irq);
-
     if (irq_handlers[irq]) {
         regs = irq_handlers[irq](regs);
     }

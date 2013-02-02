@@ -10,7 +10,7 @@ void process_init() {
     vector_init(&processes);
 }
 
-process* process_new(paging_context* context) {
+process* process_new(paging_context context) {
     process* self = kmalloc(sizeof(process));
 
     self->context = context;
@@ -29,7 +29,7 @@ process* process_new(paging_context* context) {
     return self;
 }
 
-process* process_create(void* entry, paging_context* context) {
+process* process_create(void* entry, paging_context context) {
     thread* new_thread = thread_new(entry);
     unsigned stack = memory_alloc();
     paging_map(context, 0x7ffff000, stack, PAGE_PERM_USER);

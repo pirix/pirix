@@ -18,7 +18,7 @@ typedef struct process {
     vector threads;
     vector fds;
     channel* chan;
-    paging_context* context;
+    paging_context context;
 } process;
 
 /**
@@ -32,7 +32,7 @@ void process_init();
  * @return new process
  * @memberof process
  */
-process* process_new(paging_context* context);
+process* process_new(paging_context context);
 
 /**
  * Create a new process object with a thread.
@@ -41,7 +41,7 @@ process* process_new(paging_context* context);
  * @return new process
  * @memberof process
  */
-process* process_create(void* entry, paging_context* context);
+process* process_create(void* entry, paging_context context);
 
 /**
  * Get a process.

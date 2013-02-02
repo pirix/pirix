@@ -22,6 +22,9 @@ loader:
     or $0x80000000, %ecx
     movl %ecx, %cr0
 
+    call setup_gdt
+    call setup_idt
+
     /* jump to higher half */
     ljmp $0x08, $init
 
@@ -44,8 +47,6 @@ boot_page_dir:
 
 .section .text
 init:
-    call setup_gdt
-    call setup_idt
     movl $kernel_stack, %esp
     call main
 
