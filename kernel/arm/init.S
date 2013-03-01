@@ -213,22 +213,6 @@ task_switch:
 .ret:
     bx lr
 
-.global paging_invalidate_tlb
-paging_invalidate_tlb:
-    mov r0, #0
-    mcr p15, 0, r0, c8, c7, 0
-    bx lr
-
-.global paging_invalidate_tlb_entry
-paging_invalidate_tlb_entry:
-    mcr p15, 0, r0, c8, c7, 1
-    bx lr
-
-.global paging_set_transition_table
-paging_set_transition_table:
-    mcr p15, 0, r0, c2, c0, 0
-    bx lr
-
 .global idle
 idle:
     b .

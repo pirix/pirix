@@ -24,6 +24,10 @@ static void modules_init() {
     extern unsigned* kernel_end;
     boot_header* boothdr = (boot_header*)&kernel_end;
 
+    if (boothdr->magic != BOOT_MAGIC) {
+        panic("invalid boot header");
+    }
+
     if (boothdr->module_count > BOOT_MAX_MODULES) {
         panic("too many modules");
     }

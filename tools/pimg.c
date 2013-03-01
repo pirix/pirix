@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <libelf.h>
-#include <boot.h>
+#include <pirix/boot.h>
 
 static unsigned offset = 0x1000;
 static boot_header* boothdr;
@@ -121,12 +121,17 @@ void boothdr_create(Elf* image) {
     boothdr_shdr->sh_offset = offset;
     boothdr_shdr->sh_addr = offset;
     offset += boothdr_shdr->sh_size;
+
+    boothdr->magic = BOOT_MAGIC;
 }
 
-void boothdr_add_module(const char* name, unsigned addr, unsigned size, unsigned entry) {
+void boothdr_add_module(const char* path, unsigned addr, unsigned size, unsigned entry) {
     if (boothdr->module_count + 1 > BOOT_MAX_MODULES) {
         fprintf(stderr, "too many modules\n");
     }
+
+    const char* name = strrchr(path, '/');
+    name = name ? name+1 : path;
 
     struct boot_module* mod = &boothdr->modules[boothdr->module_count++];
     strncpy(mod->name, name, BOOT_MAX_MODNAME);
@@ -161,8 +166,8 @@ int main(int argc, char** argv) {
     }
 
     // check if required options were given
-    if (kernel_fd < 0) {
-        fprintf(stderr, "no kernel specified\n");
+    if (!kernel_fd) {
+        fprintf(stderr, "error: no kernel specified\n");
         return 1;
     }
 
@@ -171,7 +176,7 @@ int main(int argc, char** argv) {
     int image_fd = open(output_file, O_WRONLY|O_CREAT, 0777);
 
     if (image_fd < 0) {
-        fprintf(stderr, "could not open %s for writing\n", output_file);
+        fprintf(stderr, "error: could not open %s for writing\n", output_file);
         return 1;
     }
 

@@ -8,6 +8,9 @@
 .section .init
 .global loader
 loader:
+    /* set temporary stack */
+    movl $boot_stack, %esp
+
     /* set temporary page directory */
     movl $boot_page_dir, %ecx
     movl %ecx, %cr3
@@ -34,7 +37,12 @@ multiboot:
     .long MB_FLAGS
     .long MB_CHECK
 
+.align 0x4
+    .space 128
+boot_stack:
+
 .align 0x1000
+.global boot_page_dir
 boot_page_dir:
     .long 0x00000083
     .rept 767

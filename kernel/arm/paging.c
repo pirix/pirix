@@ -23,10 +23,6 @@
 
 #define PTE_ADDR_MASK 0xfffff000
 
-void paging_set_transition_table(unsigned* ttable);
-void paging_invalidate_tlb();
-void paging_invalidate_tlb_entry(unsigned entry);
-
 static paging_context kernel_context = NULL;
 
 int paging_map(paging_context context, unsigned virt, unsigned phys, unsigned access) {
@@ -60,12 +56,14 @@ int paging_map(paging_context context, unsigned virt, unsigned phys, unsigned ac
     unsigned* pt = (unsigned*)paging_map_kernel(ppt);
     pt[pti] = phys | PTE_TYPE_EXTP | access;
 
-    paging_invalidate_tlb_entry(virt);
+    // invalidate tlb entry
+    asm volatile("mcr p15, 0, %0, c8, c7, 1" :: "r"(virt));
+
     return 0;
 }
 
-unsigned paging_map_kernel(unsigned phys) {
-    if (phys > 0x8000000) return 0;
+unsigned* paging_map_kernel(unsigned* phys) {
+    if (phys > 0x80000000) return 0;
     return 0x80000000 + phys;
 }
 
@@ -77,8 +75,10 @@ paging_context paging_create_context() {
 }
 
 void paging_activate_context(paging_context context) {
-    paging_set_transition_table(context);
-    paging_invalidate_tlb();
+    // set transition table
+    asm volatile("mcr p15, 0, %0, c2, c0, 0" :: "r"(context));
+    // invalidate tlb
+    asm volatile("mcr p15, 0, %0, c8, c7, 0" :: "r"(0));
 }
 
 void paging_init() {

@@ -10,33 +10,33 @@ void memory_init() {
     memset(bitmap+8, 0xff, sizeof(unsigned[BITMAP_SIZE-8]));
 }
 
-unsigned memory_alloc() {
+unsigned long memory_alloc() {
     for (unsigned i = 0; i < BITMAP_SIZE; i++) {
         // skip this element if full
         if (!bitmap[i]) continue;
 
         // check each bit for a free section
-        for (unsigned j = 0; j < WORD_BITS; j++) {
+        for (unsigned j = 0; j < 32; j++) {
             // skip if not free
             if (!(bitmap[i] & (1 << j))) continue;
 
             // found a free section
             bitmap[i] &= ~(1 << j);
-            return (i*WORD_BITS + j)*4096;
+            return (i*32 + j)*0x1000;
         }
     }
     return 0;
 }
 
-unsigned memory_alloc_aligned(unsigned frames, unsigned alignment) {
+unsigned long memory_alloc_aligned(unsigned frames, unsigned alignment) {
     unsigned align_val = 1 << alignment;
     unsigned align_mask = align_val - 1;
 
     for (unsigned i = 0; i < BITMAP_SIZE; i++) {
         if (!bitmap[i]) continue;
 
-        unsigned start = (i*WORD_BITS) & align_mask;
-        for (unsigned j = start; j <= WORD_BITS - frames; j += align_val) {
+        unsigned start = (i*32) & align_mask;
+        for (unsigned j = start; j <= 32 - frames; j += align_val) {
             if (!(bitmap[i] & (1 << j))) continue;
 
             unsigned k;
@@ -48,14 +48,14 @@ unsigned memory_alloc_aligned(unsigned frames, unsigned alignment) {
                 bitmap[i] &= ~(1 << (j+k));
             }
 
-            return (i*WORD_BITS+j)*4096;
+            return (i*32+j)*0x1000;
         }
     }
 
     return 0;
 }
 
-void memory_free(unsigned frame) {
-    unsigned f = frame/4096;
-    bitmap[f/WORD_BITS] |= 1 << (f % WORD_BITS);
+void memory_free(unsigned long frame) {
+    unsigned long f = frame/0x1000;
+    bitmap[f/32] |= 1 << (f % 32);
 }

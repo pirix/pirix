@@ -1,5 +1,7 @@
 #pragma once
 
+#define PAGE_SIZE 4096
+
 typedef struct registers {
     unsigned eax, ebx, ecx, edx, esi, edi, ebp;
     unsigned irq, err;

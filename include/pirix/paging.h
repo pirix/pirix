@@ -7,6 +7,6 @@ typedef unsigned* paging_context;
 
 void paging_init();
 paging_context paging_create_context();
-int paging_map(paging_context context, unsigned virt, unsigned phys, unsigned access);
-unsigned paging_map_kernel(unsigned phys);
+int paging_map(paging_context context, unsigned long virt, unsigned long phys, unsigned access);
+void* paging_map_kernel(unsigned long phys);
 void paging_activate_context(paging_context context);

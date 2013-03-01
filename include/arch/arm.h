@@ -1,5 +1,7 @@
 #pragma once
 
+#define PAGE_SIZE 4096
+
 typedef struct registers {
     unsigned usr_r13, usr_r14;
     unsigned cpsr, svc_r14;

@@ -6,9 +6,9 @@
 #include "ipc.h"
 
 typedef struct heap {
-    unsigned* start;
-    unsigned size;
-    unsigned used;
+    unsigned long start;
+    unsigned long size;
+    unsigned long used;
 } heap;
 
 typedef struct process {

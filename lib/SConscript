@@ -1,0 +1,8 @@
+Import("target")
+
+target.Library("pirix", [
+    "pirix/libgloss.c",
+    "pirix/$ARCH/syscall.S"
+])
+
+target.Object("crt0", "pirix/${ARCH}/crt0.S")
