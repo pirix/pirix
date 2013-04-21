@@ -20,6 +20,12 @@ thread* thread_new(void* entry) {
         .r15 = (unsigned)entry
     };
     */
+    *regs = (registers) {
+        .eip = (unsigned)entry,
+        .cs = 0x18 | 0x3,
+        .ss = 0x20 | 0x3,
+        .eflags = 0x202,
+    };
 
     thread* new_thread = kmalloc(sizeof(thread));
     new_thread->state = STATE_READY;
@@ -32,6 +38,7 @@ thread* thread_new(void* entry) {
 void thread_set_stack(thread* self, unsigned* addr) {
     // @todo !!!
     //self->regs->usr_r13 = (unsigned)addr;
+    self->regs->esp = (unsigned)addr;
 }
 
 void thread_block(thread* self, thread_state state) {

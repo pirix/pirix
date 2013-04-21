@@ -19,7 +19,6 @@ registers* paging_fault(registers* regs) {
 }
 
 void paging_init() {
-    kprintf("init paging\n");
     irq_register(14, &paging_fault);
 
     unsigned* kcontext = (unsigned*)memory_alloc_aligned(4, 2);
@@ -48,46 +47,51 @@ void paging_init() {
 }
 
 paging_context paging_create_context() {
-    panic("create context");
-    unsigned* pcontext = memory_alloc_aligned(4, 2);
-    unsigned* context = paging_map_kernel(pcontext);
+    unsigned* pcontext = (unsigned*)memory_alloc_aligned(4, 2);
+    unsigned* context = paging_map_kernel((unsigned long)pcontext);
 
-    memset(context, 1, 0x1000);
-    return context;
+    memset(context, 0, 0x1000);
 
-    paging_unmap_kernel(context);
+    //context[1023] = (unsigned long)pcontext | 0x3;
+
+    paging_unmap_kernel((unsigned long)context);
     return pcontext;
 }
 
 int paging_map(paging_context context, unsigned long virt, unsigned long phys, unsigned access) {
-    unsigned long pdidx = virt >> 22;
-    unsigned long ptidx = virt >> 12 & 0x3ff;
-    unsigned* dir, table;
+    unsigned* dir;
 
     if (context == current_context) {
         dir = page_dir;
     }
     else {
-        dir = paging_map_kernel(context);
+        dir = (unsigned*)paging_map_kernel((unsigned long)context);
     }
 
+    unsigned long pdidx = virt >> 22;
+
+    // create page table if unexistent
     if (!(dir[pdidx] & 0x1)) {
-        panic("have to create paging table");
+        unsigned* pt = (unsigned*)memory_alloc_aligned(4, 2);
+        unsigned* kpt = paging_map_kernel((unsigned long)pt);
+        memset(kpt, 0, 0x1000);
+        paging_unmap_kernel((unsigned long)kpt);
+        dir[pdidx] = (unsigned long)pt;
     }
 
     if (context == current_context) {
-        table = page_tables[ptidx];
+        page_tables[virt >> 12] = phys;
     }
     else {
-        table = paging_map_kernel(dir[pdidx]);
+        unsigned* ptable = (unsigned*)dir[virt >> 22];
+        unsigned* table = (unsigned*)paging_map_kernel((unsigned long)ptable);
+        table[virt >> 12 & 0x3ff] = phys;
+        paging_unmap_kernel((unsigned long)table);
+        paging_unmap_kernel((unsigned long)dir);
     }
 
     if (context == current_context) {
         invlpg(virt);
-    }
-    else {
-        paging_unmap_kernel(dir);
-        paging_unmap_kernel(table);
     }
 
     return 0;
@@ -100,7 +104,7 @@ void* paging_map_kernel(unsigned long phys) {
         if (!(*entry & 0x1)) {
             *entry = phys | 0x103;
             invlpg(virt);
-            return virt + (phys & 0xfff);
+            return (void*)(virt + (phys & 0xfff));
         }
     }
 
