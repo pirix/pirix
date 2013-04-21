@@ -38,16 +38,20 @@ multiboot:
     .long MB_CHECK
 
 .align 0x4
-    .space 128
+    .space 32
 boot_stack:
 
 .align 0x1000
 .global boot_page_dir
 boot_page_dir:
-    .long 0x00000083
-    .rept 767
-        .long 0x0
+    /* identity mapping from 0x0 to 0xc0000000 */
+    .equ addr, 0
+    .rept 768
+        .long addr | 0x83
+        .equ addr, addr + 0x00400000
     .endr
+
+    /* map the first 4MB to 0xc0000000 */
     .long 0x00000083
     .rept 255
         .long 0x0

@@ -32,4 +32,5 @@ SECTIONS {
     }
 
     kernel_end = . - KERNEL_VIRT;
+    boot_hdr = .;
  }

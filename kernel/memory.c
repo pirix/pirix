@@ -6,8 +6,8 @@
 static unsigned bitmap[BITMAP_SIZE];
 
 void memory_init() {
-    // reserve the first MB for the kernel
-    memset(bitmap+8, 0xff, sizeof(unsigned[BITMAP_SIZE-8]));
+    // reserve the first 4 MB for the kernel
+    memset(bitmap+32, 0xff, sizeof(unsigned[BITMAP_SIZE-32]));
 }
 
 unsigned long memory_alloc() {

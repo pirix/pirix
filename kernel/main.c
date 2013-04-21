@@ -21,19 +21,19 @@ void exception(registers* regs) {
 }
 
 static void modules_init() {
-    extern unsigned* kernel_end;
-    boot_header* boothdr = (boot_header*)&kernel_end;
+    kprintf("modules init\n");
+    extern boot_header boot_hdr;
 
-    if (boothdr->magic != BOOT_MAGIC) {
+    if (boot_hdr.magic != BOOT_MAGIC) {
         panic("invalid boot header");
     }
 
-    if (boothdr->module_count > BOOT_MAX_MODULES) {
+    if (boot_hdr.module_count > BOOT_MAX_MODULES) {
         panic("too many modules");
     }
 
-    for (unsigned int i = 0; i < boothdr->module_count; i++) {
-        boot_module* mod = boothdr->modules + i;
+    for (unsigned int i = 0; i < boot_hdr.module_count; i++) {
+        boot_module* mod = boot_hdr.modules + i;
 
         kprintf("loading %s...\n", mod->name);
 
