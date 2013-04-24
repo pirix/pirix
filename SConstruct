@@ -10,12 +10,16 @@ env = Environment(
     ENV=os.environ,
     variables=vars,
     tools=["default", "textfile"],
-    ASPPCOMSTR="[AS] $TARGET",
-    CCCOMSTR="[CC] $TARGET",
-    LINKCOMSTR="[LD] $TARGET",
-    ARCOMSTR="[AR] $TARGET",
-    RANLIBCOMSTR="[RL] $TARGET",
 )
+
+if env["DEBUG"]:
+    env["CFLAGS"] = ["-g"]
+else:
+    env["ASPPCOMSTR"] = "[AS] $TARGET"
+    env["CCCOMSTR"] ="[CC] $TARGET"
+    env["LINKCOMSTR"] = "[LD] $TARGET"
+    env["ARCOMSTR"] = "[AR] $TARGET"
+    env["RANLIBCOMSTR"] = "[RL] $TARGET"
 
 host = env.Clone(
     CFLAGS=["-std=gnu99"],
