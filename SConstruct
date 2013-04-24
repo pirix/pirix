@@ -22,17 +22,21 @@ else:
     env["RANLIBCOMSTR"] = "[RL] $TARGET"
 
 host = env.Clone(
-    CFLAGS=["-std=gnu99"],
     CPPPATH=["#/include"],
+)
+host.Append(
+    CFLAGS=["-std=gnu99"],
 )
 
 target = env.Clone(
     AS="$ARCH-elf-pirix-as",
     CC="$ARCH-elf-pirix-gcc",
-    CFLAGS=["-ffreestanding", "-fno-stack-protector", "-std=gnu99"],
     CPPPATH=["#/include", "#/servers"],
     LINK="$ARCH-elf-pirix-gcc",
-    LINKFLAGS="-T kernel/$ARCH/link.ld -nostartfiles -nodefaultlibs",
+)
+target.Append(
+    CFLAGS=["-ffreestanding", "-fno-stack-protector", "-std=gnu99"],
+    LINKFLAGS=["-T", "kernel/$ARCH/link.ld", "-nostartfiles", "-nodefaultlibs"],
 )
 
 env.Substfile("include/config.h.in", SUBST_DICT={
