@@ -64,8 +64,17 @@ int paging_map(paging_context context, unsigned long virt, unsigned long phys, u
     unsigned long pdidx = virt >> 22;
     unsigned long ptidx = (virt >> 12) & 0x3ff;
 
+    switch (access) {
+    case PAGE_PERM_USER:
+        access = 0x4;
+        break;
+    default:
+        access = 0x0;
+        break;
+    }
+
     if (context == current_context && page_dir[pdidx]) {
-        page_tables[ptidx] = phys | 0x3;
+        page_tables[ptidx] = phys | access | 0x3;
         invlpg(virt);
         return 0;
     }
@@ -73,17 +82,17 @@ int paging_map(paging_context context, unsigned long virt, unsigned long phys, u
     dir = (unsigned*)paging_map_kernel((unsigned long)context);
 
     // create page table if unexistent
-    if (!dir[pdidx]) {
+    if (!(dir[pdidx] & 0x1)) {
         unsigned* ptable = (unsigned*)memory_alloc_aligned(4, 2);
         table = paging_map_kernel((unsigned long)ptable);
         memset(table, 0, 0x1000);
-        dir[pdidx] = (unsigned long)ptable;
+        dir[pdidx] = (unsigned long)ptable | 0x3;
     }
     else {
-        table = paging_map_kernel(dir[pdidx]);
+        table = paging_map_kernel(dir[pdidx] & 0xfffff000);
     }
 
-    table[ptidx] = phys | 0x3;
+    table[ptidx] = phys | access | 0x3;
     paging_unmap_kernel((unsigned long)table);
     paging_unmap_kernel((unsigned long)dir);
 
@@ -110,7 +119,6 @@ void paging_unmap_kernel(unsigned long virt) {
 }
 
 void paging_activate_context(paging_context context) {
-    kprintf("switch to context %p\n", context);
     asm volatile("mov %0, %%cr3" :: "r"(context));
     current_context = context;
 }
