@@ -138,6 +138,8 @@ void boothdr_add_module(const char* path, unsigned addr, unsigned size, unsigned
     mod->addr = addr;
     mod->size = size;
     mod->entry = entry;
+
+    printf("module: %s addr: %p size: %p entry: %p\n", name, addr, size, entry);
 }
 
 int main(int argc, char** argv) {
@@ -232,7 +234,8 @@ int main(int argc, char** argv) {
 
         Elf32_Ehdr* ehdr = elf32_getehdr(mod_elf);
 
-        boothdr_add_module(mod, start, offset-start, ehdr->e_entry);
+        unsigned addr = phdr->p_vaddr - phdr->p_offset + start;
+        boothdr_add_module(mod, addr, offset-start, ehdr->e_entry);
     }
 
     elf_update(image, ELF_C_NULL);
