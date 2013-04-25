@@ -64,14 +64,7 @@ int paging_map(paging_context context, unsigned long virt, unsigned long phys, u
     unsigned long pdidx = virt >> 22;
     unsigned long ptidx = (virt >> 12) & 0x3ff;
 
-    switch (access) {
-    case PAGE_PERM_USER:
-        access = 0x4;
-        break;
-    default:
-        access = 0x0;
-        break;
-    }
+    access = (access == PAGE_PERM_USER) ? 0x4 : 0x0;
 
     if (context == current_context && page_dir[pdidx]) {
         page_tables[ptidx] = phys | access | 0x3;

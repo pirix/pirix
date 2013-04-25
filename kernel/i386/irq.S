@@ -2,25 +2,28 @@
 
 .section .text
 handle_irq:
-    push %ebp
-    push %edi
-    push %esi
-    push %edx
-    push %ecx
-    push %ebx
+    pusha
+
+    mov %ds, %ax
     push %eax
+
+    mov $0x10, %ax
+    mov %ax, %ds
+    mov %ax, %es
+    mov %ax, %fs
+    mov %ax, %gs
 
     push %esp
     call irq_handle
     add $4, %esp
 
-    pop %eax
     pop %ebx
-    pop %ecx
-    pop %edx
-    pop %esi
-    pop %edi
-    pop %ebp
+    mov %bx, %ds
+    mov %bx, %es
+    mov %bx, %fs
+    mov %bx, %gs
+
+    popa
 
     add $8, %esp
     iret
@@ -43,9 +46,6 @@ irq_stub_\nr:
     pushl $\nr
     jmp handle_irq
 .endm
-
-set_gate:
-    ret
 
 .macro set_gate nr isr
     movl $idt+\nr*8, %eax // idt offset

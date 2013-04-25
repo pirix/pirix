@@ -3,9 +3,10 @@
 #define PAGE_SIZE 4096
 
 typedef struct registers {
-    unsigned eax, ebx, ecx, edx, esi, edi, ebp;
+    unsigned ds;
+    unsigned edi, esi, ebp, esp, ebx, edx, ecx, eax;
     unsigned irq, err;
-    unsigned eip, cs, eflags, esp, ss;
+    unsigned eip, cs, eflags, usr_esp, ss;
 } __attribute__((packed)) registers;
 
 static inline unsigned char inb(unsigned short port) {

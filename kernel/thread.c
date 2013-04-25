@@ -38,7 +38,7 @@ thread* thread_new(void* entry) {
 void thread_set_stack(thread* self, unsigned* addr) {
     // @todo !!!
     //self->regs->usr_r13 = (unsigned)addr;
-    self->regs->esp = (unsigned)addr;
+    self->regs->usr_esp = (unsigned)addr;
 }
 
 void thread_block(thread* self, thread_state state) {
