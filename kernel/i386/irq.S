@@ -15,7 +15,7 @@ handle_irq:
 
     push %esp
     call irq_handle
-    add $4, %esp
+    mov %eax, %esp
 
     pop %ebx
     mov %bx, %ds
