@@ -35,6 +35,7 @@ handle_syscall:
     push %ebx
     push %eax
     call syscall
+    add $20, %esp
     iret
 
 .macro irq_stub nr
