@@ -1,4 +1,4 @@
-.macro define_syscall name, id
+.macro define_syscall name, id, args
 .global \name
 \name:
     mov r12, #\id

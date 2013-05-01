@@ -29,6 +29,11 @@ handle_irq:
     iret
 
 handle_syscall:
+    push %edi
+    push %edx
+    push %ecx
+    push %ebx
+    push %eax
     call syscall
     iret
 

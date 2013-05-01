@@ -1,11 +1,15 @@
 Import("target")
 
 env = target.Clone(
-    CFLAGS="-Wall -fno-stack-protector -std=gnu99",
     LINKFLAGS="-T servers/link.ld",
     LIBS="pirix",
     LIBPATH=["#build/$ARCH/lib"],
 )
+
+env.Append(
+    CFLAGS=["-Wall", "-fno-stack-protector"],
+)
+
 
 vfs = env.Program("vfs/vfs", env.Glob("vfs/*.c"))
 devmgr = env.Program("devmgr/devmgr", env.Glob("devmgr/*.c"))
