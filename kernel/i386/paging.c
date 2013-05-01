@@ -21,17 +21,27 @@ registers* paging_fault(registers* regs) {
 void paging_init() {
     irq_register(14, &paging_fault);
 
+    /*
+     * initialize kernel context
+     *
+     * addresses 0x0 - 0xc0000000 are currently identity mapped,
+     * memory_alloc_aligned should return a free memory address from
+     * this block, otherwise we are in serious trouble.
+     */
+
     unsigned* kcontext = (unsigned*)memory_alloc_aligned(4, 2);
 
     memset(kcontext, 0, 768*4);
 
+    // create page tables from 0xc0000000
     for (int i = 0; i < 255; i++) {
         unsigned* table = (unsigned*)memory_alloc_aligned(4, 2);
         kcontext[i+768] = (unsigned long)table | 0x3;
 
-        memset(table, 0, 4*1024);
+        memset(table, 0, 0x1000);
 
         if (i == 0) {
+            // map 0xc0000000 to the first 4MB
             for (int j = 0; j < 1024; j++) {
                 table[j] = j*0x1000 | 0x103;
             }
@@ -53,9 +63,16 @@ paging_context paging_create_context() {
     memset(context, 0, 0xc00);
     memcpy(context+768, page_dir+768, 0x3f8);
 
+    unsigned* ptable = (unsigned*)memory_alloc_aligned(4, 2);
+    unsigned* table = paging_map_kernel((unsigned long)ptable);
+
+    table[1023] = (unsigned long)pcontext | 0x3;
+    context[1022] = (unsigned long)ptable | 0x3;
     context[1023] = (unsigned long)pcontext | 0x3;
 
+    paging_unmap_kernel((unsigned long)table);
     paging_unmap_kernel((unsigned long)context);
+
     return pcontext;
 }
 
