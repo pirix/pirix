@@ -11,7 +11,6 @@ unsigned irq_find(registers* regs);
 
 void irq_init() {
     irq_setup();
-    irq_enable();
 }
 
 void irq_register(unsigned irq, irq_handler* handler) {

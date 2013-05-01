@@ -61,6 +61,7 @@ void main() {
     modules_init();
     irq_init();
     timer_init();
+    irq_enable();
 
     for (;;);
 }

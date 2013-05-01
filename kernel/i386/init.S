@@ -8,6 +8,8 @@
 .section .init
 .global loader
 loader:
+    cli
+
     /* set temporary stack */
     movl $boot_stack, %esp
 
