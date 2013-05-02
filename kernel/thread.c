@@ -22,8 +22,9 @@ thread* thread_new(void* entry) {
     */
     *regs = (registers) {
         .eip = (unsigned)entry,
-        .cs = 0x08 | 0x3,
-        .ss = 0x10 | 0x3,
+        .cs = 0x08,
+        .ss = 0x10,
+        .ds = 0x10,
         .eflags = 0x202,
     };
 

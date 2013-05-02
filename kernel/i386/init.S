@@ -17,9 +17,9 @@ loader:
     movl $boot_page_dir, %ecx
     movl %ecx, %cr3
 
-    /* enable PSE (4MB pages) */
+    /* enable PSE (4MB pages) and PGE (global pages) */
     movl %cr4, %ecx
-    or $0x00000010, %ecx
+    or $0x00000090, %ecx
     movl %ecx, %cr4
 
     /* enable paging */

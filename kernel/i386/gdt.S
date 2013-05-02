@@ -2,7 +2,7 @@
 .global setup_gdt
 setup_gdt:
     // write tss address into gdt
-    movl $gdt+5*8, %eax
+    movl $gdt5, %eax
     movl $tss, %ebx
     movw %bx, 2(%eax) // base 0:15
     shr $16, %ebx
@@ -12,14 +12,15 @@ setup_gdt:
 
     // load gdt and set segment registers
     lgdt gdt_ptr
+    jmp $0x08, $Lret
+Lret:
     mov $0x10, %ax
 	mov %ax, %ds
 	mov %ax, %es
 	mov %ax, %fs
 	mov %ax, %gs
 	mov %ax, %ss
-    jmp $0x08, $Lret
-Lret:
+
     // load tss
     mov $0x28, %ax
     ltr %ax
@@ -27,28 +28,27 @@ Lret:
 
 .section .data
 .align 0x8
-gdt:
-0:
+gdt0:
     .quad 0
-1:
+gdt1:
     .short 0xffff, 0
     .byte 0, 0x9a, 0xcf, 0
-2:
+gdt2:
     .short 0xffff, 0
     .byte 0, 0x92, 0xcf, 0
-3:
+gdt3:
     .short 0xffff, 0
     .byte 0, 0xfa, 0xcf, 0
-4:
+gdt4:
     .short 0xffff, 0
     .byte 0, 0xf2, 0xcf, 0
-5:
+gdt5:
     .short 0x68, 0
     .byte 0, 0x89, 0x40, 0
 
 gdt_ptr:
-    .short . - gdt - 1
-    .long gdt
+    .short . - gdt0 - 1
+    .long gdt0
 
 tss:
     .quad 0x0, 0x0, 0x10
