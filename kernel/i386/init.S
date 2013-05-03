@@ -10,19 +10,19 @@
 loader:
     cli
 
-    /* set temporary stack */
+    // set temporary stack
     movl $boot_stack, %esp
 
-    /* set temporary page directory */
+    // set temporary page directory
     movl $boot_page_dir, %ecx
     movl %ecx, %cr3
 
-    /* enable PSE (4MB pages) and PGE (global pages) */
+    // enable PSE (4MB pages) and PGE (global pages)
     movl %cr4, %ecx
     or $0x00000090, %ecx
     movl %ecx, %cr4
 
-    /* enable paging */
+    // enable paging
     movl %cr0, %ecx
     or $0x80000000, %ecx
     movl %ecx, %cr0
@@ -30,7 +30,7 @@ loader:
     call setup_gdt
     call setup_idt
 
-    /* jump to higher half */
+    // jump to higher half
     ljmp $0x08, $init
 
 .align 0x4
@@ -43,24 +43,29 @@ multiboot:
     .space 32
 boot_stack:
 
+/*
+ * initial page table:
+ * 0x00000000-0xc0000000 => 0x00000000-0xc0000000
+ * 0xc0000000-0xffffffff => 0x00000000-0x3fffffff
+ * flags 0x83: 4MB page, kernel mode
+ */
 .align 0x1000
 .global boot_page_dir
 boot_page_dir:
-    /* identity mapping from 0x0 to 0xc0000000 */
     .equ addr, 0
     .rept 768
         .long addr | 0x83
-        .equ addr, addr + 0x00400000
+        .equ addr, addr + 0x400000
     .endr
-
-    /* map the first 4MB to 0xc0000000 */
-    .long 0x00000083
-    .rept 255
-        .long 0x0
+    .equ addr, 0
+    .rept 256
+        .long addr | 0x83
+        .equ addr, addr + 0x400000
     .endr
 
 .section .text
 init:
+    movl $0, %ebp
     movl $kernel_stack, %esp
     call main
 
