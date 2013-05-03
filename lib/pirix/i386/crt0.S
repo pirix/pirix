@@ -8,6 +8,4 @@ _start:
     movl %eax, %ebx
     movl $SYS_EXIT, %eax
     int $0x80
-.loop:
-    hlt
-    jmp .loop
+    jmp .
