@@ -1,7 +1,7 @@
 #include <pirix/memory.h>
 #include <string.h>
 
-#define BITMAP_SIZE 1024
+#define BITMAP_SIZE 32768
 
 static unsigned bitmap[BITMAP_SIZE];
 

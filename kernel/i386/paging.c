@@ -25,17 +25,17 @@ void paging_init() {
      * initialize kernel context
      *
      * addresses 0x0 - 0xc0000000 are currently identity mapped,
-     * memory_alloc_aligned should return a free memory address from
-     * this block, otherwise we are in serious trouble.
+     * memory_alloc should return a free memory address from this
+     * block, otherwise we are in serious trouble.
      */
 
-    unsigned* kcontext = (unsigned*)memory_alloc_aligned(4, 2);
+    unsigned* kcontext = (unsigned*)memory_alloc();
 
     memset(kcontext, 0, 768*4);
 
     // create page tables from 0xc0000000
     for (int i = 0; i < 255; i++) {
-        unsigned* table = (unsigned*)memory_alloc_aligned(4, 2);
+        unsigned* table = (unsigned*)memory_alloc();
         kcontext[i+768] = (unsigned long)table | 0x3;
 
         memset(table, 0, 0x1000);
@@ -57,13 +57,13 @@ void paging_init() {
 }
 
 paging_context paging_create_context() {
-    unsigned* pcontext = (unsigned*)memory_alloc_aligned(4, 2);
+    unsigned* pcontext = (unsigned*)memory_alloc();
     unsigned* context = paging_map_kernel((unsigned long)pcontext);
 
     memset(context, 0, 0xc00);
     memcpy(context+768, page_dir+768, 0x3f8);
 
-    unsigned* ptable = (unsigned*)memory_alloc_aligned(4, 2);
+    unsigned* ptable = (unsigned*)memory_alloc();
     unsigned* table = paging_map_kernel((unsigned long)ptable);
 
     table[1023] = (unsigned long)pcontext | 0x3;
@@ -93,7 +93,7 @@ int paging_map(paging_context context, unsigned long virt, unsigned long phys, u
 
     // create page table if unexistent
     if (!(dir[pdidx] & 0x1)) {
-        unsigned* ptable = (unsigned*)memory_alloc_aligned(4, 2);
+        unsigned* ptable = (unsigned*)memory_alloc();
         table = paging_map_kernel((unsigned long)ptable);
         memset(table, 0, 0x1000);
         dir[pdidx] = (unsigned long)ptable | 0x3;
