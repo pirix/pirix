@@ -22,7 +22,7 @@ Lret:
 	mov %ax, %ss
 
     // load tss
-    mov $0x28, %ax
+    mov $(0x28 | 0x3), %ax
     ltr %ax
     ret
 

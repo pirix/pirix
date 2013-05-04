@@ -60,11 +60,12 @@ paging_context paging_create_context() {
     unsigned* pcontext = (unsigned*)memory_alloc();
     unsigned* context = paging_map_kernel((unsigned long)pcontext);
 
-    memset(context, 0, 0xc00);
-    memcpy(context+768, page_dir+768, 0x3f8);
-
     unsigned* ptable = (unsigned*)memory_alloc();
     unsigned* table = paging_map_kernel((unsigned long)ptable);
+
+    memset(table, 0, 0x1000);
+    memset(context, 0, 0xc00);
+    memcpy(context+768, page_dir+768, 0x3f8);
 
     table[1023] = (unsigned long)pcontext | 0x3;
     context[1022] = (unsigned long)ptable | 0x3;
@@ -106,6 +107,8 @@ int paging_map(paging_context context, unsigned long virt, unsigned long phys, u
     paging_unmap_kernel((unsigned long)table);
     paging_unmap_kernel((unsigned long)dir);
 
+    invlpg(virt);
+
     return 0;
 }
 
@@ -120,6 +123,7 @@ void* paging_map_kernel(unsigned long phys) {
         }
     }
 
+    panic("kernel mapping area full");
     return 0;
 }
 
