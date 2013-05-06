@@ -28,5 +28,5 @@ static inline void irq_disable() {
 }
 
 static inline void invlpg(unsigned long addr) {
-    asm volatile("invlpg %0" :: "m"(addr) : "memory");
+    asm volatile("invlpg (%0)" :: "r" (addr) : "memory");
 }
