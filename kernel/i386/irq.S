@@ -1,4 +1,4 @@
-.extern irq_handle, syscall
+.extern irq_handle, syscall, tss
 
 .section .text
 handle_irq:
@@ -26,6 +26,12 @@ handle_irq:
     popa
 
     add $8, %esp
+
+    // save esp to tss
+    sub $16, %esp
+    mov %esp, (tss+4)
+    add $16, %esp
+
     iret
 
 handle_syscall:
@@ -34,6 +40,13 @@ handle_syscall:
     push %ecx
     push %ebx
     push %eax
+
+    mov $0x10, %ax
+    mov %ax, %ds
+    mov %ax, %es
+    mov %ax, %fs
+    mov %ax, %gs
+
     call syscall
     add $20, %esp
     iret

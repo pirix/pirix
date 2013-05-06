@@ -50,6 +50,10 @@ gdt_ptr:
     .short . - gdt0 - 1
     .long gdt0
 
+.global tss
 tss:
-    .quad 0x0, 0x0, 0x10
-    .space 29*4
+    .long 0x0
+    .long 0x0, 0x10 // esp0, ss0
+    .long 0x0, 0x0  // esp1, ss1
+    .long 0x0, 0x0  // esp2, ss2
+    .space 19*4
