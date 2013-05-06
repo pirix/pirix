@@ -15,6 +15,7 @@ env = Environment(
 if env["DEBUG"]:
     env["CFLAGS"] = ["-g", "-O0"]
 else:
+    env["CFLAGS"] = ["-O3", "-w"]
     env["ASPPCOMSTR"] = "[AS] $TARGET"
     env["CCCOMSTR"] ="[CC] $TARGET"
     env["LINKCOMSTR"] = "[LD] $TARGET"
