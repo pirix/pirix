@@ -133,6 +133,7 @@ void paging_unmap_kernel(unsigned long virt) {
 }
 
 void paging_activate_context(paging_context context) {
-    asm volatile("mov %0, %%cr3" :: "r"(context));
+    if (context == current_context) return;
+    asm volatile("mov %0, %%cr3" :: "r"(context) : "memory");
     current_context = context;
 }
