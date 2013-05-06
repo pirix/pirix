@@ -97,7 +97,7 @@ int paging_map(paging_context context, unsigned long virt, unsigned long phys, u
         unsigned* ptable = (unsigned*)memory_alloc();
         table = paging_map_kernel((unsigned long)ptable);
         memset(table, 0, 0x1000);
-        dir[pdidx] = (unsigned long)ptable | 0x3;
+        dir[pdidx] = (unsigned long)ptable | access | 0x3;
     }
     else {
         table = paging_map_kernel(dir[pdidx] & 0xfffff000);
