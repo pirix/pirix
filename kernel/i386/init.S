@@ -73,10 +73,6 @@ init:
     hlt
     jmp 1b
 
-.global task_switch
-task_switch:
-    ret
-
 .global idle
 idle:
     hlt

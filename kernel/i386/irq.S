@@ -28,9 +28,9 @@ handle_irq:
     add $8, %esp
 
     // save esp to tss
-    sub $16, %esp
+    add $20, %esp
     mov %esp, (tss+4)
-    add $16, %esp
+    sub $20, %esp
 
     iret
 
@@ -49,7 +49,19 @@ handle_syscall:
 
     call syscall
     add $20, %esp
+
+    add $20, %esp
+    mov %esp, (tss+4)
+    sub $20, %esp
+
     iret
+
+.global task_switch
+task_switch:
+    push %ebp
+    movl %esp, %ebp
+    leave
+    ret
 
 .macro irq_stub nr
 .global irq_stub_\nr
