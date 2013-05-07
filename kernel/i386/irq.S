@@ -1,11 +1,10 @@
-.extern irq_handle, syscall, tss
+.extern irq_handle, scheduler_schedule,  syscall, tss
 
 .section .text
 handle_irq:
     pusha
 
-    mov %ds, %ax
-    push %eax
+    pushl %ds
 
     mov $0x10, %ax
     mov %ax, %ds
@@ -25,10 +24,8 @@ handle_irq:
 
     popa
 
-    add $8, %esp
-
-    // save esp to tss
-    add $20, %esp
+    // remove args from stack and save esp to tss
+    add $28, %esp
     mov %esp, (tss+4)
     sub $20, %esp
 
@@ -48,9 +45,9 @@ handle_syscall:
     mov %ax, %gs
 
     call syscall
-    add $20, %esp
 
-    add $20, %esp
+    // remove args from stack and save esp to tss
+    add $40, %esp
     mov %esp, (tss+4)
     sub $20, %esp
 
@@ -58,9 +55,39 @@ handle_syscall:
 
 .global task_switch
 task_switch:
-    push %ebp
-    movl %esp, %ebp
-    leave
+    mov %esp, %eax
+
+    push $task_switch_ret
+    pushl %cs
+    pushf
+    push %eax
+    pushl %ss
+
+    add $8, %esp
+
+    pusha
+
+    pushl %ds
+
+    push %esp
+    call scheduler_schedule
+    mov %eax, %esp
+
+    pop %ebx
+    mov %bx, %ds
+    mov %bx, %es
+    mov %bx, %fs
+    mov %bx, %gs
+
+    popa
+
+    // remove args from stack and save esp to tss
+    add $28, %esp
+    mov %esp, (tss+4)
+    sub $20, %esp
+
+    iret
+task_switch_ret:
     ret
 
 .macro irq_stub nr
