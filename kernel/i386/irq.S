@@ -55,15 +55,11 @@ handle_syscall:
 
 .global task_switch
 task_switch:
-    mov %esp, %eax
-
-    push $task_switch_ret
-    pushl %cs
+    cli
     pushf
-    push %eax
-    pushl %ss
-
-    add $8, %esp
+    pushl %cs
+    push $task_switch_ret
+    sub $8, %esp
 
     pusha
 
