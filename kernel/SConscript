@@ -18,6 +18,13 @@ platform = {
     ],
 }[target["PLATFORM"]]
 
+target = target.Clone(
+    LINKFLAGS=["-T", "kernel/$ARCH/link.ld", "-nostartfiles", "-nodefaultlibs"],
+)
+target.Append(
+    CFLAGS=["-ffreestanding", "-fno-stack-protector"],
+)
+
 for src in platform:
     Command(src, "#drivers/"+src, Copy("$TARGET", "$SOURCE"))
 

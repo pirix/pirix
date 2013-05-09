@@ -37,14 +37,13 @@ target = env.Clone(
     LINK="$ARCH-elf-pirix-gcc",
 )
 target.Append(
-    CFLAGS=["-ffreestanding", "-fno-stack-protector", "-std=gnu99"],
-    LINKFLAGS=["-T", "kernel/$ARCH/link.ld", "-nostartfiles", "-nodefaultlibs"],
+    CFLAGS=["-std=gnu99"],
 )
 
 if target["ARCH"] == "arm":
     target.Append(
-        CFLAGS=["-march=armv6", "-mfpu=vfp", "-mfloat-abi=softfp"],
-        ASFLAGS=["-march=armv6", "-mfpu=vfp", "-mfloat-abi=softfp"],
+        CFLAGS=["-march=armv6"],
+        ASFLAGS=["-march=armv6"],
     )
 
 env.Substfile("include/config.h.in", SUBST_DICT={
