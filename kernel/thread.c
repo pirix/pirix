@@ -13,20 +13,7 @@ thread* thread_new(void* entry) {
 
     registers* regs = (registers*)(svc_stack + SVC_STACK) - 1;
 
-    // @todo !!!
-    /*
-    *regs = (registers) {
-        .spsr = 0x50, // user mode
-        .r15 = (unsigned)entry
-    };
-    */
-    *regs = (registers) {
-        .eip = (unsigned)entry,
-        .cs = 0x18 | 0x3,
-        .ss = 0x20 | 0x3,
-        .ds = 0x20 | 0x3,
-        .eflags = 0x202,
-    };
+    registers_init(regs, entry);
 
     thread* new_thread = kmalloc(sizeof(thread));
     new_thread->state = STATE_READY;
@@ -37,9 +24,7 @@ thread* thread_new(void* entry) {
 }
 
 void thread_set_stack(thread* self, unsigned* addr) {
-    // @todo !!!
-    //self->regs->usr_r13 = (unsigned)addr;
-    self->regs->usr_esp = (unsigned)addr;
+    registers_set_stack(self->regs, addr);
 }
 
 void thread_block(thread* self, thread_state state) {

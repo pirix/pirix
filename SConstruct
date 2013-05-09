@@ -14,6 +14,7 @@ env = Environment(
 
 if env["DEBUG"]:
     env["CFLAGS"] = ["-g", "-O0"]
+    env["ASFLAGS"] = ["-g"]
 else:
     env["CFLAGS"] = ["-O3", "-w"]
     env["ASPPCOMSTR"] = "[AS] $TARGET"
@@ -39,6 +40,12 @@ target.Append(
     CFLAGS=["-ffreestanding", "-fno-stack-protector", "-std=gnu99"],
     LINKFLAGS=["-T", "kernel/$ARCH/link.ld", "-nostartfiles", "-nodefaultlibs"],
 )
+
+if target["ARCH"] == "arm":
+    target.Append(
+        CFLAGS=["-march=armv6", "-mfpu=vfp", "-mfloat-abi=softfp"],
+        ASFLAGS=["-march=armv6", "-mfpu=vfp", "-mfloat-abi=softfp"],
+    )
 
 env.Substfile("include/config.h.in", SUBST_DICT={
     "@DEBUG@": env["DEBUG"],

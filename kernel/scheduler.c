@@ -16,8 +16,7 @@ void scheduler_init() {
     // create idle thread in system mode
     extern void idle();
     idle_thread = thread_new(&idle);
-    // @todo !!!
-    //idle_thread->regs->spsr = 0x5F;
+    registers_set_kernel_mode(idle_thread->regs);
 }
 
 void scheduler_enqueue_thread(thread* new_thread) {

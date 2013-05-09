@@ -8,44 +8,40 @@
 #undef errno
 extern int errno;
 
-void _exit(int status) {
+void exit(int status) {
     sys_exit(status);
     while (1);
 }
 
-int _execve(char* name, char** argv, char** env) {
+int execve(char* name, char** argv, char** env) {
     return sys_execve(name, argv, env);
 }
 
-int _fork() {
+int fork() {
     return sys_fork();
 }
 
-int _wait(int* status) {
+int wait(int* status) {
     return sys_wait(status);
 }
 
-int _getpid() {
+int getpid() {
     return sys_getpid();
 }
 
-int _isatty(int file) {
+int isatty(int file) {
     return sys_isatty(file);
 }
 
-int _kill(int pid, int sig) {
+int kill(int pid, int sig) {
     return sys_kill(pid, sig);
-}
-
-int _sbrk(int incr) {
-    return sys_sbrk(incr);
 }
 
 int sbrk(int incr) {
     return sys_sbrk(incr);
 }
 
-int _open(char* name, int flags, ...) {
+int open(char* name, int flags, ...) {
     int fd = sys_connect(VFS_PID);
 
     message msg;
@@ -56,45 +52,45 @@ int _open(char* name, int flags, ...) {
     return res < 0 ? res : fd;
 }
 
-int _read(int file, char* buf, int len) {
+int read(int file, char* buf, int len) {
     return sys_read(file, buf, len);
 }
 
-int _write(int file, char* buf, int len) {
+int write(int file, char* buf, int len) {
     return sys_write(file, buf, len);
 }
 
-int _close(int file) {
+int close(int file) {
     return sys_close(file);
 }
 
-int _link(char* old, char* new) {
+int link(char* old, char* new) {
     return sys_link(old, new);
 }
 
-int _unlink(char* name) {
+int unlink(char* name) {
     return sys_unlink(name);
 }
 
-int _stat(int file, struct stat* st) {
+int stat(const char* path, struct stat* st) {
     st->st_mode = S_IFCHR;
     return 0;
 }
 
-int _fstat(int file, struct stat* st) {
+int fstat(int file, struct stat* st) {
     st->st_mode = S_IFCHR;
     return 0;
 }
 
-int _lseek(int file, int offset, int whence) {
+int lseek(int file, int offset, int whence) {
     return sys_lseek(file, offset, whence);
 }
 
-int _times(int buf) {
+int times(int buf) {
     errno = ENOSYS;
     return -1;
 }
 
-int _gettimeofday(struct timeval* p, void* z){
+int gettimeofday(struct timeval* p, void* z){
     return -1;
 }

@@ -10,6 +10,21 @@ typedef struct registers {
     unsigned r15, spsr;
 } __attribute__((packed)) registers;
 
+static inline void registers_init(registers* regs, void* entry) {
+    *regs = (registers) {
+        .spsr = 0x50, // user mode
+        .r15 = (unsigned)entry
+    };
+}
+
+static inline void registers_set_kernel_mode(registers* regs) {
+    regs->spsr = 0x5F;
+}
+
+static inline void registers_set_stack(registers* regs, unsigned* stack) {
+    regs->usr_r13 = (unsigned)stack;
+}
+
 static inline void irq_enable() {
     asm volatile("cpsie if");
 }

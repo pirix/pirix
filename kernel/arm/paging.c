@@ -25,7 +25,7 @@
 
 static paging_context kernel_context = NULL;
 
-int paging_map(paging_context context, unsigned virt, unsigned phys, unsigned access) {
+int paging_map(paging_context context, unsigned long virt, unsigned long phys, unsigned access) {
     switch(access) {
         case PAGE_PERM_USER:
             access = PTE_PERM_USER;
@@ -62,15 +62,15 @@ int paging_map(paging_context context, unsigned virt, unsigned phys, unsigned ac
     return 0;
 }
 
-unsigned* paging_map_kernel(unsigned* phys) {
+void* paging_map_kernel(unsigned long phys) {
     if (phys > 0x80000000) return 0;
-    return 0x80000000 + phys;
+    return (void*)(0x80000000 + phys);
 }
 
 paging_context paging_create_context() {
     paging_context context = (paging_context)memory_alloc_aligned(2, 2);
     paging_context kcontext = (paging_context)paging_map_kernel((unsigned)context);
-    memset(kcontext, 0, 2048*WORD_SIZE);
+    memset(kcontext, 0, 0x2000);
     return kcontext;
 }
 
