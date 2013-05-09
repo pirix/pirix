@@ -1,3 +1,5 @@
+#include <arch/arm.h>
+
 static unsigned* irq_base = (unsigned*)0x9000B200;
 
 #define IRQB_PENDING 0
@@ -41,7 +43,7 @@ void irq_disallow(unsigned irq) {
     }
 }
 
-unsigned irq_find() {
+unsigned irq_find(registers* regs) {
     unsigned pending = irq_base[IRQB_PENDING];
 
     if (pending & (1 << 9)) {

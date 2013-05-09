@@ -1,0 +1,3 @@
+Import("host")
+
+host.Program("pimg", ["pimg.c"], LIBS=["elf"])

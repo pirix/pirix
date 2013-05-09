@@ -1,7 +1,7 @@
-OUTPUT_ARCH("arm")
-
 KERNEL_PHYS = 0x00008000;
 KERNEL_VIRT = 0xC0000000;
+
+ENTRY(loader)
 
 SECTIONS {
     . = KERNEL_PHYS;
@@ -32,4 +32,5 @@ SECTIONS {
     }
 
     kernel_end = . - KERNEL_VIRT;
+    boot_hdr = .;
  }

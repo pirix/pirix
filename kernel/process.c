@@ -10,13 +10,13 @@ void process_init() {
     vector_init(&processes);
 }
 
-process* process_new(paging_context* context) {
+process* process_new(paging_context context) {
     process* self = kmalloc(sizeof(process));
 
     self->context = context;
     self->chan = 0;
 
-    self->heap.start = (unsigned*)0x100000;
+    self->heap.start = 0x100000;
     self->heap.size = 0;
     self->heap.used = 0;
 
@@ -29,10 +29,9 @@ process* process_new(paging_context* context) {
     return self;
 }
 
-process* process_create(void* entry, paging_context* context) {
+process* process_create(void* entry, paging_context context) {
     thread* new_thread = thread_new(entry);
-    unsigned stack = memory_alloc();
-    paging_map(context, 0x7ffff000, stack, PTE_PERM_USER);
+    paging_map(context, 0x7ffff000, memory_alloc(), PAGE_PERM_USER);
     thread_set_stack(new_thread, (unsigned*)0x80000000);
 
     process* self = process_new(context);
@@ -57,18 +56,17 @@ void process_remove_thread(process* self, thread* thread) {
 
 unsigned* process_sbrk(process* self, unsigned incr) {
     if (incr == 0) {
-        return self->heap.start + self->heap.size;
+        return (unsigned*)(self->heap.start + self->heap.size);
     }
 
     while (incr > self->heap.size - self->heap.used) {
-        unsigned phys = memory_alloc();
-        unsigned virt = (unsigned)self->heap.start + self->heap.size;
-        paging_map(self->context, virt, phys, PTE_PERM_USER);
+        unsigned long virt = self->heap.start + self->heap.size;
+        paging_map(self->context, virt, memory_alloc(), PAGE_PERM_USER);
         self->heap.size += 0x1000;
     }
 
     self->heap.used += incr;
-    return self->heap.start;
+    return (unsigned*)self->heap.start;
 }
 
 void process_kill(int pid, int sig) {

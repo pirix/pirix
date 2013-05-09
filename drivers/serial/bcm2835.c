@@ -49,9 +49,3 @@ void serial_putc(char c) {
     while (!(*uart_lsr & 0x20));
     *uart_io = c;
 }
-
-void serial_puts(const char* str) {
-    while (*str) {
-        serial_putc(*str++);
-    }
-}

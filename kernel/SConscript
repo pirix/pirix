@@ -1,0 +1,27 @@
+Import("target")
+
+platform = {
+    "RBPI": [
+        "serial/bcm2835.c",
+        "timer/bcm2835.c",
+        "irq/bcm2835.c",
+    ],
+    "QEMU": [
+        "serial/pl011.c",
+        "timer/icp.c",
+        "irq/icp.c",
+    ],
+    "i386": [
+        "serial/i386.c",
+        "timer/i386.c",
+        "irq/i386.c",
+    ],
+}[target["PLATFORM"]]
+
+for src in platform:
+    Command(src, "#drivers/"+src, Copy("$TARGET", "$SOURCE"))
+
+arch = target.Glob("$ARCH/*.c") + target.Glob("$ARCH/*.S")
+core = target.Glob("*.c") + target.Glob("*.S")
+
+target.Program("kernel", core + arch + platform)

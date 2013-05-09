@@ -7,7 +7,5 @@ void devfs_register() {
 }
 
 void devfs_run() {
-    int fd = open("/dev/null", 0);
-    sys_log("opened!");
     while (1);
 }

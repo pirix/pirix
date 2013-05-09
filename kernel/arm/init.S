@@ -17,6 +17,7 @@
 #define UND_MODE 27
 
 .section .init
+.global loader
 loader:
     /* deactive llcache */
     mrc p15, 0, r0, c1, c0
@@ -210,32 +211,6 @@ task_switch:
 
     rfeia r13!
 .ret:
-    bx lr
-
-.global irq_enable
-irq_enable:
-    cpsie if
-    bx lr
-
-.global irq_disable
-irq_disable:
-    cpsid if
-    bx lr
-
-.global paging_invalidate_tlb
-paging_invalidate_tlb:
-    mov r0, #0
-    mcr p15, 0, r0, c8, c7, 0
-    bx lr
-
-.global paging_invalidate_tlb_entry
-paging_invalidate_tlb_entry:
-    mcr p15, 0, r0, c8, c7, 1
-    bx lr
-
-.global paging_set_transition_table
-paging_set_transition_table:
-    mcr p15, 0, r0, c2, c0, 0
     bx lr
 
 .global idle
