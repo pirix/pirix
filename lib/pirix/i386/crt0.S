@@ -5,7 +5,6 @@
 
 _start:
     call main
-    movl %eax, %ebx
-    movl $SYS_EXIT, %eax
+    movl $SYS_EXIT, %edi
     int $0x80
     jmp .
