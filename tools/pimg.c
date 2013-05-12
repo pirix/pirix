@@ -95,7 +95,7 @@ Elf_Scn* image_strtab(Elf* image) {
     return strtab_scn;
 }
 
-void boothdr_create(Elf* image) {
+void image_create_boothdr(Elf* image) {
     boothdr = malloc(sizeof(boot_header));
     memset(boothdr, 0, sizeof(boot_header));
 
@@ -125,21 +125,93 @@ void boothdr_create(Elf* image) {
     boothdr->magic = BOOT_MAGIC;
 }
 
-void boothdr_add_module(const char* path, unsigned addr, unsigned size, unsigned entry) {
+boot_module* boothdr_create_module(const char* name) {
     if (boothdr->module_count + 1 > BOOT_MAX_MODULES) {
         fprintf(stderr, "too many modules\n");
+        exit(1);
     }
-
-    const char* name = strrchr(path, '/');
-    name = name ? name+1 : path;
 
     struct boot_module* mod = &boothdr->modules[boothdr->module_count++];
     strncpy(mod->name, name, BOOT_MAX_MODNAME);
-    mod->addr = addr;
-    mod->size = size;
-    mod->entry = entry;
 
-    printf("module: %s addr: %p size: %p entry: %p\n", name, addr, size, entry);
+    return mod;
+}
+
+Elf* image_create(int image_fd, int kernel_fd) {
+    Elf* image = elf_begin(image_fd, ELF_C_WRITE, NULL);
+    Elf* kernel_elf = elf_begin(kernel_fd, ELF_C_READ, NULL);
+
+    Elf32_Ehdr* kernel_ehdr = elf32_getehdr(kernel_elf);
+    Elf32_Ehdr* ehdr = elf32_newehdr(image);
+    memcpy(ehdr, kernel_ehdr, sizeof(Elf32_Ehdr));
+    ehdr->e_type = ET_EXEC;
+    ehdr->e_version = EV_CURRENT;
+    ehdr->e_shstrndx = 0;
+    ehdr->e_phoff = elf32_fsize(ELF_T_EHDR, 1, EV_CURRENT);
+    ehdr->e_shentsize = elf32_fsize(ELF_T_SHDR, 1, EV_CURRENT);
+    align_size(&ehdr->e_phoff, 4);
+
+    elf_flagelf(image, ELF_C_SET, ELF_F_LAYOUT);
+
+    image_appendscn(image, elf_findscn(kernel_elf, ".init"), STR_TEXT);
+    image_appendscn(image, elf_findscn(kernel_elf, ".text"), STR_TEXT);
+    image_appendscn(image, elf_findscn(kernel_elf, ".data"), STR_DATA);
+    image_appendscn(image, elf_findscn(kernel_elf, ".rodata"), STR_RODATA);
+    image_appendscn(image, elf_findscn(kernel_elf, ".bss"), STR_BSS);
+
+    Elf32_Phdr* phdr = elf32_newphdr(image, 1);
+    phdr->p_type = PT_LOAD;
+    phdr->p_offset = elf32_getshdr(elf_getscn(image, 1))->sh_offset;
+    phdr->p_paddr = ehdr->e_entry;
+    phdr->p_vaddr = ehdr->e_entry;
+    phdr->p_align = 0x8000;
+    phdr->p_flags = PF_R | PF_W | PF_X;
+
+    image_create_boothdr(image);
+
+    return image;
+}
+
+void image_add_module(Elf* image, const char* name, int mod_fd) {
+    align_size(&offset, 0x1000);
+
+    Elf* mod_elf = elf_begin(mod_fd, ELF_C_READ, NULL);
+    unsigned start = image_appendscn(image, elf_findscn(mod_elf, ".text"), STR_TEXT);
+    image_appendscn(image, elf_findscn(mod_elf, ".data"), STR_DATA);
+    image_appendscn(image, elf_findscn(mod_elf, ".rodata"), STR_RODATA);
+    image_appendscn(image, elf_findscn(mod_elf, ".bss"), STR_BSS);
+
+    Elf32_Phdr* image_phdr = elf32_getphdr(image);
+
+    unsigned addr = image_phdr->p_vaddr - image_phdr->p_offset + start;
+    boot_module* mod = boothdr_create_module(name);
+    mod->addr = addr;
+    mod->size = offset-start;
+    mod->entry = elf32_getehdr(mod_elf)->e_entry;
+}
+
+void image_finish(Elf* image) {
+   Elf32_Ehdr* ehdr = elf32_getehdr(image);
+   Elf32_Phdr* phdr = elf32_getphdr(image);
+
+   elf_update(image, ELF_C_NULL);
+
+   unsigned start = elf32_getshdr(elf_getscn(image, 1))->sh_offset;
+   unsigned end = elf32_getshdr(elf_getscn(image, ehdr->e_shnum-1))->sh_offset;
+   unsigned filesz = end - start + elf32_getshdr(elf_getscn(image, ehdr->e_shnum-1))->sh_size;
+
+   phdr->p_filesz = filesz;
+   phdr->p_memsz = filesz;
+
+   elf_update(image, ELF_C_NULL);
+
+   // update section header offset
+   align_size(&filesz, 4);
+   ehdr->e_shoff = filesz;
+   ehdr->e_shstrndx = elf_ndxscn(image_strtab(image));
+
+   elf_update(image, ELF_C_WRITE);
+   elf_end(image);
 }
 
 int main(int argc, char** argv) {
@@ -159,6 +231,10 @@ int main(int argc, char** argv) {
         switch (option) {
         case 'k':
             kernel_fd = open(optarg, O_RDONLY);
+            if (kernel_fd == -1) {
+                perror("error: can't open kernel");
+                return 1;
+            }
             break;
 
         case 'o':
@@ -168,7 +244,7 @@ int main(int argc, char** argv) {
     }
 
     // check if required options were given
-    if (!kernel_fd) {
+    if (kernel_fd == -1) {
         fprintf(stderr, "error: no kernel specified\n");
         return 1;
     }
@@ -177,87 +253,28 @@ int main(int argc, char** argv) {
 
     int image_fd = open(output_file, O_WRONLY|O_CREAT, 0777);
 
-    if (image_fd < 0) {
-        fprintf(stderr, "error: could not open %s for writing\n", output_file);
+    if (image_fd == -1) {
+        perror("error: can't open output");
         return 1;
     }
 
-    Elf* image = elf_begin(image_fd, ELF_C_WRITE, NULL);
-    Elf* kernel_elf = elf_begin(kernel_fd, ELF_C_READ, NULL);
+    Elf* image = image_create(image_fd, kernel_fd);
 
-    Elf32_Ehdr* kernel_ehdr = elf32_getehdr(kernel_elf);
-    Elf32_Ehdr* ehdr = elf32_newehdr(image);
+    for (unsigned i = 1; optind < argc; i++) {
+        const char* mod_file = argv[optind++];
+        int mod_fd = open(mod_file, O_RDONLY);
 
-    memcpy(ehdr, kernel_ehdr, sizeof(Elf32_Ehdr));
-    ehdr->e_type = ET_EXEC;
-    ehdr->e_version = EV_CURRENT;
-    ehdr->e_shstrndx = 0;
-    ehdr->e_phoff = elf32_fsize(ELF_T_EHDR, 1, EV_CURRENT);
-    ehdr->e_shentsize = elf32_fsize(ELF_T_SHDR, 1, EV_CURRENT);
-    align_size(&ehdr->e_phoff, 4);
-
-    elf_flagelf(image, ELF_C_SET, ELF_F_LAYOUT);
-
-    image_appendscn(image, elf_findscn(kernel_elf, ".init"), STR_TEXT);
-    image_appendscn(image, elf_findscn(kernel_elf, ".text"), STR_TEXT);
-    image_appendscn(image, elf_findscn(kernel_elf, ".data"), STR_DATA);
-    image_appendscn(image, elf_findscn(kernel_elf, ".rodata"), STR_RODATA);
-    image_appendscn(image, elf_findscn(kernel_elf, ".bss"), STR_BSS);
-
-    // create program header
-    Elf32_Phdr* phdr = elf32_newphdr(image, 1);
-    phdr->p_type = PT_LOAD;
-    phdr->p_offset = elf32_getshdr(elf_getscn(image, 1))->sh_offset;
-    phdr->p_paddr = ehdr->e_entry;
-    phdr->p_vaddr = ehdr->e_entry;
-    phdr->p_align = 0x8000;
-    phdr->p_flags = PF_R | PF_W | PF_X;
-
-    boothdr_create(image);
-
-    for (unsigned module = 1; optind < argc; module++) {
-        const char* mod = argv[optind++];
-        int mod_fd = open(mod, O_RDONLY);
-
-        if (!mod_fd) {
-            fprintf(stderr, "could not open %s\n", mod);
+        if (mod_fd == -1) {
+            fprintf(stderr, "error: can't not open %s\n", mod_file);
             return 1;
         }
 
-        align_size(&offset, 0x1000);
-
-        Elf* mod_elf = elf_begin(mod_fd, ELF_C_READ, NULL);
-        unsigned start = image_appendscn(image, elf_findscn(mod_elf, ".text"), STR_TEXT);
-        image_appendscn(image, elf_findscn(mod_elf, ".data"), STR_DATA);
-        image_appendscn(image, elf_findscn(mod_elf, ".rodata"), STR_RODATA);
-        image_appendscn(image, elf_findscn(mod_elf, ".bss"), STR_BSS);
-
-        Elf32_Ehdr* ehdr = elf32_getehdr(mod_elf);
-
-        unsigned addr = phdr->p_vaddr - phdr->p_offset + start;
-        boothdr_add_module(mod, addr, offset-start, ehdr->e_entry);
+        const char* mod_name = strrchr(mod_file, '/');
+        mod_name = mod_name ? mod_name+1 : mod_file;
+        image_add_module(image, mod_name, mod_fd);
     }
 
-    elf_update(image, ELF_C_NULL);
-
-    unsigned start = elf32_getshdr(elf_getscn(image, 1))->sh_offset;
-    unsigned end = elf32_getshdr(elf_getscn(image, ehdr->e_shnum-1))->sh_offset;
-    unsigned filesz = end - start + elf32_getshdr(elf_getscn(image, ehdr->e_shnum-1))->sh_size;
-
-    phdr->p_filesz = filesz;
-    phdr->p_memsz = filesz;
-
-    elf_update(image, ELF_C_NULL);
-
-    // update section header offset
-    align_size(&filesz, 4);
-    ehdr->e_shoff = filesz;
-    ehdr->e_shstrndx = elf_ndxscn(image_strtab(image));
-
-    elf_update(image, ELF_C_WRITE);
-
-    elf_end(image);
-
+    image_finish(image);
     close(image_fd);
     close(kernel_fd);
 
