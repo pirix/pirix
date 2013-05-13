@@ -8,13 +8,17 @@
 #undef errno
 extern int errno;
 
+char* __env[1] = { 0 };
+char** environ = __env;
+
 void exit(int status) {
     sys_exit(status);
     while (1);
 }
 
 int execve(char* name, char** argv, char** env) {
-    return sys_execve(name, argv, env);
+    errno = ENOMEM;
+    return -1;
 }
 
 int fork() {
@@ -29,8 +33,8 @@ int getpid() {
     return sys_getpid();
 }
 
-int isatty(int file) {
-    return sys_isatty(file);
+int isatty(int fd) {
+    return (fd == 1) ? 1 : 0;
 }
 
 int kill(int pid, int sig) {
@@ -46,6 +50,7 @@ int _sbrk(int incr) {
 }
 
 int open(char* name, int flags, ...) {
+    return -1;
     int fd = sys_connect(VFS_PID);
 
     message msg;
@@ -56,24 +61,27 @@ int open(char* name, int flags, ...) {
     return res < 0 ? res : fd;
 }
 
-int read(int file, char* buf, int len) {
-    return sys_read(file, buf, len);
+int read(int fd, char* buf, int len) {
+    return 0;
 }
 
-int write(int file, char* buf, int len) {
-    return sys_write(file, buf, len);
+int write(int fd, char* buf, int len) {
+    if (fd == 1) sys_print(buf, len);
+    return len;
 }
 
-int close(int file) {
-    return sys_close(file);
+int close(int fd) {
+    return -1;
 }
 
 int link(char* old, char* new) {
-    return sys_link(old, new);
+    errno = EMLINK;
+    return -1;
 }
 
 int unlink(char* name) {
-    return sys_unlink(name);
+    errno = ENOENT;
+    return -1;
 }
 
 int stat(const char* path, struct stat* st) {
@@ -81,13 +89,13 @@ int stat(const char* path, struct stat* st) {
     return 0;
 }
 
-int fstat(int file, struct stat* st) {
+int fstat(int fd, struct stat* st) {
     st->st_mode = S_IFCHR;
     return 0;
 }
 
-int lseek(int file, int offset, int whence) {
-    return sys_lseek(file, offset, whence);
+int lseek(int fd, int offset, int whence) {
+    return 0;
 }
 
 int times(int buf) {

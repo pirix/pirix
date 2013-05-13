@@ -66,7 +66,7 @@ void process_remove_thread(process* self, thread* thread);
  * Increase the heap size of a process.
  * @memberof process
  */
-unsigned* process_sbrk(process* self, unsigned incr);
+unsigned long process_sbrk(process* self, int incr);
 
 /**
  * Exit the current process.

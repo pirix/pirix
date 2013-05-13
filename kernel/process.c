@@ -16,7 +16,7 @@ process* process_new(paging_context context) {
     self->context = context;
     self->chan = 0;
 
-    self->heap.start = 0x100000;
+    self->heap.start = 0x1000000;
     self->heap.size = 0;
     self->heap.used = 0;
 
@@ -54,9 +54,9 @@ void process_remove_thread(process* self, thread* thread) {
     vector_set(&self->threads, thread->tid, 0);
 }
 
-unsigned* process_sbrk(process* self, unsigned incr) {
+unsigned long process_sbrk(process* self, int incr) {
     if (incr == 0) {
-        return (unsigned*)(self->heap.start + self->heap.size);
+        return self->heap.start + self->heap.size;
     }
 
     while (incr > self->heap.size - self->heap.used) {
@@ -66,7 +66,7 @@ unsigned* process_sbrk(process* self, unsigned incr) {
     }
 
     self->heap.used += incr;
-    return (unsigned*)self->heap.start;
+    return self->heap.start;
 }
 
 void process_kill(int pid, int sig) {
