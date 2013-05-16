@@ -3,7 +3,9 @@
 \name:
     push %ebp
     movl %esp, %ebp
-.ifgt \args-3
+    push %ebx
+    push %edi
+    .ifgt \args-3
     movl 20(%ebp), %edx
 .endif
 .ifgt \args-2
@@ -17,6 +19,8 @@
 .endif
     movl $(\id), %edi
     int $0x80
+    pop %edi
+    pop %ebx
     leave
     ret
 .endm
