@@ -47,6 +47,7 @@ if target["ARCH"] == "arm":
     )
 
 env.Substfile("include/config.h.in", SUBST_DICT={
+    "@ARCH@": env["ARCH"],
     "@DEBUG@": env["DEBUG"],
     "@VERSION@": env["VERSION"],
     "@PLATFORM@": env["PLATFORM"],
@@ -73,7 +74,7 @@ host.SConscript("tools/SConscript", exports="host",
 modules = [
     "build/$ARCH/kernel/kernel",
     "build/$ARCH/servers/vfs/vfs",
-    "build/$ARCH/servers/devmgr/devmgr"
+    "build/$ARCH/servers/login/login"
 ]
 
 cmd = "build/tools/pimg -o $TARGET -k %s" % " ".join(modules)

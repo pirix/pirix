@@ -5,6 +5,9 @@
 #include <pirix/ipc.h>
 #include <pirix/timer.h>
 #include <sys/sysinfo.h>
+#include <sys/utsname.h>
+#include <string.h>
+#include <config.h>
 
 int syscall(int a, int b, int c, int d, int id) {
     switch (id) {
@@ -17,12 +20,6 @@ int syscall(int a, int b, int c, int d, int id) {
         return 0;
     }
 
-    case SYS_SYSINFO: {
-        sysinfo* info = (sysinfo*)a;
-        info->uptime = timer_uptime();
-        return 0;
-    }
-
     case SYS_PRINT: {
         char* buf = (char*)a;
         int len = b;
@@ -30,6 +27,22 @@ int syscall(int a, int b, int c, int d, int id) {
             kputc(*(buf++));
         }
         return len;
+    }
+
+    case SYS_SYSINFO: {
+        sysinfo* info = (sysinfo*)a;
+        info->uptime = timer_uptime();
+        return 0;
+    }
+
+    case SYS_UNAME: {
+        struct utsname* un = (struct utsname*)a;
+        memcpy(un->sysname, "Pirix", 6);
+        memcpy(un->nodename, "", 1);
+        memcpy(un->release, "", 1);
+        memcpy(un->version, VERSION, sizeof(VERSION));
+        memcpy(un->machine, ARCH, sizeof(ARCH));
+        return 0;
     }
 
     case SYS_EXIT:

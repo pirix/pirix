@@ -3,8 +3,9 @@
 
 define_syscall sys_exit,    SYS_EXIT, 1
 define_syscall sys_log,     SYS_LOG, 1
-define_syscall sys_sysinfo, SYS_SYSINFO, 1
 define_syscall sys_print,   SYS_PRINT, 3
+define_syscall sys_sysinfo, SYS_SYSINFO, 1
+define_syscall sys_uname,   SYS_UNAME, 1
 define_syscall sys_fork,    SYS_FORK, 0
 define_syscall sys_getpid,  SYS_GETPID, 0
 define_syscall sys_kill,    SYS_KILL, 2

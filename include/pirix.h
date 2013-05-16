@@ -2,11 +2,13 @@
 
 typedef struct message message;
 typedef struct sysinfo sysinfo;
+struct utsinfo;
 
 int sys_exit(int status);
 int sys_log(char* buf);
-int sys_sysinfo(sysinfo* info);
 int sys_print(char* buf, int len);
+int sys_sysinfo(sysinfo* info);
+int sys_uname(struct utsinfo*);
 
 int sys_getpid();
 int sys_kill(int pid, int sig);

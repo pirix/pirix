@@ -3,6 +3,7 @@
 #define RBPI 1
 #define QEMU 2
 
+#define ARCH "@ARCH@"
 #define PLATFORM @PLATFORM@
 #define VERSION "@VERSION@"
 

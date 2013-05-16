@@ -1,5 +1,6 @@
 #include <sys/stat.h>
 #include <sys/time.h>
+#include <sys/utsname.h>
 #include <errno.h>
 #include <pirix.h>
 #include <pirix/ipc.h>
@@ -105,4 +106,8 @@ int times(int buf) {
 
 int gettimeofday(struct timeval* p, void* z){
     return -1;
+}
+
+int uname(struct utsname* name) {
+    return sys_uname(name);
 }
