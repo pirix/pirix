@@ -7,6 +7,7 @@ define_syscall sys_print,   SYS_PRINT, 3
 define_syscall sys_sysinfo, SYS_SYSINFO, 1
 define_syscall sys_uname,   SYS_UNAME, 1
 define_syscall sys_fork,    SYS_FORK, 0
+define_syscall sys_clone,   SYS_CLONE, 3
 define_syscall sys_getpid,  SYS_GETPID, 0
 define_syscall sys_kill,    SYS_KILL, 2
 define_syscall sys_sbrk,    SYS_SBRK, 1

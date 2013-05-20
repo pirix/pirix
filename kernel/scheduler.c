@@ -1,6 +1,7 @@
 #include <pirix/kernel.h>
 #include <pirix/scheduler.h>
 #include <pirix/process.h>
+#include <pirix/spinlock.h>
 #include <pirix/kheap.h>
 
 // task switch routine in init.S
@@ -11,6 +12,7 @@ static thread* idle_thread = 0;
 
 static thread* queue_head = 0;
 static thread* queue_tail = 0;
+static int queue_lock = 0;
 
 void scheduler_init() {
     // create idle thread in system mode
@@ -22,24 +24,28 @@ void scheduler_init() {
 void scheduler_enqueue_thread(thread* new_thread) {
     new_thread->next = 0;
 
+    spin_lock(&queue_lock);
+
     if (queue_tail) {
         queue_tail->next = new_thread;
     }
-
-    queue_tail = new_thread;
-
-    if (!queue_head) {
+    else if (!queue_head) {
         queue_head = new_thread;
     }
+    queue_tail = new_thread;
+
+    spin_unlock(&queue_lock);
 }
 
 thread* scheduler_dequeue_thread() {
+    spin_lock(&queue_lock);
+    thread* t = 0;
     if (queue_head) {
-        thread* t = queue_head;
+        t = queue_head;
         queue_head = queue_head->next;
-        return t;
     }
-    return 0;
+    spin_unlock(&queue_lock);
+    return t;
 }
 
 thread* scheduler_current_thread() {

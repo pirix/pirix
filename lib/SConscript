@@ -5,4 +5,6 @@ target.Library("pirix", [
     "pirix/$ARCH/syscall.S"
 ])
 
+target.Library("pthread", Glob("pthread/*.c"))
+
 target.Object("crt0", "pirix/${ARCH}/crt0.S")

@@ -9,10 +9,7 @@
 #undef errno
 extern int errno;
 
-char* __env[1] = { 0 };
-char** environ = __env;
-
-void exit(int status) {
+void _exit(int status) {
     sys_exit(status);
     while (1);
 }

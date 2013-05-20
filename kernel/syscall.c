@@ -59,6 +59,20 @@ int syscall(int a, int b, int c, int d, int id) {
     case SYS_FORK:
         return -1;
 
+    case SYS_CLONE: {
+        thread* t = scheduler_current_thread();
+
+        void* entry = (void*)a;
+        void* stack = (void*)b;
+
+        thread* new = thread_new(entry);
+        thread_set_stack(new, stack);
+        process_add_thread(t->process, new);
+        scheduler_enqueue_thread(new);
+
+        return new->tid;
+    }
+
     case SYS_GETPID: {
         thread* t = scheduler_current_thread();
         if (t && t->process) {

@@ -49,5 +49,11 @@ static inline void irq_disable() {
 }
 
 static inline void invlpg(unsigned long addr) {
-    asm volatile("invlpg (%0)" :: "r" (addr) : "memory");
+    asm volatile("invlpg (%0)" :: "r"(addr) : "memory");
+}
+
+static inline int test_lock(int* ptr) {
+    int result;
+    asm volatile("lock; xchgl %0, %1" : "+m"(*ptr), "=a"(result) : "1"(1) : "cc");
+    return result;
 }

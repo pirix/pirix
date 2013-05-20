@@ -1,7 +1,7 @@
 Import("target")
 
 env = target.Clone(
-    LIBS="pirix",
+    LIBS=["pirix", "pthread"],
     LIBPATH=["#build/$ARCH/lib"],
 )
 
