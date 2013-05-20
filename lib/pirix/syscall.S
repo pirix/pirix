@@ -9,6 +9,7 @@ define_syscall sys_uname,   SYS_UNAME, 1
 define_syscall sys_fork,    SYS_FORK, 0
 define_syscall sys_clone,   SYS_CLONE, 3
 define_syscall sys_getpid,  SYS_GETPID, 0
+define_syscall sys_gettid,  SYS_GETTID, 0
 define_syscall sys_kill,    SYS_KILL, 2
 define_syscall sys_sbrk,    SYS_SBRK, 1
 define_syscall sys_wait,    SYS_WAIT, 1

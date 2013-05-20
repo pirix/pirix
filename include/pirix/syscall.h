@@ -13,8 +13,9 @@
 #define SYS_WAIT     0x12
 #define SYS_FORK     0x13
 #define SYS_CLONE    0x14
-#define SYS_GETPID   0x15
-#define SYS_YIELD    0x16
+#define SYS_YIELD    0x15
+#define SYS_GETPID   0x16
+#define SYS_GETTID   0x17
 
 // IPC
 #define SYS_LISTEN   0x30

@@ -75,10 +75,15 @@ int syscall(int a, int b, int c, int d, int id) {
 
     case SYS_GETPID: {
         thread* t = scheduler_current_thread();
-        if (t && t->process) {
+        if (t->process) {
             return t->process->pid;
         }
         else return -1;
+    }
+
+    case SYS_GETTID: {
+        thread* t = scheduler_current_thread();
+        return t->tid;
     }
 
     case SYS_YIELD:
