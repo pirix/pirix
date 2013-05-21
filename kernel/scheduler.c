@@ -43,6 +43,7 @@ thread* scheduler_dequeue_thread() {
     if (queue_head) {
         t = queue_head;
         queue_head = queue_head->next;
+        if (!queue_head) queue_tail = 0;
     }
     spin_unlock(&queue_lock);
     return t;
