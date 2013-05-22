@@ -1,4 +1,5 @@
 #include <arch/i386.h>
+#include <pirix/kprint.h>
 #include <pirix/paging.h>
 #include <pirix/memory.h>
 #include <pirix/irq.h>

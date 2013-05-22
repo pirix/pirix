@@ -49,6 +49,7 @@ static void modules_init() {
 }
 
 void main() {
+    extern void serial_init();
     serial_init();
 
     kputs("PIRIX VERSION " VERSION " BOOTING...\n");

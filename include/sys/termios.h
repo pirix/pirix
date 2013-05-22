@@ -1,5 +1,7 @@
 #pragma once
 
+#include <sys/types.h>
+
 // subscript names for c_cc
 #define VEOF    1
 #define VEOL    2
@@ -86,7 +88,7 @@
 #define CREAD   0x20
 #define PARENB  0x40
 #define PARODD  0x80
-#define HUPLC   0x100
+#define HUPCL   0x100
 #define CLOCAL  0x200
 
 // local modes
@@ -99,6 +101,11 @@
 #define ISIG   0x40
 #define NOFLSH 0x80
 #define TOSTOP 0x100
+
+// tcsetattr() constants
+#define TCSANOW   1
+#define TCSADRAIN 2
+#define TCSAFLUSH 3
 
 // tcflush() constants
 #define TCIFLUSH  1

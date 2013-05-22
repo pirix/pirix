@@ -42,6 +42,7 @@ void kprintf(const char* fmt, ...) {
 }
 
 void kputc(char c) {
+    extern void serial_putc(char);
     serial_putc(c);
 }
 

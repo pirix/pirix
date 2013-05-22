@@ -15,13 +15,13 @@ void semaphore_wait(semaphore* sem) {
 
     if (sem->count > 0) {
         sem->count--;
-        sem->lock = 0;
+        spin_unlock(&sem->lock);
         return;
     }
 
     thread* t = scheduler_current_thread();
 
-    // add thread to queue
+    // enqueue thread
     t->next = 0;
     if (!sem->queue) sem->queue = t;
     else {
@@ -30,9 +30,9 @@ void semaphore_wait(semaphore* sem) {
         curr->next = t;
     }
 
-    thread_block(t, STATE_SEMA);
-
     spin_unlock(&sem->lock);
+
+    thread_block(t, STATE_SEMA);
     scheduler_switch();
 }
 
