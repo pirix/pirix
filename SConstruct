@@ -59,14 +59,14 @@ env.Substfile("include/arch.h.in", SUBST_DICT={
     "@ARCH@": env["ARCH"],
 })
 
-target.SConscript("kernel/SConscript", exports="target",
-                  variant_dir="build/$ARCH/kernel")
+kernel = target.SConscript("kernel/SConscript", exports="target",
+                           variant_dir="build/$ARCH/kernel")
 
-target.SConscript("lib/SConscript", exports="target",
-                  variant_dir="build/$ARCH/lib")
+libs = target.SConscript("lib/SConscript", exports="target",
+                         variant_dir="build/$ARCH/lib")
 
-target.SConscript("servers/SConscript", exports="target",
-                  variant_dir="build/$ARCH/servers")
+servers = target.SConscript("servers/SConscript", exports="target",
+                            variant_dir="build/$ARCH/servers")
 
 host.SConscript("tools/SConscript", exports="host",
                 variant_dir="build/tools")
@@ -83,6 +83,9 @@ image = target.Command("build/$ARCH/pirix.img", "", cmd)
 target.Depends(image, "build/tools/pimg")
 target.Depends(image, modules)
 
+env.Install("$PREFIX/bin", [kernel] + servers)
+env.Install("$PREFIX/boot", image)
+env.Install("$PREFIX/lib", libs)
 env.Install("$PREFIX/include", Glob("include/pirix.h"))
 env.Install("$PREFIX/include/pirix", Glob("include/pirix/*.h"))
 env.Install("$PREFIX/include/sys", Glob("include/sys/*.h"))

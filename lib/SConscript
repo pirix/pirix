@@ -1,10 +1,13 @@
 Import("target")
 
-target.Library("pirix", [
-    "pirix/libgloss.c",
+libs = []
+
+libs.append(target.Library("pirix", Glob("pirix/*.c") + [
     "pirix/$ARCH/syscall.S"
-])
+]))
 
-target.Library("pthread", Glob("pthread/*.c"))
+libs.append(target.Library("pthread", Glob("pthread/*.c")))
 
-target.Object("crt0", "pirix/${ARCH}/crt0.S")
+libs.append(target.Object("crt0", "pirix/${ARCH}/crt0.S"))
+
+Return("libs")

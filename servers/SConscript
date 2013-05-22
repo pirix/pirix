@@ -10,5 +10,9 @@ env.Append(
     LINKFLAGS=["-T", "servers/link.ld"],
 )
 
-vfs = env.Program("vfs/vfs", env.Glob("vfs/*.c"))
-login = env.Program("login/login", env.Glob("login/*.c"))
+servers = []
+
+servers.append(env.Program("vfs/vfs", env.Glob("vfs/*.c")))
+servers.append(env.Program("login/login", env.Glob("login/*.c")))
+
+Return("servers")

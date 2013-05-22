@@ -31,4 +31,6 @@ for src in platform:
 arch = target.Glob("$ARCH/*.c") + target.Glob("$ARCH/*.S")
 core = target.Glob("*.c") + target.Glob("*.S")
 
-target.Program("kernel", core + arch + platform)
+kernel = target.Program("kernel", core + arch + platform)
+
+Return("kernel")
