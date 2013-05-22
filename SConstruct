@@ -5,6 +5,7 @@ vars.Add("ARCH", "target architecture", "i386")
 vars.Add("PLATFORM", "target platform", "i386")
 vars.Add("DEBUG", "set to 1 for debug", 0)
 vars.Add("VERSION", "current version", "0.1")
+vars.Add("PREFIX", "install prefix", "/usr")
 
 env = Environment(
     ENV=os.environ,
@@ -81,3 +82,8 @@ cmd = "build/tools/pimg -o $TARGET -k %s" % " ".join(modules)
 image = target.Command("build/$ARCH/pirix.img", "", cmd)
 target.Depends(image, "build/tools/pimg")
 target.Depends(image, modules)
+
+env.Install("$PREFIX/include", Glob("include/pirix.h"))
+env.Install("$PREFIX/include/pirix", Glob("include/pirix/*.h"))
+env.Install("$PREFIX/include/sys", Glob("include/sys/*.h"))
+env.Alias("install", "$PREFIX")
