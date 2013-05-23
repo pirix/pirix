@@ -1,7 +1,9 @@
 #pragma once
 
-#define ANY_PID -1
 #define VFS_PID 0
+
+#include "semaphore.h"
+#include "vector.h"
 
 typedef struct process process;
 
@@ -12,12 +14,18 @@ typedef struct message {
 
 typedef struct channel {
     process* proc;
-    message msg;
+    message msg_buffer;
+    semaphore send_sem;
+    semaphore recv_sem;
+    vector reply;
+    int reply_id;
 } channel;
 
 typedef struct connect {
-    channel* chan;
     int cid;
+    thread* owner;
+    channel* chan;
+    message msg_buffer;
 } connect;
 
 int ipc_listen();

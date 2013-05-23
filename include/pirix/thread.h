@@ -8,8 +8,7 @@ typedef struct message message;
 typedef enum thread_state {
     STATE_READY,
     STATE_WAIT,
-    STATE_RECV,
-    STATE_SEND,
+    STATE_REPLY,
     STATE_SEMA,
     STATE_DEAD,
 } thread_state;
