@@ -16,7 +16,11 @@ handle_irq:
     call irq_handle
     mov %eax, %esp
 
-    pop %ebx
+    // save %esp (which is also in %eax) to tss
+    add $28, %eax
+    movl %eax, (tss+4)
+
+    popl %ebx
     mov %bx, %ds
     mov %bx, %es
     mov %bx, %fs
@@ -24,14 +28,13 @@ handle_irq:
 
     popa
 
-    // remove args from stack and save esp to tss
-    add $28, %esp
-    mov %esp, (tss+4)
-    sub $20, %esp
+    // remove error codes
+    add $8, %esp
 
     iret
 
 handle_syscall:
+    pushl %ds
     push %edi
     push %edx
     push %ecx
@@ -46,10 +49,16 @@ handle_syscall:
 
     call syscall
 
-    // remove args from stack and save esp to tss
-    add $40, %esp
+    // remove args from stack and save %esp to tss
+    add $44, %esp
     mov %esp, (tss+4)
-    sub $20, %esp
+    sub $24, %esp
+
+    pop %ebx
+    mov %bx, %ds
+    mov %bx, %es
+    mov %bx, %fs
+    mov %bx, %gs
 
     iret
 
@@ -69,6 +78,10 @@ task_switch:
     call scheduler_schedule
     mov %eax, %esp
 
+    // save %esp (which is also in %eax) to tss
+    add $28, %eax
+    movl %eax, (tss+4)
+
     pop %ebx
     mov %bx, %ds
     mov %bx, %es
@@ -77,10 +90,8 @@ task_switch:
 
     popa
 
-    // remove args from stack and save esp to tss
-    add $28, %esp
-    mov %esp, (tss+4)
-    sub $20, %esp
+    // remove error codes
+    add $8, %esp
 
     iret
 task_switch_ret:
