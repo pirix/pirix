@@ -5,7 +5,6 @@ handle_irq:
     pusha
 
     pushl %ds
-
     mov $0x10, %ax
     mov %ax, %ds
     mov %ax, %es
@@ -17,7 +16,7 @@ handle_irq:
     mov %eax, %esp
 
     // save %esp (which is also in %eax) to tss
-    add $28, %eax
+    add $64, %eax
     movl %eax, (tss+4)
 
     popl %ebx
