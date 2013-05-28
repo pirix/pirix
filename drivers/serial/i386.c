@@ -5,8 +5,8 @@ static short* vmem = (short*)0xc00b8000;
 static int vx = 0, vy = 0;
 
 void video_scroll() {
-    memcpy(vmem, vmem+25, sizeof(short)*80*24);
-    memset(vmem+(80*24), 0, sizeof(short)*25);
+    memcpy(vmem, vmem+80, sizeof(short)*80*24);
+    memset(vmem+(80*24), 0, sizeof(short)*80);
     vy--;
 }
 
