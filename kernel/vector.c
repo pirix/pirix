@@ -3,17 +3,24 @@
 #include <string.h>
 
 static void vector_resize(vector* self) {
-    void** tmp = kmalloc(self->bounds*2*sizeof(void*));
-    memcpy(tmp, self->content, self->bounds*sizeof(void*));
-    memset(tmp+self->bounds, 0, self->bounds*sizeof(void*));
-    kfree(self->content, self->bounds*sizeof(void*));
-    self->content = tmp;
-    self->bounds *= 2;
+    if (self->bounds > 0) {
+        void** tmp = kmalloc(self->bounds*2*sizeof(void*));
+        memcpy(tmp, self->content, self->bounds*sizeof(void*));
+        memset(tmp+self->bounds, 0, self->bounds*sizeof(void*));
+        kfree(self->content, self->bounds*sizeof(void*));
+        self->bounds *= 2;
+        self->content = tmp;
+    }
+    else {
+        vector_init(self, 4);
+    }
 }
 
-void vector_init(vector* self) {
-    self->content = kcalloc(8, sizeof(void*));
-    self->bounds = 8;
+void vector_init(vector* self, int size) {
+    if (size > 0) {
+        self->content = kcalloc(size, sizeof(void*));
+    }
+    self->bounds = size;
     self->count = 0;
 }
 
@@ -47,6 +54,15 @@ int vector_count(vector* self) {
 }
 
 void vector_clear(vector* self) {
+    if (self->bounds <= 0) return;
+    memset(self->content, 0, sizeof(void*)*self->bounds);
+    self->count = 0;
+}
+
+void vector_free(vector* self) {
+    if (self->bounds <= 0) return;
     kfree(self->content, sizeof(void*)*self->bounds);
+    self->bounds = 0;
+    self->count = 0;
     self->content = 0;
 }

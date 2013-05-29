@@ -1,9 +1,11 @@
 #include <sys/stat.h>
 #include <sys/time.h>
+#include <string.h>
 #include <errno.h>
-#include <pirix.h>
+#include <sys/pirix.h>
+#include <sys/uio.h>
 #include <pirix/ipc.h>
-#include <vfs/vfs.h>
+#include <servers/system.h>
 
 #undef errno
 extern int errno;
@@ -47,19 +49,34 @@ int _sbrk(int incr) {
 }
 
 int open(char* name, int flags, ...) {
-    return -1;
-    int fd = sys_connect(VFS_PID);
+    int fd = ipc_connect(0, 0);
 
-    message msg;
-    msg.tag = VFS_OPEN;
+    if (fd < 0) {
+        errno = ESRCH;
+        return -1;
+    }
 
-    int res = sys_send(fd, &msg);
+    struct pathmgr_msg msg;
+    msg.tag = PATHMGR_RESOLVE;
 
-    return res < 0 ? res : fd;
+    struct iovec iov[2];
+    SETIOV(&iov[0], &msg, sizeof(msg));
+    SETIOV(&iov[1], name, strlen(name));
+
+    return ipc_send(fd, &MSG_BUF_VEC(iov, 2), NULL);
 }
 
 int read(int fd, char* buf, int len) {
-    return 0;
+    //io_read_msg msg;
+
+    //msg.type = IO_READ;
+    //msg.size = len;
+    const char msg[] = "READ";
+
+    msg_buffer out = MSG_BUF_LIN(msg, sizeof(msg));
+    msg_buffer in = MSG_BUF_LIN(buf, len);
+
+    return ipc_send(fd, &out, &in);
 }
 
 int write(int fd, char* buf, int len) {

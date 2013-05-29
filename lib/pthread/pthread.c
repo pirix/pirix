@@ -2,7 +2,7 @@
 #include <pthread.h>
 #include <stdlib.h>
 #include <stdint.h>
-#include <pirix.h>
+#include <sys/pirix.h>
 
 #define PTHREAD_STACK_SIZE 1024
 

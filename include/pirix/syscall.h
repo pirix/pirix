@@ -18,11 +18,13 @@
 #define SYS_GETTID   0x17
 
 // IPC
-#define SYS_LISTEN   0x30
-#define SYS_CONNECT  0x31
-#define SYS_SEND     0x32
-#define SYS_RECV     0x33
-#define SYS_REPLY    0x34
+#define SYS_IPC_LISTEN     0x30
+#define SYS_IPC_CLOSE      0x31
+#define SYS_IPC_CONNECT    0x32
+#define SYS_IPC_DISCONNECT 0x33
+#define SYS_IPC_SEND       0x34
+#define SYS_IPC_RECEIVE    0x35
+#define SYS_IPC_REPLY      0x36
 
 // Memory
 #define SYS_SBRK     0x60

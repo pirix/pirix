@@ -90,20 +90,26 @@ int syscall(int a, int b, int c, int d, int id) {
         scheduler_switch();
         return 0;
 
-    case SYS_LISTEN:
+    case SYS_IPC_LISTEN:
         return ipc_listen();
 
-    case SYS_CONNECT:
-        return ipc_connect((int)a);
+    case SYS_IPC_CLOSE:
+        return ipc_close((int)a);
 
-    case SYS_SEND:
-        return ipc_send((int)a, (message*)b);
+    case SYS_IPC_CONNECT:
+        return ipc_connect((int)a, (int)b);
 
-    case SYS_RECV:
-        return ipc_recv((message*)a);
+    case SYS_IPC_DISCONNECT:
+        return ipc_disconnect((int)a);
 
-    case SYS_REPLY:
-        return ipc_reply((int)a, (message*)b);
+    case SYS_IPC_SEND:
+        return ipc_send((int)a, (msg_buffer*)b, (msg_buffer*)c);
+
+    case SYS_IPC_RECEIVE:
+        return ipc_receive((int)a, (msg_buffer*)b);
+
+    case SYS_IPC_REPLY:
+        return ipc_reply((int)a, (int)b, (msg_buffer*)c);
 
     case SYS_SBRK: {
         thread* t = scheduler_current_thread();

@@ -1,6 +1,5 @@
 #pragma once
 
-typedef struct message message;
 typedef struct sysinfo sysinfo;
 struct utsname;
 
@@ -18,9 +17,3 @@ int sys_yield();
 int sys_getpid();
 int sys_gettid();
 int sys_sbrk(int incr);
-
-int sys_listen();
-int sys_connect(int pid);
-int sys_send(int cid, message* msg);
-int sys_recv(message* msg);
-int sys_reply(int cid, message* msg);

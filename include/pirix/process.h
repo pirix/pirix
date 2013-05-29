@@ -17,6 +17,7 @@ typedef struct process {
     heap heap;
     vector threads;
     vector fds;
+    vector chans;
     channel* chan;
     paging_context context;
 } process;

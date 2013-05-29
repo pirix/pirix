@@ -7,7 +7,7 @@
 static vector processes;
 
 void process_init() {
-    vector_init(&processes);
+    vector_init(&processes, 16);
 }
 
 process* process_new(paging_context context) {
@@ -20,8 +20,9 @@ process* process_new(paging_context context) {
     self->heap.size = 0;
     self->heap.used = 0;
 
-    vector_init(&self->threads);
-    vector_init(&self->fds);
+    vector_init(&self->threads, 4);
+    vector_init(&self->fds, 8);
+    vector_init(&self->chans, 0);
 
     int pid = vector_add(&processes, self);
     self->pid = pid;

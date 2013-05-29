@@ -1,8 +1,10 @@
+#include <fcntl.h>
 #include <stdio.h>
-#include <pirix.h>
 #include <pirix/ipc.h>
-#include <vfs/vfs.h>
+#include <sys/pirix.h>
+#include <servers/system.h>
 #include <sys/utsname.h>
+#include <sys/uio.h>
 
 int main(int argc, const char* argv[]) {
     struct utsname name;
@@ -13,6 +15,11 @@ int main(int argc, const char* argv[]) {
     printf("Login: ");
     fflush(stdout);
 
+    int fd = open("/etc/passwd", O_RDONLY);
+
+    printf("fd: %i\n", fd);
+
     while (1);
+
     return 0;
 }
