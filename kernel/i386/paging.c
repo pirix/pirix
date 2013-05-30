@@ -14,7 +14,7 @@ static paging_context current_context = NULL;
 registers* paging_fault(registers* regs) {
     unsigned long addr;
     asm volatile("mov %%cr2, %0" : "=r"(addr));
-    kprintf("page fault at %p\n", addr);
+    kprintf("page fault at %p, eip: %p\n", addr, regs->eip);
     panic(0);
     return regs;
 }
