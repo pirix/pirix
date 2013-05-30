@@ -140,3 +140,12 @@ void paging_activate_context(paging_context context) {
     asm volatile("mov %0, %%cr3" :: "r"(context) : "memory");
     current_context = context;
 }
+
+void* paging_getphys(unsigned long virt) {
+    unsigned long pdidx = virt >> 22;
+    unsigned long ptidx = (virt >> 12) & 0x3FF + 0x400*pdidx;
+
+    if (!(page_dir[pdidx] & 0x1)) return 0;
+    if (!(page_tables[ptidx] & 0x1)) return 0;
+    return (void*)((page_tables[ptidx] & ~0xFFF) + (virt & 0xFFF));
+}
