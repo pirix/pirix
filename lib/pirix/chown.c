@@ -14,3 +14,8 @@ int chown(const char* path, uid_t owner, gid_t group) {
     errno = ENOENT;
     return -1;
 }
+
+int lchown(const char* path, uid_t owner, gid_t group) {
+    errno = ENOENT;
+    return -1;
+}
