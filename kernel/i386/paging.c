@@ -85,8 +85,10 @@ int paging_map(paging_context context, unsigned long virt, unsigned long phys, u
 
     access = (access == PAGE_PERM_USER) ? 0x4 : 0x0;
 
+    if (!context) context = current_context;
+
     if (context == current_context && page_dir[pdidx]) {
-        page_tables[ptidx] = phys | access | 0x3;
+        page_tables[ptidx+0x400*pdidx] = phys | access | 0x3;
         invlpg(virt);
         return 0;
     }
