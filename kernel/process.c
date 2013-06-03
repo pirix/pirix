@@ -73,6 +73,7 @@ unsigned long process_sbrk(process* self, int incr) {
     while (incr > self->heap.size - self->heap.used) {
         unsigned long virt = self->heap.start + self->heap.size;
         paging_map(self->context, virt, memory_alloc(), PAGE_PERM_USER);
+        memset((void*)virt, 0, 0x1000);
         self->heap.size += 0x1000;
     }
 
