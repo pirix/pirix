@@ -63,7 +63,8 @@ unsigned image_appendscn(Elf* image, Elf_Scn* source, int name) {
 
     tgt_shdr->sh_name = name;
 
-    align_size(&offset, tgt_shdr->sh_addralign);
+    int diff = (int)(tgt_shdr->sh_addr%0x1000)-(int)(offset%0x1000);
+    offset += diff < 0 ? 0x1000+diff : diff;
     tgt_shdr->sh_offset = offset;
     offset += tgt_shdr->sh_size;
 
@@ -176,10 +177,38 @@ void image_add_module(Elf* image, const char* name, int mod_fd) {
     align_size(&offset, 0x1000);
 
     Elf* mod_elf = elf_begin(mod_fd, ELF_C_READ, NULL);
-    unsigned start = image_appendscn(image, elf_findscn(mod_elf, ".text"), STR_TEXT);
-    image_appendscn(image, elf_findscn(mod_elf, ".data"), STR_DATA);
-    image_appendscn(image, elf_findscn(mod_elf, ".rodata"), STR_RODATA);
-    image_appendscn(image, elf_findscn(mod_elf, ".bss"), STR_BSS);
+    unsigned start = 0;
+
+    size_t n_phdr;
+    Elf32_Phdr* phdr = elf32_getphdr(mod_elf);
+    elf_getphdrnum(mod_elf, &n_phdr);
+
+    // search program headers for sections
+    for (int i = 0; i < n_phdr; i++) {
+        if (phdr->p_type != PT_LOAD) continue;
+
+        Elf_Scn* scn = NULL;
+        while ((scn = elf_nextscn(mod_elf, scn)) != NULL) {
+            Elf32_Shdr* shdr = elf32_getshdr(scn);
+
+            if (shdr->sh_size <= 0) continue;
+
+            if ((shdr->sh_flags & SHF_ALLOC) &&
+                (shdr->sh_addr >= phdr->p_vaddr) &&
+                (shdr->sh_addr + shdr->sh_size
+                 <= phdr->p_vaddr + phdr->p_memsz)) {
+
+                int name = STR_RODATA;
+                if (shdr->sh_flags & SHF_WRITE) name = STR_DATA;
+                if (shdr->sh_flags & SHF_EXECINSTR) name = STR_TEXT;
+                if (shdr->sh_type & SHT_NOBITS) name = STR_BSS;
+
+                unsigned scn_start = image_appendscn(image, scn, name);
+                if (!start) start = scn_start;
+            }
+        }
+        phdr++;
+    }
 
     Elf32_Phdr* image_phdr = elf32_getphdr(image);
 
