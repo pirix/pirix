@@ -1,6 +1,6 @@
 #include <pirix/vector.h>
 #include <pirix/kheap.h>
-#include <string.h>
+#include <pirix/string.h>
 
 static void vector_resize(vector* self) {
     if (self->bounds > 0) {

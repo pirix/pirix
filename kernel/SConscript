@@ -22,7 +22,7 @@ target = target.Clone(
     LINKFLAGS=["-T", "kernel/$ARCH/link.ld", "-nostartfiles", "-nodefaultlibs"],
 )
 target.Append(
-    CFLAGS=["-ffreestanding", "-fno-stack-protector"],
+    CFLAGS=["-D__KERNEL__", "-ffreestanding", "-fno-stack-protector"],
 )
 
 for src in platform:

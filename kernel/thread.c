@@ -4,7 +4,7 @@
 #include <pirix/paging.h>
 #include <pirix/memory.h>
 #include <pirix/scheduler.h>
-#include <string.h>
+#include <pirix/string.h>
 
 #define SVC_STACK 1024
 

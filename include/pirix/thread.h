@@ -21,6 +21,9 @@ typedef struct thread {
     registers* regs;
     process* process;
     struct thread* next;
+#ifdef __i386
+    unsigned tls[2];
+#endif
 } thread;
 
 /**

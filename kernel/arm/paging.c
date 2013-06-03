@@ -1,6 +1,6 @@
 #include <pirix/paging.h>
 #include <pirix/memory.h>
-#include <string.h>
+#include <pirix/string.h>
 
 #define TTE_TYPE_MASK 0x003
 #define TTE_TYPE_FREE 0x000

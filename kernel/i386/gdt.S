@@ -2,7 +2,7 @@
 .global setup_gdt
 setup_gdt:
     // write tss address into gdt
-    movl $gdt5, %eax
+    movl $gdt_tss, %eax
     movl $tss, %ebx
     movw %bx, 2(%eax) // base 0:15
     shr $16, %ebx
@@ -28,27 +28,31 @@ Lret:
 
 .section .data
 .align 0x8
-gdt0:
+.global gdt_tls
+gdt:
     .quad 0
-gdt1:
+gdt_kernel_code:
     .short 0xffff, 0
     .byte 0, 0x9a, 0xcf, 0
-gdt2:
+gdt_kernel_data:
     .short 0xffff, 0
     .byte 0, 0x92, 0xcf, 0
-gdt3:
+gdt_user_code:
     .short 0xffff, 0
     .byte 0, 0xfa, 0xcf, 0
-gdt4:
+gdt_user_data:
     .short 0xffff, 0
     .byte 0, 0xf2, 0xcf, 0
-gdt5:
+gdt_tss:
     .short 0x68, 0
     .byte 0, 0x89, 0x40, 0
+gdt_tls:
+    .short 0, 0
+    .byte 0, 0, 0, 0
 
 gdt_ptr:
-    .short . - gdt0 - 1
-    .long gdt0
+    .short . - gdt - 1
+    .long gdt
 
 .global tss
 tss:

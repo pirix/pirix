@@ -4,8 +4,8 @@
 #include <pirix/process.h>
 #include <pirix/kheap.h>
 #include <pirix/paging.h>
-#include <sys/uio.h>
-#include <string.h>
+#include <pirix/string.h>
+#include <pirix/uio.h>
 
 static unsigned iovec_sum(struct iovec* iov, int count) {
     unsigned size = 0;

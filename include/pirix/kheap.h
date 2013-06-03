@@ -1,6 +1,6 @@
 #pragma once
 
-#include <sys/types.h>
+#include <pirix/types.h>
 
 void kheap_init();
 void* kmalloc(size_t size);

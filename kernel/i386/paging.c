@@ -4,7 +4,7 @@
 #include <pirix/memory.h>
 #include <pirix/irq.h>
 #include <pirix/kernel.h>
-#include <string.h>
+#include <pirix/string.h>
 
 unsigned* page_dir = (unsigned*)0xffbff000;
 unsigned* page_tables = (unsigned*)0xffc00000;

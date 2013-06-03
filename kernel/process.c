@@ -2,7 +2,7 @@
 #include <pirix/scheduler.h>
 #include <pirix/memory.h>
 #include <pirix/kheap.h>
-#include <string.h>
+#include <pirix/string.h>
 
 static vector processes;
 
@@ -32,8 +32,18 @@ process* process_new(paging_context context) {
 
 process* process_create(void* entry, paging_context context) {
     thread* new_thread = thread_new(entry);
-    paging_map(context, 0x7ffff000, memory_alloc(), PAGE_PERM_USER);
-    thread_set_stack(new_thread, (unsigned*)0x80000000);
+
+    unsigned long stack = memory_alloc();
+
+    // clear argv and envp
+    unsigned* kstack = (unsigned*)paging_map_kernel(stack);
+    kstack[1021] = 0;
+    kstack[1022] = 0;
+    kstack[1023] = 0;
+    paging_unmap_kernel((unsigned long)kstack);
+
+    paging_map(context, 0x7ffff000, stack, PAGE_PERM_USER);
+    thread_set_stack(new_thread, (unsigned*)(0x80000000-0xc));
 
     process* self = process_new(context);
     process_add_thread(self, new_thread);

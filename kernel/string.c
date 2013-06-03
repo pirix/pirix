@@ -1,4 +1,4 @@
-#include <string.h>
+#include <pirix/string.h>
 
 void* memcpy(void* dest, const void* src, size_t num) {
     char* d = (char*)dest;

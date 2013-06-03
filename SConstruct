@@ -119,7 +119,7 @@ tools = host.SConscript(
 
 modules = [
     "build/$ARCH/kernel/kernel",
-    "build/$ARCH/servers/system/system",
+#    "build/$ARCH/servers/system/system",
     "build/$ARCH/servers/login/login"
 ]
 

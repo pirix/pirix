@@ -1,4 +1,3 @@
-#include <sys/pirix.h>
 #include <pirix/ipc.h>
 #include <servers/system.h>
 #include "pathmgr.h"
@@ -16,18 +15,18 @@ void handle() {
 }
 
 int main(int argc, char* argv[]) {
-    sys_log("system process started");
+    //sys_log("system process started");
 
-    pathmgr_init();
+    //pathmgr_init();
 
-    int chan = ipc_listen();
+    //int chan = ipc_listen();
 
     while (1) {
-        union system_msg buffer;
+        //union system_msg buffer;
 
-        int recvid = ipc_receive(chan, &MSG_BUF_LIN(&buffer, sizeof(buffer)));
+        //int recvid = ipc_receive(chan, &MSG_BUF_LIN(&buffer, sizeof(buffer)));
 
-        ipc_reply(recvid, 1337, NULL);
+        //ipc_reply(recvid, 1337, 0);
     }
 
     return 0;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <sys/types.h>
+#include <pirix/types.h>
 #include "semaphore.h"
 #include "vector.h"
 
@@ -13,7 +13,7 @@ typedef struct channel {
     vector reply;
     int recvid;
     char* buffer;
-    unsigned int size;
+    size_t size;
 } channel;
 
 typedef struct connect {
@@ -21,7 +21,7 @@ typedef struct connect {
     thread* owner;
     channel* chan;
     char* buffer;
-    unsigned int size;
+    size_t size;
     int status;
 } connect;
 

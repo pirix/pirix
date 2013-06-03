@@ -1,13 +1,11 @@
 Import("target")
 
 env = target.Clone(
-    LIBS=["pirix", "pthread"],
     LIBPATH=["#build/$ARCH/lib"],
 )
 
 env.Append(
     CFLAGS=["-Wall", "-fno-stack-protector"],
-    LINKFLAGS=["-T", "servers/link.ld"],
 )
 
 servers = []

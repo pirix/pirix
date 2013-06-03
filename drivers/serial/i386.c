@@ -1,5 +1,5 @@
 #include <arch/i386.h>
-#include <string.h>
+#include <pirix/string.h>
 
 static short* vmem = (short*)0xc00b8000;
 static int vx = 0, vy = 0;

@@ -5,6 +5,7 @@ handle_irq:
     pusha
 
     pushl %ds
+    pushl %gs
     mov $0x10, %ax
     mov %ax, %ds
     mov %ax, %es
@@ -19,11 +20,11 @@ handle_irq:
     add $64, %eax
     movl %eax, (tss+4)
 
+    popl %gs
     popl %ebx
     mov %bx, %ds
     mov %bx, %es
     mov %bx, %fs
-    mov %bx, %gs
 
     popa
 
@@ -34,6 +35,8 @@ handle_irq:
 
 handle_syscall:
     pushl %ds
+    pushl %gs
+
     push %edi
     push %edx
     push %ecx
@@ -53,11 +56,11 @@ handle_syscall:
     mov %esp, (tss+4)
     sub $24, %esp
 
+    popl %gs
     pop %ebx
     mov %bx, %ds
     mov %bx, %es
     mov %bx, %fs
-    mov %bx, %gs
 
     iret
 
@@ -72,6 +75,7 @@ task_switch:
     pusha
 
     pushl %ds
+    pushl %gs
 
     push %esp
     call scheduler_schedule
@@ -81,11 +85,11 @@ task_switch:
     add $28, %eax
     movl %eax, (tss+4)
 
+    popl %gs
     pop %ebx
     mov %bx, %ds
     mov %bx, %es
     mov %bx, %fs
-    mov %bx, %gs
 
     popa
 

@@ -9,5 +9,3 @@ struct utsname {
     char version[_UTSNAME_LENGTH];
     char machine[_UTSNAME_LENGTH];
 };
-
-int uname(struct utsname*);

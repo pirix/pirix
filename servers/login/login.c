@@ -1,23 +1,18 @@
-#include <fcntl.h>
-#include <stdio.h>
-#include <pirix/ipc.h>
-#include <sys/pirix.h>
+#include <stdlib.h>
+#include <sys/syscall.h>
+#include <unistd.h>
 #include <servers/system.h>
-#include <sys/utsname.h>
-#include <sys/uio.h>
 
 int main(int argc, const char* argv[]) {
-    struct utsname name;
-    uname(&name);
+    pirix_syscall(SYS_LOG, "hello!", 0, 0, 0);
 
-    printf("%s %s (%s)\n\n", name.sysname, name.version, name.machine);
+    puts("Hello\n");
 
-    printf("Login: ");
-    fflush(stdout);
+    while (1);
 
-    int fd = open("/etc/passwd", O_RDONLY);
+    //int fd = open("/etc/passwd", O_RDONLY);
 
-    printf("fd: %i\n", fd);
+    //printf("fd: %i\n", fd);
 
     while (1);
 

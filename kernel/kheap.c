@@ -1,7 +1,7 @@
 #include <pirix/kheap.h>
 #include <pirix/memory.h>
 #include <pirix/paging.h>
-#include <string.h>
+#include <pirix/string.h>
 
 #define BUCKET_COUNT 16
 
