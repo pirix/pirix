@@ -1,3 +1,6 @@
 #pragma once
 
 #include "arch/@ARCH@.h"
+
+typedef struct thread thread;
+void arch_switch_context(thread* t);
