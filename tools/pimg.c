@@ -63,10 +63,16 @@ unsigned image_appendscn(Elf* image, Elf_Scn* source, int name) {
 
     tgt_shdr->sh_name = name;
 
+    // align offset
     int diff = (int)(tgt_shdr->sh_addr%0x1000)-(int)(offset%0x1000);
     offset += diff < 0 ? 0x1000+diff : diff;
     tgt_shdr->sh_offset = offset;
-    offset += tgt_shdr->sh_size;
+
+    // don't increment offset for .tbss
+    if (!(tgt_shdr->sh_type == SHT_NOBITS &&
+          tgt_shdr->sh_flags & SHF_TLS)) {
+        offset += tgt_shdr->sh_size;
+    }
 
     return tgt_shdr->sh_offset;
 }
