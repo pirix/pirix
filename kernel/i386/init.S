@@ -1,17 +1,13 @@
-#define MB_MAGIC 0x1badb002
-#define MB_FLAGS 0x3
-#define MB_CHECK -(MB_MAGIC + MB_FLAGS)
+#include <arch/i386/multiboot.h>
 
-.extern main
+.extern main, serial_init, multiboot_init
 .extern setup_gdt, setup_idt
+.extern multiboot_magic, multiboot_addr
 
 .section .init
 .global loader
 loader:
     cli
-
-    // set temporary stack
-    movl $boot_stack, %esp
 
     // set temporary page directory
     movl $boot_page_dir, %ecx
@@ -27,6 +23,14 @@ loader:
     or $0x80000000, %ecx
     movl %ecx, %cr0
 
+    // setup kernel stack
+    movl $kernel_stack, %esp
+
+    // push multiboot args
+    push %ebx
+    push %eax
+
+    // initialize gdt and idt
     call setup_gdt
     call setup_idt
 
@@ -35,13 +39,9 @@ loader:
 
 .align 0x4
 multiboot:
-    .long MB_MAGIC
-    .long MB_FLAGS
-    .long MB_CHECK
-
-.align 0x4
-    .space 32
-boot_stack:
+    .long MULTIBOOT_HEADER_MAGIC
+    .long 0x3 // Flags: Module Page Align, Memory Information
+    .long -(MULTIBOOT_HEADER_MAGIC + 0x3)
 
 /*
  * initial page table:
@@ -65,8 +65,16 @@ boot_page_dir:
 
 .section .text
 init:
-    movl $0, %ebp
-    movl $kernel_stack, %esp
+    call serial_init
+
+    // returns boot_info structure in %eax
+    call multiboot_init
+
+    // remove multiboot args from stack
+    add $8, %esp
+
+    // pass boot_info to main
+    push %eax
     call main
 
 1:
@@ -79,5 +87,5 @@ idle:
     jmp idle
 
 .section .bss
-    .space 8192
+    .space 0x1000
 kernel_stack:

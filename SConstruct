@@ -48,7 +48,7 @@ host.Append(
 #
 
 target = env.Clone(
-    AS="$ARCH-elf-pirix-as",
+    AS="$ARCH-elf-pirix-gcc",
     CC="$ARCH-elf-pirix-gcc",
     CPPPATH=["#/include", "#/servers"],
     LINK="$ARCH-elf-pirix-gcc",
@@ -107,27 +107,6 @@ servers = target.SConscript(
     variant_dir="build/$ARCH/servers"
 )
 
-tools = host.SConscript(
-    "tools/SConscript",
-    exports="host",
-    variant_dir="build/tools"
-)
-
-#
-# pirix.img generation
-#
-
-modules = [
-    "build/$ARCH/kernel/kernel",
-#    "build/$ARCH/servers/system/system",
-    "build/$ARCH/servers/login/login"
-]
-
-cmd = "build/tools/pimg -o $TARGET -k %s" % " ".join(modules)
-image = env.Command("build/$ARCH/pirix.img", "", cmd)
-env.Depends(image, "build/tools/pimg")
-env.Depends(image, modules)
-
 #
 # Doxygen documentation
 #
@@ -141,12 +120,12 @@ env.Alias("doc", doxygen)
 # Install target
 #
 
-env.Install("$INSTALLPATH/boot", [kernel, image])
-env.Install("$INSTALLPATH/sbin", servers)
+env.Install("$INSTALLPATH/boot", [kernel, servers])
+#env.Install("$INSTALLPATH/sbin", servers)
 env.Install("$INSTALLPATH/usr/lib", libs)
 env.Install("$INSTALLPATH/usr/include", Glob("include/pirix.h"))
 env.Install("$INSTALLPATH/usr/include/pirix", Glob("include/pirix/*.h"))
 env.Install("$INSTALLPATH/usr/include/sys", Glob("include/sys/*.h"))
 env.Alias("install", "$INSTALLPATH")
 
-Default(kernel, libs, servers, image)
+Default(kernel, libs, servers)

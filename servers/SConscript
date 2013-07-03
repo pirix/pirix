@@ -5,7 +5,7 @@ env = target.Clone(
 )
 
 env.Append(
-    CFLAGS=["-Wall", "-fno-stack-protector"],
+    CFLAGS=["-Wall"],
 )
 
 servers = []

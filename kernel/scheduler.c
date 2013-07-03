@@ -73,6 +73,7 @@ registers* scheduler_schedule(registers* regs) {
     }
 
     arch_switch_context(current_thread);
+    kprintf("%p\n", current_thread->process->pid);
 
     return current_thread->regs;
 }

@@ -5,9 +5,9 @@
 
 static unsigned bitmap[BITMAP_SIZE];
 
+#pragma weak memory_init
 void memory_init() {
-    // reserve the first 4 MB for the kernel
-    memset(bitmap+32, 0xff, sizeof(unsigned[BITMAP_SIZE-32]));
+   memset(bitmap+64, 0xff, sizeof(unsigned[BITMAP_SIZE-64]));
 }
 
 unsigned long memory_alloc() {
@@ -25,6 +25,8 @@ unsigned long memory_alloc() {
             return (i*32 + j)*0x1000;
         }
     }
+
+    panic("out of memory");
     return 0;
 }
 
@@ -52,6 +54,7 @@ unsigned long memory_alloc_aligned(unsigned frames, unsigned alignment) {
         }
     }
 
+    panic("out of memory");
     return 0;
 }
 

@@ -1,12 +1,7 @@
-#include <stdlib.h>
-#include <sys/syscall.h>
-#include <unistd.h>
-#include <servers/system.h>
+#include <stdio.h>
 
 int main(int argc, const char* argv[]) {
-    pirix_syscall(SYS_LOG, "hello!", 0, 0, 0);
-
-    puts("Hello\n");
+    puts("Hello World from Login!\n");
 
     while (1);
 

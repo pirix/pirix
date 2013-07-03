@@ -3,6 +3,7 @@
 #include <pirix/paging.h>
 #include <pirix/memory.h>
 #include <pirix/irq.h>
+#include <pirix/process.h>
 #include <pirix/kernel.h>
 #include <pirix/string.h>
 
@@ -15,6 +16,7 @@ registers* paging_fault(registers* regs) {
     unsigned long addr;
     asm volatile("mov %%cr2, %0" : "=r"(addr));
     kprintf("page fault at %p, eip: %p\n", addr, regs->eip);
+    process_exit(128);
     panic(0);
     return regs;
 }
@@ -30,9 +32,9 @@ void paging_init() {
      * block, otherwise we are in serious trouble.
      */
 
-    unsigned* kcontext = (unsigned*)memory_alloc();
-
-    memset(kcontext, 0, 768*4);
+    // reuse boot directory
+    extern unsigned boot_page_dir;
+    unsigned* kcontext = &boot_page_dir;
 
     // create page tables from 0xc0000000
     for (int i = 0; i < 255; i++) {

@@ -1,7 +1,9 @@
 #include <pirix/ipc.h>
 #include <servers/system.h>
+#include <stdio.h>
 #include "pathmgr.h"
 
+/*
 void handle() {
     switch (5) {
     case PATHMGR_RESOLVE:
@@ -12,9 +14,10 @@ void handle() {
     case PATHMGR_DETACH:
         break;
     }
-}
+}*/
 
 int main(int argc, char* argv[]) {
+    puts("Hello World from system!");
     //sys_log("system process started");
 
     //pathmgr_init();

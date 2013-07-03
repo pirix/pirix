@@ -11,3 +11,11 @@ end
 define kernel
   file build/i386/kernel/kernel
 end
+
+define system
+  file build/i386/servers/system/system
+end
+
+define login
+  file build/i386/servers/login/login
+end
