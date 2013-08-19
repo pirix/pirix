@@ -5,7 +5,6 @@
 
 static unsigned bitmap[BITMAP_SIZE];
 
-#pragma weak memory_init
 void memory_init() {
    memset(bitmap+64, 0xff, sizeof(unsigned[BITMAP_SIZE-64]));
 }
