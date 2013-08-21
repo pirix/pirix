@@ -1,4 +1,5 @@
-#include <arch/i386.h>
+#include <i386/config.h>
+#include <i386/io.h>
 #include <pirix/string.h>
 
 static short* vmem = (short*)0xc00b8000;

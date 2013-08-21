@@ -3,7 +3,7 @@
 #include <pirix/process.h>
 #include <pirix/spinlock.h>
 #include <pirix/kheap.h>
-#include <arch.h>
+#include <arch/cpu.h>
 
 // task switch routine in init.S
 void task_switch(registers* regs);
@@ -73,7 +73,6 @@ registers* scheduler_schedule(registers* regs) {
     }
 
     arch_switch_context(current_thread);
-    kprintf("%p\n", current_thread->process->pid);
 
     return current_thread->regs;
 }

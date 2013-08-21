@@ -1,4 +1,4 @@
-#include <arch/arm.h>
+#include <arm/cpu.h>
 
 static unsigned* irq_base = (unsigned*)0x9000B200;
 

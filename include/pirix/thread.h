@@ -1,7 +1,8 @@
 #pragma once
 
-#include <arch.h>
+#include <pirix/types.h>
 
+typedef struct registers registers;
 typedef struct process process;
 typedef struct message message;
 
@@ -15,14 +16,14 @@ typedef enum thread_state {
 
 typedef struct thread {
     int tid;
-    unsigned* svc_stack;
-    unsigned* thr_stack;
+    uintptr_t svc_stack;
+    uintptr_t thr_stack;
     thread_state state;
     registers* regs;
     process* process;
     struct thread* next;
 #ifdef __i386
-    unsigned tls[2];
+    uint32_t tls[2];
 #endif
 } thread;
 
@@ -38,7 +39,7 @@ thread* thread_new(void* entry);
  * Set the stack of a thread.
  * @memberof thread
  */
-void thread_set_stack(thread* self, unsigned* addr);
+void thread_set_stack(thread* self, uintptr_t addr);
 
 /**
  * Block a thread by changing its state. The thread has to be removed

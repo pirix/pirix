@@ -1,4 +1,4 @@
-#include <arch/i386/multiboot.h>
+#include <i386/multiboot.h>
 #include <pirix/kernel.h>
 #include <pirix/string.h>
 #include <pirix/boot.h>

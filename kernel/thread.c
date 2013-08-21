@@ -5,11 +5,13 @@
 #include <pirix/memory.h>
 #include <pirix/scheduler.h>
 #include <pirix/string.h>
+#include <pirix/vector.h>
+#include <arch/cpu.h>
 
 #define SVC_STACK 1024
 
 thread* thread_new(void* entry) {
-    unsigned* svc_stack = kmalloc(SVC_STACK*sizeof(unsigned));
+    uintptr_t svc_stack = (uintptr_t)kmalloc(SVC_STACK*sizeof(uint32_t));
 
     registers* regs = (registers*)(svc_stack + SVC_STACK) - 1;
 
@@ -23,7 +25,7 @@ thread* thread_new(void* entry) {
     return new_thread;
 }
 
-void thread_set_stack(thread* self, unsigned* addr) {
+void thread_set_stack(thread* self, uintptr_t addr) {
     registers_set_stack(self->regs, addr);
 }
 
@@ -37,6 +39,6 @@ void thread_unblock(thread* self) {
 }
 
 void thread_delete(thread* self) {
-    kfree(self->svc_stack, SVC_STACK*sizeof(unsigned));
+    kfree((void*)self->svc_stack, SVC_STACK*sizeof(uint32_t));
     kfree(self, sizeof(thread));
 }

@@ -1,4 +1,4 @@
-#include <arch/i386/multiboot.h>
+#include <i386/multiboot.h>
 
 .extern main, serial_init, multiboot_init
 .extern setup_gdt, setup_idt

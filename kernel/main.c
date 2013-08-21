@@ -6,6 +6,8 @@
 #include <pirix/irq.h>
 #include <pirix/timer.h>
 #include <pirix/boot.h>
+#include <arch/cpu.h>
+#include <arch/config.h>
 #include <config.h>
 
 void panic(const char* cause) {

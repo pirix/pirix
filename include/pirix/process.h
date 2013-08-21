@@ -1,14 +1,16 @@
 #pragma once
 
-#include "vector.h"
-#include "paging.h"
-#include "thread.h"
-#include "ipc.h"
+#include <pirix/types.h>
+#include <pirix/paging.h>
+#include <pirix/vector.h>
+
+typedef struct thread thread;
+typedef struct channel channel;
 
 typedef struct heap {
-    unsigned long start;
-    unsigned long size;
-    unsigned long used;
+    uintptr_t start;
+    uintptr_t size;
+    uintptr_t used;
 } heap;
 
 typedef struct process {

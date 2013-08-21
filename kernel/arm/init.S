@@ -79,7 +79,7 @@ tt1:
       .equ addr, addr + 0x00100000
     .endr
 
-/* map periphals to 0x90000000 */
+/* map peripherals to 0x90000000 */
 #if PLATFORM == RBPI
     .equ addr, 0x20000000
     .rept 16

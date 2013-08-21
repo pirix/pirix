@@ -17,43 +17,30 @@
 #define PTE_TYPE_FREE 0x000
 #define PTE_TYPE_EXTP 0x002
 
-#define PTE_PERM_MASK 0x30
-#define PTE_PERM_KRNL 0x10
-#define PTE_PERM_USER 0x30
+#define PAGE_PERM_MASK 0x30
 
 #define PTE_ADDR_MASK 0xfffff000
 
 static paging_context kernel_context = NULL;
 
-int paging_map(paging_context context, unsigned long virt, unsigned long phys, unsigned access) {
-    switch(access) {
-        case PAGE_PERM_USER:
-            access = PTE_PERM_USER;
-            break;
-        case PAGE_PERM_KRNL:
-            access = PTE_PERM_KRNL;
-            break;
-        default:
-            return -1;
-    }
-
+int paging_map(paging_context context, uintptr_t virt, uintptr_t phys, int access) {
     // translation table index
-    unsigned tti = virt >> 20;
+    int tti = virt >> 20;
 
     // page table index
-    unsigned pti = (virt >> 12) & 0xff;
+    int pti = (virt >> 12) & 0xff;
 
-    unsigned ppt;
+    uintptr_t ppt;
 
     if ((context[tti] & TTE_TYPE_MASK) == TTE_TYPE_FREE) {
-        ppt = (unsigned)memory_alloc();
+        ppt = memory_alloc();
         context[tti] = ppt | TTE_TYPE_PAGE;
     }
     else {
         ppt = context[tti] & TTE_ADDR_MASK;
     }
 
-    unsigned* pt = (unsigned*)paging_map_kernel(ppt);
+    uint32_t* pt = (uint32_t*)paging_map_kernel(ppt);
     pt[pti] = phys | PTE_TYPE_EXTP | access;
 
     // invalidate tlb entry
@@ -62,14 +49,18 @@ int paging_map(paging_context context, unsigned long virt, unsigned long phys, u
     return 0;
 }
 
-void* paging_map_kernel(unsigned long phys) {
+uintptr_t paging_map_kernel(uintptr_t phys) {
     if (phys > 0x80000000) return 0;
     return (void*)(0x80000000 + phys);
 }
 
+void paging_unmap_kernel(uintptr_t virt) {
+
+}
+
 paging_context paging_create_context() {
     paging_context context = (paging_context)memory_alloc_aligned(2, 2);
-    paging_context kcontext = (paging_context)paging_map_kernel((unsigned)context);
+    paging_context kcontext = (paging_context)paging_map_kernel((uintptr_t)context);
     memset(kcontext, 0, 0x2000);
     return kcontext;
 }
@@ -82,6 +73,6 @@ void paging_activate_context(paging_context context) {
 }
 
 void paging_init() {
-    extern unsigned* tt1;
+    extern uintptr_t tt1;
     kernel_context = tt1;
 }

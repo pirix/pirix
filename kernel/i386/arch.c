@@ -1,5 +1,5 @@
-#include <arch/i386.h>
-#include <arch/i386/tls.h>
+#include <i386/config.h>
+#include <i386/tls.h>
 #include <pirix/process.h>
 #include <pirix/thread.h>
 #include <pirix/kernel.h>

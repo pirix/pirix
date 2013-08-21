@@ -1,4 +1,5 @@
-#include <arch/i386.h>
+#include <i386/config.h>
+#include <i386/cpu.h>
 #include <pirix/kprint.h>
 #include <pirix/paging.h>
 #include <pirix/memory.h>
@@ -7,13 +8,13 @@
 #include <pirix/kernel.h>
 #include <pirix/string.h>
 
-unsigned* page_dir = (unsigned*)0xffbff000;
-unsigned* page_tables = (unsigned*)0xffc00000;
+uint32_t* page_dir = (uint32_t*)0xffbff000;
+uint32_t* page_tables = (uint32_t*)0xffc00000;
 
 static paging_context current_context = NULL;
 
 registers* paging_fault(registers* regs) {
-    unsigned long addr;
+    uintptr_t addr;
     asm volatile("mov %%cr2, %0" : "=r"(addr));
     kprintf("page fault at %p, eip: %p\n", addr, regs->eip);
     process_exit(128);
@@ -33,13 +34,13 @@ void paging_init() {
      */
 
     // reuse boot directory
-    extern unsigned boot_page_dir;
-    unsigned* kcontext = &boot_page_dir;
+    extern uint32_t boot_page_dir;
+    uint32_t* kcontext = &boot_page_dir;
 
     // create page tables from 0xc0000000
     for (int i = 0; i < 255; i++) {
-        unsigned* table = (unsigned*)memory_alloc();
-        kcontext[i+768] = (unsigned long)table | 0x3;
+        uint32_t* table = (uint32_t*)memory_alloc();
+        kcontext[i+768] = (uintptr_t)table | 0x3;
 
         memset(table, 0, 0x1000);
 
@@ -50,42 +51,40 @@ void paging_init() {
             }
         }
         else if (i == 254) {
-            table[1023] = (unsigned long)kcontext | 0x3;
+            table[1023] = (uintptr_t)kcontext | 0x3;
         }
     }
 
-    kcontext[1023] = (unsigned long)kcontext | 0x3;
+    kcontext[1023] = (uintptr_t)kcontext | 0x3;
 
     paging_activate_context(kcontext);
 }
 
 paging_context paging_create_context() {
-    unsigned* pcontext = (unsigned*)memory_alloc();
-    unsigned* context = paging_map_kernel((unsigned long)pcontext);
+    uintptr_t pcontext = memory_alloc();
+    uint32_t* context = (uint32_t*)paging_map_kernel(pcontext);
 
-    unsigned* ptable = (unsigned*)memory_alloc();
-    unsigned* table = paging_map_kernel((unsigned long)ptable);
+    uintptr_t ptable = memory_alloc();
+    uint32_t* table = (uint32_t*)paging_map_kernel(ptable);
 
     memset(table, 0, 0x1000);
     memset(context, 0, 0xc00);
     memcpy(context+768, page_dir+768, 0x3f8);
 
-    table[1023] = (unsigned long)pcontext | 0x3;
-    context[1022] = (unsigned long)ptable | 0x3;
-    context[1023] = (unsigned long)pcontext | 0x3;
+    table[1023] = pcontext | 0x3;
+    context[1022] = ptable | 0x3;
+    context[1023] = pcontext | 0x3;
 
-    paging_unmap_kernel((unsigned long)table);
-    paging_unmap_kernel((unsigned long)context);
+    paging_unmap_kernel((uintptr_t)table);
+    paging_unmap_kernel((uintptr_t)context);
 
-    return pcontext;
+    return (paging_context)pcontext;
 }
 
-int paging_map(paging_context context, unsigned long virt, unsigned long phys, unsigned access) {
-    unsigned* dir, *table;
-    unsigned long pdidx = virt >> 22;
-    unsigned long ptidx = (virt >> 12) & 0x3ff;
-
-    access = (access == PAGE_PERM_USER) ? 0x4 : 0x0;
+int paging_map(paging_context context, uintptr_t virt, uintptr_t phys, int access) {
+    uint32_t* dir, *table;
+    int pdidx = virt >> 22;
+    int ptidx = (virt >> 12) & 0x3ff;
 
     if (!context) context = current_context;
 
@@ -99,32 +98,32 @@ int paging_map(paging_context context, unsigned long virt, unsigned long phys, u
 
     // create page table if unexistent
     if (!(dir[pdidx] & 0x1)) {
-        unsigned* ptable = (unsigned*)memory_alloc();
-        table = paging_map_kernel((unsigned long)ptable);
+        uintptr_t ptable = memory_alloc();
+        table = (uint32_t*)paging_map_kernel(ptable);
         memset(table, 0, 0x1000);
-        dir[pdidx] = (unsigned long)ptable | access | 0x3;
+        dir[pdidx] = ptable | access | 0x3;
     }
     else {
-        table = paging_map_kernel(dir[pdidx] & 0xfffff000);
+        table = (uint32_t*)paging_map_kernel(dir[pdidx] & 0xfffff000);
     }
 
     table[ptidx] = phys | access | 0x3;
-    paging_unmap_kernel((unsigned long)table);
-    paging_unmap_kernel((unsigned long)dir);
+    paging_unmap_kernel((uintptr_t)table);
+    paging_unmap_kernel((uintptr_t)dir);
 
     invlpg(virt);
 
     return 0;
 }
 
-void* paging_map_kernel(unsigned long phys) {
-    for (unsigned long virt = 0xd0000000; virt < 0xe0000000; virt += 0x1000) {
-        unsigned* entry = &page_tables[virt >> 12];
+uintptr_t paging_map_kernel(uintptr_t phys) {
+    for (uintptr_t virt = 0xd0000000; virt < 0xe0000000; virt += 0x1000) {
+        uint32_t* entry = &page_tables[virt >> 12];
 
         if (!(*entry & 0x1)) {
             *entry = phys | 0x103;
             invlpg(virt);
-            return (void*)(virt + (phys & 0xfff));
+            return (virt + (phys & 0xfff));
         }
     }
 
@@ -132,7 +131,7 @@ void* paging_map_kernel(unsigned long phys) {
     return 0;
 }
 
-void paging_unmap_kernel(unsigned long virt) {
+void paging_unmap_kernel(uintptr_t virt) {
     page_tables[virt >> 12] = 0;
     invlpg(virt);
 }
@@ -143,11 +142,11 @@ void paging_activate_context(paging_context context) {
     current_context = context;
 }
 
-void* paging_getphys(unsigned long virt) {
-    unsigned long pdidx = virt >> 22;
-    unsigned long ptidx = (virt >> 12) & 0x3FF + 0x400*pdidx;
+uintptr_t paging_getphys(uintptr_t virt) {
+    int pdidx = virt >> 22;
+    int ptidx = (virt >> 12) & 0x3FF + 0x400*pdidx;
 
     if (!(page_dir[pdidx] & 0x1)) return 0;
     if (!(page_tables[ptidx] & 0x1)) return 0;
-    return (void*)((page_tables[ptidx] & ~0xFFF) + (virt & 0xFFF));
+    return (page_tables[ptidx] & ~0xFFF) + (virt & 0xFFF);
 }

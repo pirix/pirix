@@ -4,19 +4,19 @@
 
 #define BITMAP_SIZE 32768
 
-static unsigned bitmap[BITMAP_SIZE];
+static uint32_t bitmap[BITMAP_SIZE];
 
 void memory_init() {
-   memset(bitmap+64, 0xff, sizeof(unsigned[BITMAP_SIZE-64]));
+   memset(bitmap+64, 0xff, sizeof(uint32_t[BITMAP_SIZE-64]));
 }
 
-unsigned long memory_alloc() {
-    for (unsigned i = 0; i < BITMAP_SIZE; i++) {
+uintptr_t memory_alloc() {
+    for (int i = 0; i < BITMAP_SIZE; i++) {
         // skip this element if full
         if (!bitmap[i]) continue;
 
         // check each bit for a free section
-        for (unsigned j = 0; j < 32; j++) {
+        for (int j = 0; j < 32; j++) {
             // skip if not free
             if (!(bitmap[i] & (1 << j))) continue;
 
@@ -30,18 +30,18 @@ unsigned long memory_alloc() {
     return 0;
 }
 
-unsigned long memory_alloc_aligned(unsigned frames, unsigned alignment) {
-    unsigned align_val = 1 << alignment;
-    unsigned align_mask = align_val - 1;
+uintptr_t memory_alloc_aligned(int frames, int alignment) {
+    int align_val = 1 << alignment;
+    int align_mask = align_val - 1;
 
-    for (unsigned i = 0; i < BITMAP_SIZE; i++) {
+    for (int i = 0; i < BITMAP_SIZE; i++) {
         if (!bitmap[i]) continue;
 
-        unsigned start = (i*32) & align_mask;
-        for (unsigned j = start; j <= 32 - frames; j += align_val) {
+        int start = (i*32) & align_mask;
+        for (int j = start; j <= 32 - frames; j += align_val) {
             if (!(bitmap[i] & (1 << j))) continue;
 
-            unsigned k;
+            int k;
             for (k = 0; (k < frames) && (bitmap[i] & (1 << (j+k))); k++);
 
             if (k < frames) continue;
@@ -58,7 +58,7 @@ unsigned long memory_alloc_aligned(unsigned frames, unsigned alignment) {
     return 0;
 }
 
-void memory_free(unsigned long frame) {
-    unsigned long f = frame/0x1000;
+void memory_free(uintptr_t frame) {
+    uintptr_t f = frame/0x1000;
     bitmap[f/32] |= 1 << (f % 32);
 }

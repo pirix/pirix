@@ -1,15 +1,17 @@
 #pragma once
 
+#include <i386/types.h>
+
 typedef struct registers {
-    unsigned gs, ds;
-    unsigned edi, esi, ebp, esp, ebx, edx, ecx, eax;
-    unsigned irq, err;
-    unsigned eip, cs, eflags, usr_esp, ss;
+    uint32_t gs, ds;
+    uint32_t edi, esi, ebp, esp, ebx, edx, ecx, eax;
+    uint32_t irq, err;
+    uint32_t eip, cs, eflags, usr_esp, ss;
 } __attribute__((packed)) registers;
 
 static inline void registers_init(registers* regs, void* entry) {
     *regs = (registers) {
-        .eip = (unsigned)entry,
+        .eip = (uintptr_t)entry,
         .cs = 0x18 | 0x3,
         .ss = 0x20 | 0x3,
         .ds = 0x20 | 0x3,
@@ -26,8 +28,8 @@ static inline void registers_set_kernel_mode(registers* regs) {
     regs->eflags = 0x202;
 }
 
-static inline void registers_set_stack(registers* regs, unsigned* stack) {
-    regs->usr_esp = (unsigned)stack;
+static inline void registers_set_stack(registers* regs, uintptr_t stack) {
+    regs->usr_esp = stack;
 }
 
 static inline void irq_enable() {
@@ -38,6 +40,6 @@ static inline void irq_disable() {
     asm volatile("cli");
 }
 
-static inline void invlpg(unsigned long addr) {
+static inline void invlpg(uintptr_t addr) {
     asm volatile("invlpg (%0)" :: "r"(addr) : "memory");
 }

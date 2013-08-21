@@ -1,6 +1,6 @@
 #pragma once
 
-#include <arch.h>
+#include <arch/sync.h>
 
 static inline void spin_lock(int* lock) {
     while (sync_lock(lock));

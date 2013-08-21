@@ -1,6 +1,8 @@
 #pragma once
 
+#include <pirix/types.h>
+
 void memory_init(void);
-unsigned long memory_alloc(void);
-unsigned long memory_alloc_aligned(unsigned frames, unsigned alignment);
-void memory_free(unsigned long frame);
+uintptr_t memory_alloc(void);
+uintptr_t memory_alloc_aligned(int frames, int alignment);
+void memory_free(uintptr_t frame);

@@ -1,7 +1,6 @@
 #pragma once
 
-#include <arch.h>
-
+typedef struct registers registers;
 typedef registers* (irq_handler)(registers*);
 
 void irq_init();

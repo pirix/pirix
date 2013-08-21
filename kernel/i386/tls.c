@@ -1,8 +1,8 @@
 #include <pirix/thread.h>
 #include <pirix/scheduler.h>
 #include <pirix/string.h>
-#include <arch/i386/syscall.h>
-#include <arch/i386/tls.h>
+#include <i386/syscall.h>
+#include <i386/tls.h>
 
 void tls_activate(unsigned desc[2]) {
     extern unsigned gdt_tls[2];

@@ -2,8 +2,6 @@
 
 #include <pirix/types.h>
 
-#define NULL 0
-
 void* memcpy(void* dest, const void* src, size_t num);
 void* memset(void* dest, int value, size_t num);
 int memcmp(const void* src1, const void* src2, size_t num);

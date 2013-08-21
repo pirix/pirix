@@ -1,7 +1,7 @@
 #include <pirix/irq.h>
 #include <pirix/scheduler.h>
 #include <pirix/timer.h>
-#include <config.h>
+#include <arch/config.h>
 
 static unsigned ticks;
 static unsigned subticks;

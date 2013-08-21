@@ -1,4 +1,6 @@
-#include <arch/i386.h>
+#include <i386/config.h>
+#include <i386/cpu.h>
+#include <i386/io.h>
 
 void irq_setup() {
     outb(0x20, 0x11);

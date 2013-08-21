@@ -1,6 +1,6 @@
 #include <pirix/irq.h>
-#include <arch.h>
-#include <config.h>
+#include <arch/cpu.h>
+#include <arch/config.h>
 
 static irq_handler* irq_handlers[IRQ_COUNT];
 
