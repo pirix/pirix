@@ -25,10 +25,10 @@ clean:
 	scons -c
 
 qemu: iso
-	qemu-system-i386 -nographic -cpu core2duo -cdrom pirix.iso
+	qemu-system-i386 -cpu core2duo -cdrom pirix.iso
 
 debug: iso
-	qemu-system-i386 -nographic -S -s -cdrom pirix.iso
+	qemu-system-i386 -S -s -cdrom pirix.iso
 
 boot:
 	mkdir -p boot
