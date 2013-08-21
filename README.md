@@ -1,8 +1,7 @@
 # πrix
 
-This is an attempt to create a clean and compact operating system for
-the ARM architecture. πrix is POSIX based and will target the
-Raspberry Pi as first supported physical device.
+Pirix is an attempt to create a microkernel-based, POSIX-compatible
+operating system.
 
 ## Features
 
@@ -12,9 +11,20 @@ So far, the following features are more or less stable:
     - interrupt handling
     - multitasking
 
+The following features are currently under development:
+
+    - inter-process communication
+
+## Supported Platforms
+
+    - i386
+    - ARM
+        - QEMU Integrator/CP
+        - Raspberry Pi
+
 ## Building
 
-In order to build πrix you have to install the system-specific
+In order to build Pirix you have to install the system-specific
 toolchain. A script to build the toolchain is available on
 https://github.com/pirix/pirix-toolchain/. To compile and install the
 toolchain, switch to the pirix-toolchain directory and run the
@@ -24,20 +34,16 @@ following commands:
     $ ./build.sh
     # ./install.sh
 
-Now you are ready to compile the kernel. πrix uses cmake and it's
-better to run and out-of-source build to keep the source directory
-clean. To compile the system run the following commands:
+Now you are ready to compile the kernel. Pirix uses
+[SCons](http://scons.org) which is wrapped by a Makefile. To start the
+build process simply type `make` in the source directory.
 
-    mkdir build && cd build
-    cmake path/to/pirix/source
-    make
-
-If everything went well and you have qemu-system-arm installed you can
-just type `make qemu` to give πrix a test run.
+If everything went well and you have *qemu* and *grub2* installed you
+can just type `make qemu` to give Pirix a test run.
 
 ## License
 
-Copyright (C) 2012 Thomas Gatzweiler
+Copyright (C) 2012-2013 Thomas Gatzweiler
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
