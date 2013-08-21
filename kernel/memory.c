@@ -1,5 +1,6 @@
 #include <pirix/memory.h>
 #include <pirix/string.h>
+#include <pirix/kernel.h>
 
 #define BITMAP_SIZE 32768
 

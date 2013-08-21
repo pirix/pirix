@@ -29,8 +29,8 @@ typedef struct multiboot_info {
     multiboot_uint32_t mem_upper;
     multiboot_uint32_t boot_device;
     multiboot_uint32_t cmdline;
-    multiboot_uint32_t mods_count;
-    multiboot_uint32_t mods_addr;
+    multiboot_uint32_t mod_count;
+    multiboot_uint32_t mod_addr;
     union {
         struct multiboot_aout_symbol_table aout_sym;
         struct multiboot_elf_section_header_table elf_sec;

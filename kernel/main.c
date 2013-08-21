@@ -30,7 +30,6 @@ void main(boot_info* info) {
     timer_init();
     process_init();
     scheduler_init();
-    modules_init();
     irq_enable();
 
     for (;;);
