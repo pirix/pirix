@@ -13,11 +13,15 @@ typedef struct heap {
     uintptr_t used;
 } heap;
 
+/**
+ * The process control block.
+ * Holds all information about a process.
+ */
 typedef struct process {
     int pid;
     int flags;
     heap heap;
-    vector threads;
+    vector threads;asd.lm
     vector fds;
     vector chans;
     channel* chan;
@@ -25,30 +29,30 @@ typedef struct process {
 } process;
 
 /**
- * Initialize processing.
+ * Initialize processes.
  */
 void process_init();
 
 /**
  * Create an empty process.
- * @param context paging context for the process
- * @return new process
+ * @param context The paging context for the process.
+ * @return The new process.
  * @memberof process
  */
 process* process_new(paging_context context);
 
 /**
  * Create a new process object with a thread.
- * @param entry entry point for the thread
- * @param context paging context for the process
- * @return new process
+ * @param entry The entry point for the thread.
+ * @param context The paging context for the process.
+ * @return The new process.
  * @memberof process
  */
 process* process_create(void* entry, paging_context context);
 
 /**
- * Get a process.
- * @param pid process id
+ * Get a process by its pid.
+ * @param pid The process id to search for.
  * @memberof process
  */
 process* process_get(int pid);
@@ -73,15 +77,15 @@ unsigned long process_sbrk(process* self, int incr);
 
 /**
  * Exit the current process.
- * @param retval exit code
+ * @param retval The exit code.
  * @memberof process
  */
 void process_exit(int retval);
 
 /**
  * Send a signal to a process.
- * @param pid process id
- * @param sig signal id
+ * @param pid The process id of the process to signal.
+ * @param sig The signal id.
  * @memberof process
  */
 void process_kill(int pid, int sig);
