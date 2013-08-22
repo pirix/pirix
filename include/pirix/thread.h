@@ -29,14 +29,14 @@ typedef struct thread {
 
 /**
  * Create a new thread.
- * @param entry entry point
+ * @param entry The program entry point.
  * @memberof thread
  */
 thread* thread_new(void* entry);
 
-
 /**
  * Set the stack of a thread.
+ * @param addr The new stack address.
  * @memberof thread
  */
 void thread_set_stack(thread* self, uintptr_t addr);
@@ -44,7 +44,7 @@ void thread_set_stack(thread* self, uintptr_t addr);
 /**
  * Block a thread by changing its state. The thread has to be removed
  * from the scheduler queue before.
- * @param state the blocking state
+ * @param state The blocking state.
  * @memberof thread
  */
 void thread_block(thread* self, thread_state state);

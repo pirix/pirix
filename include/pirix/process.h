@@ -21,7 +21,7 @@ typedef struct process {
     int pid;
     int flags;
     heap heap;
-    vector threads;asd.lm
+    vector threads;
     vector fds;
     vector chans;
     channel* chan;
