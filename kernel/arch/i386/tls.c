@@ -1,11 +1,11 @@
 #include <pirix/thread.h>
 #include <pirix/scheduler.h>
 #include <pirix/string.h>
-#include <i386/syscall.h>
-#include <i386/tls.h>
+#include <arch/i386/syscall.h>
+#include <arch/i386/tls.h>
 
-void tls_activate(unsigned desc[2]) {
-    extern unsigned gdt_tls[2];
+void tls_activate(uintptr_t desc[2]) {
+    extern uintptr_t gdt_tls[2];
     gdt_tls[0] = desc[0];
     gdt_tls[1] = desc[1];
 }

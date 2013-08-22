@@ -19,7 +19,7 @@ platform = {
 }[target["PLATFORM"]]
 
 target = target.Clone(
-    LINKFLAGS=["-T", "kernel/$ARCH/link.ld", "-nostartfiles", "-nodefaultlibs"],
+    LINKFLAGS=["-T", "kernel/arch/$ARCH/link.ld", "-nostartfiles", "-nodefaultlibs"],
 )
 target.Append(
     CFLAGS=["-D__KERNEL__", "-ffreestanding", "-fno-stack-protector"],
@@ -28,7 +28,7 @@ target.Append(
 for src in platform:
     Command(src, "#drivers/"+src, Copy("$TARGET", "$SOURCE"))
 
-arch = target.Glob("$ARCH/*.c") + target.Glob("$ARCH/*.S")
+arch = target.Glob("arch/$ARCH/*.c") + target.Glob("arch/$ARCH/*.S")
 core = target.Glob("*.c") + target.Glob("*.S")
 
 kernel = target.Program("kernel", core + arch + platform)

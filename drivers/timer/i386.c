@@ -1,5 +1,5 @@
-#include <i386/config.h>
-#include <i386/io.h>
+#include <arch/i386/config.h>
+#include <arch/i386/io.h>
 
 void timer_setup() {
     unsigned divisor = 1193180/TIMER_FREQ;

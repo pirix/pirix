@@ -1,4 +1,4 @@
-#define PLATFORM_NAME "Rapsberry Pi"
+#define PLATFORM_NAME "Raspberry Pi"
 #define PLATFORM RBPI
 
 #define IRQ_COUNT 72

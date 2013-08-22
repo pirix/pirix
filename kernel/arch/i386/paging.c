@@ -1,5 +1,5 @@
-#include <i386/config.h>
-#include <i386/cpu.h>
+#include <arch/i386/config.h>
+#include <arch/i386/cpu.h>
 #include <pirix/kprint.h>
 #include <pirix/paging.h>
 #include <pirix/memory.h>

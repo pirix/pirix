@@ -1,4 +1,4 @@
-#include <config.h>
+#include <arch/arm/config.h>
 
 .arm
 .arch armv6

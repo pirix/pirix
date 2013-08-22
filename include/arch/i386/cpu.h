@@ -1,6 +1,6 @@
 #pragma once
 
-#include <i386/types.h>
+#include <arch/types.h>
 
 typedef struct registers {
     uint32_t gs, ds;

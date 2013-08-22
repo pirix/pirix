@@ -57,28 +57,32 @@ target.Append(
     CFLAGS=["-std=gnu99"],
 )
 
+target.VariantDir("build/$ARCH/include/arch",
+                  "#/include/arch/$ARCH")
+
 if target["ARCH"] == "arm":
     target.Append(
         CFLAGS=["-march=armv6"],
         ASFLAGS=["-march=armv6"],
     )
+    target.VariantDir("build/$ARCH/include/platform",
+                      "#/include/platform/${PLATFORM.lower()}")
 
 #
 # Substitution of build variables
 #
 
-config_h = env.Substfile("include/config.h.in", SUBST_DICT={
+subst_dict = {
     "@ARCH@": env["ARCH"],
     "@DEBUG@": env["DEBUG"],
     "@VERSION@": env["VERSION"],
     "@PLATFORM@": env["PLATFORM"],
-})
-
-doxyfile = env.Substfile("doc/Doxyfile.in", SUBST_DICT={
-    "@VERSION@": env["VERSION"],
     "@BUILD_DIR@": Dir("build/").abspath,
-    "@SOURCE_DIR@": Dir(".").abspath,
-})
+    "@SOURCE_DIR@": Dir(".").abspath
+}
+
+config_h = env.Substfile("include/config.h.in", SUBST_DICT=subst_dict)
+doxyfile = env.Substfile("doc/Doxyfile.in", SUBST_DICT=subst_dict)
 
 #
 # SConscripts in subdirectories
@@ -88,42 +92,19 @@ kernel = target.SConscript(
     "kernel/SConscript",
     exports="target",
     variant_dir="build/$ARCH/kernel",
-    duplicate=False
 )
 
 libs = target.SConscript(
     "lib/SConscript",
     exports="target",
     variant_dir="build/$ARCH/lib",
-    duplicate=False
 )
 
 servers = target.SConscript(
     "servers/SConscript",
     exports="target",
     variant_dir="build/$ARCH/servers",
-    duplicate=False
 )
-
-#
-# Provide architecture headers
-#
-
-def SymLink(target, source, env):
-    src = os.path.abspath(str(source[0]))
-    tgt = os.path.abspath(str(target[0]))
-    os.symlink(src, tgt)
-
-headers = target.Command("build/$ARCH/include/arch",
-                         "#/include/$ARCH",
-                         SymLink)
-Requires(kernel, headers)
-
-if target["ARCH"] == "arm":
-    platform = target.Command("build/$ARCH/include/platform.h",
-                              "#/include/$ARCH/platforms/${PLATFORM.lower()}.h",
-                              SymLink)
-    Requires(kernel, platform)
 
 #
 # Doxygen documentation

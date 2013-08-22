@@ -1,4 +1,4 @@
-#include <arm/config.h>
+#include <arch/arm/config.h>
 #include <pirix/paging.h>
 #include <pirix/process.h>
 #include <pirix/thread.h>

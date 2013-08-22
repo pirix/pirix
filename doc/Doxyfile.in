@@ -1,7 +1,7 @@
 DOXYFILE_ENCODING      = UTF-8
-PROJECT_NAME           = pirix
+PROJECT_NAME           = "pirix (@ARCH@)"
 PROJECT_NUMBER         = @VERSION@
-OUTPUT_DIRECTORY       = @BUILD_DIR@/doc
+OUTPUT_DIRECTORY       = @BUILD_DIR@/@ARCH@/doc
 CREATE_SUBDIRS         = YES
 OUTPUT_LANGUAGE        = English
 BRIEF_MEMBER_DESC      = YES
@@ -10,8 +10,8 @@ ABBREVIATE_BRIEF       =
 ALWAYS_DETAILED_SEC    = NO
 INLINE_INHERITED_MEMB  = NO
 FULL_PATH_NAMES        = YES
-STRIP_FROM_PATH        = ../..
-STRIP_FROM_INC_PATH    =
+STRIP_FROM_PATH        = build/@ARCH@/
+STRIP_FROM_INC_PATH    = @BUILD_DIR@/@ARCH@/include/
 SHORT_NAMES            = NO
 JAVADOC_AUTOBRIEF      = YES
 QT_AUTOBRIEF           = NO
@@ -63,7 +63,7 @@ GENERATE_DEPRECATEDLIST= YES
 ENABLED_SECTIONS       =
 MAX_INITIALIZER_LINES  = 30
 SHOW_USED_FILES        = NO
-SHOW_FILES             = NO
+SHOW_FILES             = YES
 SHOW_NAMESPACES        = NO
 FILE_VERSION_FILTER    =
 LAYOUT_FILE            =
@@ -76,10 +76,14 @@ WARN_NO_PARAMDOC       = NO
 WARN_FORMAT            = "$file:$line: $text"
 WARN_LOGFILE           =
 
-INPUT                  = @SOURCE_DIR@/include/ @SOURCE_DIR@/kernel/
+INPUT                  = @BUILD_DIR@/@ARCH@/kernel/ \
+                         @BUILD_DIR@/@ARCH@/include/arch \
+                         @SOURCE_DIR@/include/ \
+                         @SOURCE_DIR@/include/pirix \
+
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          =
-RECURSIVE              = YES
+RECURSIVE              = NO
 EXCLUDE                =
 EXCLUDE_SYMLINKS       = NO
 EXCLUDE_PATTERNS       =
