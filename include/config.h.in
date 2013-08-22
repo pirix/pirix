@@ -6,9 +6,9 @@
 #define DEBUG @DEBUG@
 
 #if DEBUG
-#define BUILD_TYPE "Debug"
+  #define BUILD_TYPE "Debug"
 #else
-#define BUILD_TYPE "Release"
+  #define BUILD_TYPE "Release"
 #endif
 
 #define BUILD_TIME __DATE__ ", " __TIME__

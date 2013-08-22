@@ -23,8 +23,7 @@ void exception(registers* regs) {
 }
 
 void main(boot_info* info) {
-    kputs("PIRIX VERSION " VERSION " BOOTING...\n");
-    kputs(PLATFORM_NAME " " BUILD_TYPE " build (" BUILD_TIME ")\n\n");
+    kputs("Pirix " VERSION " - " PLATFORM_NAME " " BUILD_TYPE " build\n");
 
     memory_init();
     paging_init();
