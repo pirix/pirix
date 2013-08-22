@@ -95,44 +95,41 @@ int sys_sbrk(int incr) {
     return process_sbrk(t->process, incr);
 }
 
-#define MAX_SYSCALL (sizeof(syscall_table)/sizeof(syscall_table[0]))
-typedef int (*syscall_handler)(int, ...);
-
-static uintptr_t syscall_table[] = {
-    [SYS_REBOOT] = (uintptr_t)sys_reboot,
-    [SYS_LOG] = (uintptr_t)sys_log,
-    [SYS_PRINT] = (uintptr_t)sys_print,
-    [SYS_SYSINFO] = (uintptr_t)sys_sysinfo,
-    [SYS_UNAME] = (uintptr_t)sys_uname,
-    [SYS_EXIT] = (uintptr_t)sys_exit,
-    [SYS_KILL] = (uintptr_t)sys_kill,
-    [SYS_WAIT] = (uintptr_t)sys_wait,
-    [SYS_FORK] = (uintptr_t)sys_fork,
-    [SYS_CLONE] = (uintptr_t)sys_clone,
-    [SYS_GETPID] = (uintptr_t)sys_getpid,
-    [SYS_GETTID] = (uintptr_t)sys_gettid,
-    [SYS_YIELD] = (uintptr_t)sys_yield,
-    [SYS_IPC_LISTEN] = (uintptr_t)ipc_listen,
-    [SYS_IPC_CONNECT] = (uintptr_t)ipc_connect,
-    [SYS_IPC_CLOSE] = (uintptr_t)ipc_close,
-    [SYS_IPC_CONNECT] = (uintptr_t)ipc_connect,
-    [SYS_IPC_DISCONNECT] = (uintptr_t)ipc_disconnect,
-    [SYS_IPC_SEND] = (uintptr_t)ipc_send,
-    [SYS_IPC_RECEIVE] = (uintptr_t)ipc_receive,
-    [SYS_IPC_REPLY] = (uintptr_t)ipc_reply,
-    [SYS_SBRK] = (uintptr_t)sys_sbrk,
+static syscall_handler syscall_table[] = {
+    [SYS_REBOOT] = (syscall_handler)sys_reboot,
+    [SYS_LOG] = (syscall_handler)sys_log,
+    [SYS_PRINT] = (syscall_handler)sys_print,
+    [SYS_SYSINFO] = (syscall_handler)sys_sysinfo,
+    [SYS_UNAME] = (syscall_handler)sys_uname,
+    [SYS_EXIT] = (syscall_handler)sys_exit,
+    [SYS_KILL] = (syscall_handler)sys_kill,
+    [SYS_WAIT] = (syscall_handler)sys_wait,
+    [SYS_FORK] = (syscall_handler)sys_fork,
+    [SYS_CLONE] = (syscall_handler)sys_clone,
+    [SYS_GETPID] = (syscall_handler)sys_getpid,
+    [SYS_GETTID] = (syscall_handler)sys_gettid,
+    [SYS_YIELD] = (syscall_handler)sys_yield,
+    [SYS_IPC_LISTEN] = (syscall_handler)ipc_listen,
+    [SYS_IPC_CONNECT] = (syscall_handler)ipc_connect,
+    [SYS_IPC_CLOSE] = (syscall_handler)ipc_close,
+    [SYS_IPC_CONNECT] = (syscall_handler)ipc_connect,
+    [SYS_IPC_DISCONNECT] = (syscall_handler)ipc_disconnect,
+    [SYS_IPC_SEND] = (syscall_handler)ipc_send,
+    [SYS_IPC_RECEIVE] = (syscall_handler)ipc_receive,
+    [SYS_IPC_REPLY] = (syscall_handler)ipc_reply,
+    [SYS_SBRK] = (syscall_handler)sys_sbrk,
 
 #ifdef __i386
-    [SYS_TLS_SET] = (uintptr_t)tls_set,
+    [SYS_TLS_SET] = (syscall_handler)tls_set,
 #endif
 };
 
 int syscall(int a, int b, int c, int d, int id) {
-    if (id > MAX_SYSCALL) return -1;
+    int max_syscall = sizeof(syscall_table)/sizeof(syscall_table[0]);
+    if (id > max_syscall) return -1;
 
-    uintptr_t entry = syscall_table[id];
-    if (!entry) return -1;
+    syscall_handler handler = syscall_table[id];
+    if (!handler) return -1;
 
-    syscall_handler handler = (syscall_handler)entry;
     return handler(a, b, c, d);
 }

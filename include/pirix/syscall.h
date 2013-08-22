@@ -1,5 +1,7 @@
 #pragma once
 
+typedef int (*syscall_handler)(int, ...);
+
 // System
 #define SYS_REBOOT         0x00
 #define SYS_LOG            0x01
