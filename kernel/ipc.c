@@ -2,6 +2,7 @@
 #include <pirix/ipc.h>
 #include <pirix/scheduler.h>
 #include <pirix/process.h>
+#include <pirix/thread.h>
 #include <pirix/kheap.h>
 #include <pirix/paging.h>
 #include <pirix/string.h>

@@ -1,12 +1,11 @@
 #include <pirix/kernel.h>
 #include <pirix/scheduler.h>
 #include <pirix/process.h>
+#include <pirix/thread.h>
 #include <pirix/spinlock.h>
 #include <pirix/kheap.h>
 #include <arch/cpu.h>
-
-// task switch routine in init.S
-void task_switch(registers* regs);
+#include <arch.h>
 
 static thread* current_thread = 0;
 static thread* idle_thread = 0;
@@ -55,7 +54,7 @@ thread* scheduler_current_thread() {
 }
 
 void scheduler_switch() {
-    task_switch(current_thread->regs);
+    arch_switch_task(current_thread->regs);
 }
 
 registers* scheduler_schedule(registers* regs) {

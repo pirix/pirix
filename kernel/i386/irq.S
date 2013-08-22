@@ -64,8 +64,8 @@ handle_syscall:
 
     iret
 
-.global task_switch
-task_switch:
+.global arch_switch_task
+arch_switch_task:
     cli
     pushf
     pushl %cs

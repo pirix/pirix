@@ -1,6 +1,7 @@
 #include <pirix/scheduler.h>
 #include <pirix/syscall.h>
 #include <pirix/process.h>
+#include <pirix/thread.h>
 #include <pirix/kprint.h>
 #include <pirix/ipc.h>
 #include <pirix/timer.h>

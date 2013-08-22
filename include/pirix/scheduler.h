@@ -1,7 +1,7 @@
 #pragma once
 
-#include <arch.h>
-#include "thread.h"
+typedef struct thread thread;
+typedef struct registers registers;
 
 void scheduler_init();
 

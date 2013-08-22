@@ -1,4 +1,5 @@
 #include <pirix/process.h>
+#include <pirix/thread.h>
 #include <pirix/scheduler.h>
 #include <pirix/memory.h>
 #include <pirix/kheap.h>

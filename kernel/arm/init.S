@@ -187,8 +187,8 @@ exc_handler:
     bl exception
     b .
 
-.global task_switch
-task_switch:
+.global arch_switch_task
+arch_switch_task:
     ldr r0, =.ret
     mrs r1, cpsr
     push {r0, r1}

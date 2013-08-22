@@ -1,6 +1,5 @@
 build/
 include/config.h
-include/arch.h
 doc/Doxyfile
 .sconf_temp/
 .sconsign.dblite
