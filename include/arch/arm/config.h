@@ -3,4 +3,4 @@
 #define RBPI 1
 #define QEMU 2
 
-#include <platform.h>
+#include <platform/config.h>
