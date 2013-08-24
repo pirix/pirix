@@ -14,6 +14,10 @@ typedef enum thread_state {
     STATE_DEAD,
 } thread_state;
 
+/**
+ * The thread control block.
+ * Holds all information about a thread.
+ */
 typedef struct thread {
     int tid;
     uintptr_t svc_stack;
