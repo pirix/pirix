@@ -111,6 +111,7 @@ servers = target.SConscript(
 #
 
 doxygen = env.Command("build/doc/", "", "doxygen doc/Doxyfile")
+env.Depends(doxygen, kernel)
 env.Depends(doxygen, doxyfile)
 env.AlwaysBuild(doxygen)
 env.Alias("doc", doxygen)
