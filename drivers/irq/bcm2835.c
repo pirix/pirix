@@ -1,6 +1,7 @@
+#include <pirix/irq.h>
 #include <arch/arm/cpu.h>
 
-static unsigned* irq_base = (unsigned*)0x9000B200;
+static uint32_t* irq_base = (uint32_t*)0x9000B200;
 
 #define IRQB_PENDING 0
 #define IRQ1_PENDING 1
@@ -13,13 +14,13 @@ static unsigned* irq_base = (unsigned*)0x9000B200;
 #define IRQ2_DISABLE 8
 #define IRQB_DISABLE 9
 
-void irq_setup() {
+void irq_init() {
     irq_base[IRQ1_DISABLE] = 0xffffffff;
     irq_base[IRQ2_DISABLE] = 0xffffffff;
     irq_base[IRQB_DISABLE] = 0xff;
 }
 
-void irq_allow(unsigned irq) {
+void irq_allow(int irq) {
     if (irq < 32) {
         irq_base[IRQ1_ENABLE] |= 1 << irq;
     }
@@ -31,7 +32,7 @@ void irq_allow(unsigned irq) {
     }
 }
 
-void irq_disallow(unsigned irq) {
+void irq_disallow(int irq) {
     if (irq < 32) {
         irq_base[IRQ1_DISABLE] |= 1 << irq;
     }
@@ -43,8 +44,8 @@ void irq_disallow(unsigned irq) {
     }
 }
 
-unsigned irq_find(registers* regs) {
-    unsigned pending = irq_base[IRQB_PENDING];
+registers* irq_handle(registers* regs) {
+    uint32_t pending = irq_base[IRQB_PENDING];
 
     if (pending & (1 << 9)) {
         // IRQ2 PENDING
@@ -56,9 +57,9 @@ unsigned irq_find(registers* regs) {
 
     for (int i = 0; i < 8; i++) {
         if (pending & (1 << i)) {
-            return 64+i;
+            return irq_run_handler(64 + i, regs);
         }
     }
 
-    return 0;
+    return regs;
 }
