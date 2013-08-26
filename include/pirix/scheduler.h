@@ -3,15 +3,29 @@
 typedef struct thread thread;
 typedef struct registers registers;
 
+/**
+ * @defgroup Scheduler Scheduling
+ * Scheduling functions
+ */
+
+/**
+ * Initialize scheduling.
+ *
+ * @ingroup Scheduler
+ */
 void scheduler_init();
 
 /**
  * Switch to the next thread immediately.
+ *
+ * @ingroup Scheduler
  */
 void scheduler_switch();
 
 /**
  * Return the current thread.
+ *
+ * @ingroup Scheduler
  */
 thread* scheduler_current_thread();
 
@@ -23,8 +37,10 @@ void scheduler_enqueue_thread(thread* new_thread);
 
 /**
  * Removes the thread from the head of the queue and returns it.
+ *
  * @return dequeued thread
  * @retval 0 if the queue is empty
+ * @ingroup Scheduler
  */
 thread* scheduler_dequeue_thread();
 
@@ -34,5 +50,6 @@ thread* scheduler_dequeue_thread();
  *
  * @param regs the registers of the current thread
  * @return registers of the thread to run next
+ * @ingroup Scheduler
  */
 registers* scheduler_schedule(registers* regs);
