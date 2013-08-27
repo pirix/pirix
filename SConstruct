@@ -22,7 +22,7 @@ env = Environment(
 )
 
 if env["DEBUG"]:
-    env["CFLAGS"] = ["-g", "-O0"]
+    env["CFLAGS"] = ["-g", "-O0", "-Wall"]
     env["ASFLAGS"] = ["-g"]
 else:
     env["CFLAGS"] = ["-O3", "-w"]

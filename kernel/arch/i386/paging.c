@@ -144,7 +144,7 @@ void paging_activate_context(paging_context context) {
 
 uintptr_t paging_getphys(uintptr_t virt) {
     int pdidx = virt >> 22;
-    int ptidx = (virt >> 12) & 0x3FF + 0x400*pdidx;
+    int ptidx = (virt >> 12) & (0x3FF + 0x400*pdidx);
 
     if (!(page_dir[pdidx] & 0x1)) return 0;
     if (!(page_tables[ptidx] & 0x1)) return 0;

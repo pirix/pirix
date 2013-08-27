@@ -18,6 +18,7 @@ int sys_reboot() {
 int sys_log(const char* text) {
     thread* t = scheduler_current_thread();
     kprintf("[%i] %s\n", t->process->pid, (char*)text);
+    return 0;
 }
 
 int sys_print(const char* text, int len) {
