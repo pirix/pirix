@@ -1,5 +1,5 @@
 #include <pirix/paging.h>
-#include <pirix/memory.h>
+#include <pirix/frame.h>
 #include <pirix/string.h>
 
 #define TTE_TYPE_MASK 0x003
@@ -33,7 +33,7 @@ int paging_map(paging_context context, uintptr_t virt, uintptr_t phys, int acces
     uintptr_t ppt;
 
     if ((context[tti] & TTE_TYPE_MASK) == TTE_TYPE_FREE) {
-        ppt = memory_alloc();
+        ppt = frame_alloc();
         context[tti] = ppt | TTE_TYPE_PAGE;
     }
     else {
@@ -59,7 +59,7 @@ void paging_unmap_kernel(uintptr_t virt) {
 }
 
 paging_context paging_create_context() {
-    paging_context context = (paging_context)memory_alloc_aligned(2, 2);
+    paging_context context = (paging_context)frame_alloc_aligned(2, 2);
     paging_context kcontext = (paging_context)paging_map_kernel((uintptr_t)context);
     memset(kcontext, 0, 0x2000);
     return kcontext;

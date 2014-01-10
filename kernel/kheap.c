@@ -1,5 +1,5 @@
 #include <pirix/kheap.h>
-#include <pirix/memory.h>
+#include <pirix/frame.h>
 #include <pirix/paging.h>
 #include <pirix/string.h>
 
@@ -25,7 +25,7 @@ static int kheap_bucket_find(size_t size) {
 }
 
 static void kheap_slab_create(int bucket) {
-    uintptr_t mem = memory_alloc();
+    uintptr_t mem = frame_alloc();
     uint32_t* slab = (uint32_t*)paging_map_kernel(mem);
 
     for (unsigned i = 0; i < 4096/4; i += (1 << bucket)) {

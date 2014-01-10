@@ -2,7 +2,7 @@
 #include <arch/i386/cpu.h>
 #include <pirix/kprint.h>
 #include <pirix/paging.h>
-#include <pirix/memory.h>
+#include <pirix/frame.h>
 #include <pirix/irq.h>
 #include <pirix/process.h>
 #include <pirix/kernel.h>
@@ -29,7 +29,7 @@ void paging_init() {
      * initialize kernel context
      *
      * addresses 0x0 - 0xc0000000 are currently identity mapped,
-     * memory_alloc should return a free memory address from this
+     * frame_alloc should return a free memory address from this
      * block, otherwise we are in serious trouble.
      */
 
@@ -39,7 +39,7 @@ void paging_init() {
 
     // create page tables from 0xc0000000
     for (int i = 0; i < 255; i++) {
-        uint32_t* table = (uint32_t*)memory_alloc();
+        uint32_t* table = (uint32_t*)frame_alloc();
         kcontext[i+768] = (uintptr_t)table | 0x3;
 
         memset(table, 0, 0x1000);
@@ -61,10 +61,10 @@ void paging_init() {
 }
 
 paging_context paging_create_context() {
-    uintptr_t pcontext = memory_alloc();
+    uintptr_t pcontext = frame_alloc();
     uint32_t* context = (uint32_t*)paging_map_kernel(pcontext);
 
-    uintptr_t ptable = memory_alloc();
+    uintptr_t ptable = frame_alloc();
     uint32_t* table = (uint32_t*)paging_map_kernel(ptable);
 
     memset(table, 0, 0x1000);
@@ -98,7 +98,7 @@ int paging_map(paging_context context, uintptr_t virt, uintptr_t phys, int acces
 
     // create page table if unexistent
     if (!(dir[pdidx] & 0x1)) {
-        uintptr_t ptable = memory_alloc();
+        uintptr_t ptable = frame_alloc();
         table = (uint32_t*)paging_map_kernel(ptable);
         memset(table, 0, 0x1000);
         dir[pdidx] = ptable | access | 0x3;

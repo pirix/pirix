@@ -1,7 +1,7 @@
 #include <pirix/process.h>
 #include <pirix/thread.h>
 #include <pirix/scheduler.h>
-#include <pirix/memory.h>
+#include <pirix/frame.h>
 #include <pirix/kheap.h>
 #include <pirix/string.h>
 
@@ -34,7 +34,7 @@ process* process_new(paging_context context) {
 process* process_create(void* entry, paging_context context) {
     thread* new_thread = thread_new(entry);
 
-    uintptr_t stack = memory_alloc();
+    uintptr_t stack = frame_alloc();
 
     // clear argv and envp (FIXME: works only on 32bit)
     uintptr_t kstack = paging_map_kernel(stack);
@@ -71,7 +71,7 @@ unsigned long process_sbrk(process* self, int incr) {
 
     while (incr > self->heap.size - self->heap.used) {
        	uintptr_t virt = self->heap.start + self->heap.size;
-        paging_map(self->context, virt, memory_alloc(), PAGE_PERM_USER);
+        paging_map(self->context, virt, frame_alloc(), PAGE_PERM_USER);
         memset((void*)virt, 0, 0x1000);
         self->heap.size += 0x1000;
     }

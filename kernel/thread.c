@@ -2,7 +2,7 @@
 #include <pirix/process.h>
 #include <pirix/kheap.h>
 #include <pirix/paging.h>
-#include <pirix/memory.h>
+#include <pirix/frame.h>
 #include <pirix/scheduler.h>
 #include <pirix/string.h>
 #include <pirix/vector.h>

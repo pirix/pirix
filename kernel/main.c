@@ -1,5 +1,5 @@
 #include <pirix/kprint.h>
-#include <pirix/memory.h>
+#include <pirix/frame.h>
 #include <pirix/paging.h>
 #include <pirix/process.h>
 #include <pirix/scheduler.h>
@@ -25,7 +25,7 @@ void exception(registers* regs) {
 void main(boot_info* info) {
     kputs("Pirix " VERSION " - " PLATFORM_NAME " " BUILD_TYPE " build\n");
 
-    memory_init();
+    frame_init();
     paging_init();
     irq_init();
     timer_init();
