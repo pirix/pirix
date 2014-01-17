@@ -1,17 +1,11 @@
 #pragma once
 
 #include <pirix/types.h>
-#include <pirix/paging.h>
+#include <pirix/addrspace.h>
 #include <pirix/vector.h>
 
 typedef struct thread thread;
 typedef struct channel channel;
-
-typedef struct heap {
-    uintptr_t start;
-    uintptr_t size;
-    uintptr_t used;
-} heap;
 
 /**
  * The process control block.
@@ -20,12 +14,11 @@ typedef struct heap {
 typedef struct process {
     int pid;
     int flags;
-    heap heap;
     vector threads;
     vector fds;
     vector chans;
     channel* chan;
-    paging_context context;
+    addrspace* as;
 } process;
 
 /**
@@ -40,7 +33,7 @@ void process_init();
  * @return The new process.
  * @memberof process
  */
-process* process_new(paging_context context);
+process* process_new(addrspace* as);
 
 /**
  * Create a new process object with a thread.
@@ -50,7 +43,7 @@ process* process_new(paging_context context);
  * @return The new process.
  * @memberof process
  */
-process* process_create(void* entry, paging_context context);
+process* process_create(void* entry, addrspace* as);
 
 /**
  * Get a process by its pid.
@@ -82,7 +75,7 @@ void process_remove_thread(process* self, thread* thread);
  * @param incr The amount of bytes to allocate.
  * @memberof process
  */
-unsigned long process_sbrk(process* self, int incr);
+uintptr_t process_sbrk(process* self, int incr);
 
 /**
  * Exit the current process.

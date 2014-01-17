@@ -11,7 +11,7 @@
 uint32_t* page_dir = (uint32_t*)0xffbff000;
 uint32_t* page_tables = (uint32_t*)0xffc00000;
 
-static paging_context current_context = NULL;
+static pagedir current_pagedir = NULL;
 
 registers* paging_fault(registers* regs) {
     uintptr_t addr;
@@ -35,89 +35,99 @@ void paging_init() {
 
     // reuse boot directory
     extern uint32_t boot_page_dir;
-    uint32_t* kcontext = &boot_page_dir;
+    uint32_t* kpagedir = &boot_page_dir;
 
     // create page tables from 0xc0000000
     for (int i = 0; i < 255; i++) {
         uint32_t* table = (uint32_t*)frame_alloc();
-        kcontext[i+768] = (uintptr_t)table | 0x3;
+        kpagedir[i+768] = (uintptr_t)table | 0x3;
 
-        memset(table, 0, 0x1000);
+        memset(table, 0, PAGE_SIZE);
 
         if (i == 0) {
             // map 0xc0000000 to the first 4MB
             for (int j = 0; j < 1024; j++) {
-                table[j] = j*0x1000 | 0x103;
+                table[j] = j*PAGE_SIZE | 0x103;
             }
         }
         else if (i == 254) {
-            table[1023] = (uintptr_t)kcontext | 0x3;
+            table[1023] = (uintptr_t)kpagedir | 0x3;
         }
     }
 
-    kcontext[1023] = (uintptr_t)kcontext | 0x3;
+    kpagedir[1023] = (uintptr_t)kpagedir | 0x3;
 
-    paging_activate_context(kcontext);
+    paging_activate_pagedir(kpagedir);
 }
 
-paging_context paging_create_context() {
-    uintptr_t pcontext = frame_alloc();
-    uint32_t* context = (uint32_t*)paging_map_kernel(pcontext);
+pagedir paging_create_pagedir() {
+    uintptr_t pdir = frame_alloc();
+    uint32_t* dir = (uint32_t*)paging_map_kernel(pdir, PAGE_SIZE);
 
     uintptr_t ptable = frame_alloc();
-    uint32_t* table = (uint32_t*)paging_map_kernel(ptable);
+    uint32_t* table = (uint32_t*)paging_map_kernel(ptable, PAGE_SIZE);
 
-    memset(table, 0, 0x1000);
-    memset(context, 0, 0xc00);
-    memcpy(context+768, page_dir+768, 0x3f8);
+    memset(table, 0, PAGE_SIZE);
+    memset(dir, 0, 0xc00);
+    memcpy(dir+768, page_dir+768, 0x3f8);
 
-    table[1023] = pcontext | 0x3;
-    context[1022] = ptable | 0x3;
-    context[1023] = pcontext | 0x3;
+    table[1023] = pdir | 0x3;
+    dir[1022] = ptable | 0x3;
+    dir[1023] = pdir | 0x3;
 
-    paging_unmap_kernel((uintptr_t)table);
-    paging_unmap_kernel((uintptr_t)context);
+    paging_unmap_kernel((uintptr_t)table, PAGE_SIZE);
+    paging_unmap_kernel((uintptr_t)dir, PAGE_SIZE);
 
-    return (paging_context)pcontext;
+    return (pagedir)pdir;
 }
 
-int paging_map(paging_context context, uintptr_t virt, uintptr_t phys, int access) {
+int paging_map(pagedir pdir, uintptr_t virt, uintptr_t phys, int access) {
     uint32_t* dir, *table;
     int pdidx = virt >> 22;
     int ptidx = (virt >> 12) & 0x3ff;
 
-    if (!context) context = current_context;
+    if (!pdir) pdir = current_pagedir;
 
-    if (context == current_context && page_dir[pdidx]) {
+    if (pdir == current_pagedir && page_dir[pdidx]) {
         page_tables[ptidx+0x400*pdidx] = phys | access | 0x3;
         invlpg(virt);
         return 0;
     }
 
-    dir = (unsigned*)paging_map_kernel((unsigned long)context);
+    dir = (uint32_t*)paging_map_kernel((uintptr_t)pdir, PAGE_SIZE);
 
     // create page table if unexistent
     if (!(dir[pdidx] & 0x1)) {
         uintptr_t ptable = frame_alloc();
-        table = (uint32_t*)paging_map_kernel(ptable);
-        memset(table, 0, 0x1000);
+        table = (uint32_t*)paging_map_kernel(ptable, PAGE_SIZE);
+        memset(table, 0, PAGE_SIZE);
         dir[pdidx] = ptable | access | 0x3;
     }
     else {
-        table = (uint32_t*)paging_map_kernel(dir[pdidx] & 0xfffff000);
+        table = (uint32_t*)paging_map_kernel(dir[pdidx] & 0xfffff000, PAGE_SIZE);
     }
 
     table[ptidx] = phys | access | 0x3;
-    paging_unmap_kernel((uintptr_t)table);
-    paging_unmap_kernel((uintptr_t)dir);
+    paging_unmap_kernel((uintptr_t)table, PAGE_SIZE);
+    paging_unmap_kernel((uintptr_t)dir, PAGE_SIZE);
 
     invlpg(virt);
 
     return 0;
 }
 
-uintptr_t paging_map_kernel(uintptr_t phys) {
-    for (uintptr_t virt = 0xd0000000; virt < 0xe0000000; virt += 0x1000) {
+static int calculate_page_count(uintptr_t addr, size_t size) {
+    int page_count = (size+PAGE_SIZE-1) / PAGE_SIZE;
+    if ((addr % PAGE_SIZE) + size > PAGE_SIZE) {
+        page_count++;
+    }
+    return page_count;
+}
+
+uintptr_t paging_map_kernel(uintptr_t phys, size_t size) {
+    int page_count = calculate_page_count(phys, size);
+
+    for (uintptr_t virt = 0xd0000000; virt < 0xe0000000; virt += PAGE_SIZE) {
         uint32_t* entry = &page_tables[virt >> 12];
 
         if (!(*entry & 0x1)) {
@@ -131,15 +141,20 @@ uintptr_t paging_map_kernel(uintptr_t phys) {
     return 0;
 }
 
-void paging_unmap_kernel(uintptr_t virt) {
-    page_tables[virt >> 12] = 0;
-    invlpg(virt);
+void paging_unmap_kernel(uintptr_t virt, size_t size) {
+    int page_count = calculate_page_count(virt, size);
+
+    for (int i = 0; i < page_count; i++) {
+        page_tables[virt >> 12] = 0;
+        invlpg(virt);
+        virt += PAGE_SIZE;
+    }
 }
 
-void paging_activate_context(paging_context context) {
-    if (context == current_context) return;
-    asm volatile("mov %0, %%cr3" :: "r"(context) : "memory");
-    current_context = context;
+void paging_activate_pagedir(pagedir dir) {
+    if (dir == current_pagedir) return;
+    asm volatile("mov %0, %%cr3" :: "r"(dir) : "memory");
+    current_pagedir = dir;
 }
 
 uintptr_t paging_getphys(uintptr_t virt) {

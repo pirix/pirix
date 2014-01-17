@@ -5,6 +5,6 @@
 #include <pirix/kernel.h>
 
 void arch_switch_context(thread* new_thread) {
-    paging_activate_context(new_thread->process->context);
+    paging_activate_pagedir(new_thread->process->as->pagedir);
     tls_activate(new_thread->tls);
 }

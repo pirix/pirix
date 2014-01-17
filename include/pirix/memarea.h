@@ -8,12 +8,12 @@ typedef struct membackend {
 } membackend;
 
 typedef struct memarea {
-    uintptr_t addr;
-    size_t size;
+    uintptr_t start;
+    uintptr_t end;
     int flags;
     int refcount;
-    membackend* backend;
-    memarea* next;
+    struct membackend* backend;
+    struct memarea* next;
 } memarea;
 
 /**

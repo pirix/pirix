@@ -26,9 +26,9 @@ static int kheap_bucket_find(size_t size) {
 
 static void kheap_slab_create(int bucket) {
     uintptr_t mem = frame_alloc();
-    uint32_t* slab = (uint32_t*)paging_map_kernel(mem);
+    uint32_t* slab = (uint32_t*)paging_map_kernel(mem, 0x1000);
 
-    for (unsigned i = 0; i < 4096/4; i += (1 << bucket)) {
+    for (unsigned i = 0; i < 0x1000/4; i += (1 << bucket)) {
         kfree(&slab[i], 4*(1<<bucket));
     }
 }

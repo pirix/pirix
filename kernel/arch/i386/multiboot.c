@@ -20,6 +20,8 @@ static void multiboot_modules(int count, multiboot_mod_list* mod) {
         strncpy(binfo.modules[i].args, (char*)mod->args, BOOT_MOD_ARGS_MAX);
         mod++;
     }
+
+    binfo.mod_count = count;
 }
 
 static void multiboot_mmap(int length, multiboot_mmap_entry* mmap) {

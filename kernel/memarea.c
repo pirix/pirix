@@ -14,7 +14,7 @@ void memarea_use(memarea* area) {
 void memarea_release(memarea* area) {
     area->refcount--;
     if (area->refcount <= 0) {
-        memarea_free(area);
+        memarea_delete(area);
     }
 }
 
