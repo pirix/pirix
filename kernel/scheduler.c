@@ -53,6 +53,10 @@ thread* scheduler_current_thread() {
     return current_thread;
 }
 
+process* scheduler_current_process() {
+    return current_thread->process;
+}
+
 void scheduler_switch() {
     arch_switch_task(current_thread->regs);
 }

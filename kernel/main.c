@@ -26,8 +26,9 @@ void exception(registers* regs) {
 static void module_load(boot_module* module) {
     kprintf("Loading %s\n", module->args);
 
-    //addrspace* as = addrspace_new();
-    //process* proc = process_create((void*)0x8000, as);
+    addrspace* as = addrspace_new();
+    process* proc = process_create((void*)0x7fffff00, as);
+
     uintptr_t addr = paging_map_kernel(module->addr, module->size);
 
     Elf32_Ehdr* ehdr = (Elf32_Ehdr*)addr;

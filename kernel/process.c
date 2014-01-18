@@ -3,6 +3,7 @@
 #include <pirix/scheduler.h>
 #include <pirix/frame.h>
 #include <pirix/kheap.h>
+#include <pirix/memarea.h>
 #include <pirix/string.h>
 
 static vector processes;
@@ -30,17 +31,13 @@ process* process_new(addrspace* as) {
 process* process_create(void* entry, addrspace* as) {
     thread* new_thread = thread_new(entry);
 
-    /*
-    uintptr_t stack = frame_alloc();
+    memarea* stack = memarea_new(0, MEM_READ | MEM_WRITE | MEM_GROWDOWN);
+    stack->start = 0x7ffff000;
+    stack->end = 0x80000000;
 
-    // clear argv and envp (FIXME: works only on 32bit)
-    uintptr_t kstack = paging_map_kernel(stack);
-    memset((void*)kstack+1021, 0, sizeof(uint32_t)*3);
-    paging_unmap_kernel(kstack);
+    addrspace_add_area(as, stack);
 
-    paging_map(context, 0x7ffff000, stack, PAGE_PERM_USER);
     thread_set_stack(new_thread, 0x80000000-0xc);
-    */
 
     process* self = process_new(as);
     process_add_thread(self, new_thread);

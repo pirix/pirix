@@ -11,30 +11,30 @@ typedef struct memarea {
     uintptr_t start;
     uintptr_t end;
     int flags;
-    int refcount;
     struct membackend* backend;
     struct memarea* next;
 } memarea;
+
+#define MEM_READ     (1 << 0)
+#define MEM_WRITE    (1 << 1)
+#define MEM_EXEC     (1 << 2)
+#define MEM_GROWUP   (1 << 3)
+#define MEM_GROWDOWN (1 << 4)
 
 /**
  * Create a new memarea.
  * @param backend The backend to use.
  * @memberof memarea
  */
-memarea* memarea_new(membackend* backend);
+memarea* memarea_new(membackend* backend, int flags);
 
 /**
- * Increase the reference count of the memarea.
+ * Find the corresponding memarea for an memory address.
+ * @param first The memarea to start searching with.
+ * @param addr The address to search for.
  * @memberof memarea
  */
-void memarea_use(memarea* area);
-
-/**
- * Decrease the reference count of the memarea.
- * Deletes the memarea if the reference count reaches zero.
- * @memberof memarea
- */
-void memarea_release(memarea* area);
+memarea* memarea_find(memarea* first, uintptr_t addr);
 
 /**
  * Delete the memarea.

@@ -1,21 +1,24 @@
 #include <pirix/kheap.h>
 #include <pirix/memarea.h>
 
-memarea* memarea_new(membackend* backend) {
+memarea* memarea_new(membackend* backend, int flags) {
     memarea* area = kmalloc(sizeof(memarea));
     area->backend = backend;
+    area->flags = flags;
     return area;
 }
 
-void memarea_use(memarea* area) {
-    area->refcount++;
-}
+memarea* memarea_find(memarea* first, uintptr_t addr) {
+    memarea* curr = first;
 
-void memarea_release(memarea* area) {
-    area->refcount--;
-    if (area->refcount <= 0) {
-        memarea_delete(area);
+    while (curr) {
+        if (addr >= curr->start && addr <= curr->end) {
+            return curr;
+        }
+        curr = curr->next;
     }
+
+    return 0;
 }
 
 void memarea_delete(memarea* area) {

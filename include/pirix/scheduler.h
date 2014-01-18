@@ -1,6 +1,7 @@
 #pragma once
 
 typedef struct thread thread;
+typedef struct process process;
 typedef struct registers registers;
 
 /**
@@ -23,11 +24,18 @@ void scheduler_init();
 void scheduler_switch();
 
 /**
- * Return the current thread.
+ * Returns the current thread.
  *
  * @ingroup Scheduler
  */
 thread* scheduler_current_thread();
+
+/**
+ * Returns the current process.
+ *
+ * @ingroup Scheduler
+ */
+process* scheduler_current_process();
 
 /**
  * Adds a thread to the end of the queue.

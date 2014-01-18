@@ -5,6 +5,7 @@
 #include <pirix/frame.h>
 #include <pirix/irq.h>
 #include <pirix/process.h>
+#include <pirix/scheduler.h>
 #include <pirix/kernel.h>
 #include <pirix/string.h>
 
@@ -17,8 +18,8 @@ registers* paging_fault(registers* regs) {
     uintptr_t addr;
     asm volatile("mov %%cr2, %0" : "=r"(addr));
     kprintf("page fault at %p, eip: %p\n", addr, regs->eip);
-    process_exit(128);
-    panic(0);
+    process* proc = scheduler_current_process();
+    addrspace_pagefault(proc->as, addr);
     return regs;
 }
 
@@ -69,6 +70,8 @@ pagedir paging_create_pagedir() {
 
     memset(table, 0, PAGE_SIZE);
     memset(dir, 0, 0xc00);
+
+    // copy kernel space pages
     memcpy(dir+768, page_dir+768, 0x3f8);
 
     table[1023] = pdir | 0x3;
@@ -81,41 +84,25 @@ pagedir paging_create_pagedir() {
     return (pagedir)pdir;
 }
 
-int paging_map(pagedir pdir, uintptr_t virt, uintptr_t phys, int access) {
-    uint32_t* dir, *table;
+void paging_map(uintptr_t virt, uintptr_t phys, int access) {
     int pdidx = virt >> 22;
     int ptidx = (virt >> 12) & 0x3ff;
 
-    if (!pdir) pdir = current_pagedir;
-
-    if (pdir == current_pagedir && page_dir[pdidx]) {
-        page_tables[ptidx+0x400*pdidx] = phys | access | 0x3;
-        invlpg(virt);
-        return 0;
+    if (!(page_dir[pdidx] & 0x1)) {
+        uintptr_t table = frame_alloc();
+        page_dir[pdidx] = table | access | 0x3;
+        memset(&page_tables[ptidx+0x400*pdidx], 0, PAGE_SIZE);
     }
 
-    dir = (uint32_t*)paging_map_kernel((uintptr_t)pdir, PAGE_SIZE);
-
-    // create page table if unexistent
-    if (!(dir[pdidx] & 0x1)) {
-        uintptr_t ptable = frame_alloc();
-        table = (uint32_t*)paging_map_kernel(ptable, PAGE_SIZE);
-        memset(table, 0, PAGE_SIZE);
-        dir[pdidx] = ptable | access | 0x3;
-    }
-    else {
-        table = (uint32_t*)paging_map_kernel(dir[pdidx] & 0xfffff000, PAGE_SIZE);
-    }
-
-    table[ptidx] = phys | access | 0x3;
-    paging_unmap_kernel((uintptr_t)table, PAGE_SIZE);
-    paging_unmap_kernel((uintptr_t)dir, PAGE_SIZE);
+    page_tables[ptidx+0x400*pdidx] = phys | access | 0x3;
 
     invlpg(virt);
-
-    return 0;
 }
 
+/**
+ * Calculate the number of pages needed to map a memory address with a
+ * specific size.
+ */
 static int calculate_page_count(uintptr_t addr, size_t size) {
     int page_count = (size+PAGE_SIZE-1) / PAGE_SIZE;
     if ((addr % PAGE_SIZE) + size > PAGE_SIZE) {
@@ -124,21 +111,53 @@ static int calculate_page_count(uintptr_t addr, size_t size) {
     return page_count;
 }
 
-uintptr_t paging_map_kernel(uintptr_t phys, size_t size) {
-    int page_count = calculate_page_count(phys, size);
+/**
+ * Find a continous area of pages.
+ */
+static uintptr_t find_mapping_area(size_t page_count) {
+    uintptr_t continous_start = 0;
+    int continous_count = 0;
 
     for (uintptr_t virt = 0xd0000000; virt < 0xe0000000; virt += PAGE_SIZE) {
-        uint32_t* entry = &page_tables[virt >> 12];
+        if (page_tables[virt >> 12] & 0x1) {
+            continous_start = 0;
+            continue;
+        }
 
-        if (!(*entry & 0x1)) {
-            *entry = phys | 0x103;
-            invlpg(virt);
-            return (virt + (phys & 0xfff));
+        if (!continous_start) {
+            continous_start = virt;
+            continous_count = 1;
+        }
+        else {
+            continous_count++;
+        }
+
+        if (continous_count >= page_count) {
+            return continous_start;
         }
     }
 
-    panic("kernel mapping area full");
     return 0;
+}
+
+uintptr_t paging_map_kernel(uintptr_t phys, size_t size) {
+    int page_count = calculate_page_count(phys, size);
+
+    uintptr_t mapping_area = find_mapping_area(page_count);
+
+    if (!mapping_area) {
+        panic("kernel mapping area full");
+        return 0;
+    }
+
+    for (int i = 0; i < page_count; i++) {
+        uintptr_t virt = mapping_area + i*PAGE_SIZE;
+        uint32_t* entry = &page_tables[virt >> 12];
+        *entry = ((phys & 0xfffff000) + i*PAGE_SIZE) | 0x103;
+        invlpg(virt);
+    }
+
+    return mapping_area + (phys & 0xfff);
 }
 
 void paging_unmap_kernel(uintptr_t virt, size_t size) {
