@@ -1,7 +1,7 @@
 #include <pirix/kheap.h>
 #include <pirix/memarea.h>
 
-memarea* memarea_new(membackend* backend, int flags) {
+memarea* memarea_new(const membackend* backend, int flags) {
     memarea* area = kmalloc(sizeof(memarea));
     area->backend = backend;
     area->flags = flags;

@@ -15,17 +15,21 @@ void addrspace_add_area(addrspace* self, memarea* area) {
     if (!self->areas) {
         area->next = 0;
         self->areas = area;
-        return;
+    }
+    else {
+        memarea* curr = self->areas;
+
+        while (curr && curr->start > area->start) {
+            curr = curr->next;
+        }
+
+        area->next = curr->next;
+        curr->next = area;
     }
 
-    memarea* curr = self->areas;
-
-    while (curr && curr->start > area->start) {
-        curr = curr->next;
+    if (area->backend->open) {
+        area->backend->open(area);
     }
-
-    area->next = curr->next;
-    curr->next = area;
 }
 
 uintptr_t addrspace_sbrk(addrspace* self, int incr) {
@@ -46,8 +50,12 @@ uintptr_t addrspace_sbrk(addrspace* self, int incr) {
 
 void addrspace_pagefault(addrspace* self, uintptr_t addr) {
     memarea* area = memarea_find(self->areas, addr);
-    area->backend->populate(self, addr);
-    while (1);
+    if (area) {
+        area->backend->pagefault(area, addr);
+    }
+    else {
+        while (1);
+    }
 }
 
 void addrspace_delete(addrspace* self) {

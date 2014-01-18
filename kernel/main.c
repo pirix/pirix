@@ -6,6 +6,7 @@
 #include <pirix/irq.h>
 #include <pirix/timer.h>
 #include <pirix/boot.h>
+#include <pirix/memarea.h>
 #include <arch/cpu.h>
 #include <arch/config.h>
 #include <elf.h>
@@ -26,19 +27,29 @@ void exception(registers* regs) {
 static void module_load(boot_module* module) {
     kprintf("Loading %s\n", module->args);
 
-    addrspace* as = addrspace_new();
-    process* proc = process_create((void*)0x7fffff00, as);
-
     uintptr_t addr = paging_map_kernel(module->addr, module->size);
-
     Elf32_Ehdr* ehdr = (Elf32_Ehdr*)addr;
 
     if (memcmp(ELFMAG, ehdr, SELFMAG)) {
         kprintf("invalid elf magic\n");
+        paging_unmap_kernel(module->addr, module->size);
+        return;
     }
-    else {
-        kprintf("valid elf magic\n");
+
+    addrspace* as = addrspace_new();
+
+    Elf32_Phdr* phdr = (Elf32_Phdr*)(addr + ehdr->e_phoff);
+
+    for (unsigned i = 0; i < ehdr->e_phnum; i++, phdr++) {
+        if (!(phdr->p_type & PT_LOAD)) continue;
+
+        memarea* area = memarea_new(&elf_backend, MEM_READ | MEM_WRITE | MEM_EXEC);
+        area->data.elf_addr = module->addr;
+        area->data.elf_segment = (uintptr_t)phdr;
+        addrspace_add_area(as, area);
     }
+
+    process* proc = process_create((void*)ehdr->e_entry, as);
 }
 
 static void module_init(boot_info* info) {

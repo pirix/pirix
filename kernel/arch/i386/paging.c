@@ -91,7 +91,8 @@ void paging_map(uintptr_t virt, uintptr_t phys, int access) {
     if (!(page_dir[pdidx] & 0x1)) {
         uintptr_t table = frame_alloc();
         page_dir[pdidx] = table | access | 0x3;
-        memset(&page_tables[ptidx+0x400*pdidx], 0, PAGE_SIZE);
+        invlpg(&page_tables[0x400*pdidx]);
+        memset(&page_tables[0x400*pdidx], 0, PAGE_SIZE);
     }
 
     page_tables[ptidx+0x400*pdidx] = phys | access | 0x3;
@@ -142,7 +143,6 @@ static uintptr_t find_mapping_area(size_t page_count) {
 
 uintptr_t paging_map_kernel(uintptr_t phys, size_t size) {
     int page_count = calculate_page_count(phys, size);
-
     uintptr_t mapping_area = find_mapping_area(page_count);
 
     if (!mapping_area) {
@@ -152,8 +152,8 @@ uintptr_t paging_map_kernel(uintptr_t phys, size_t size) {
 
     for (int i = 0; i < page_count; i++) {
         uintptr_t virt = mapping_area + i*PAGE_SIZE;
-        uint32_t* entry = &page_tables[virt >> 12];
-        *entry = ((phys & 0xfffff000) + i*PAGE_SIZE) | 0x103;
+        uint32_t entry = ((phys & 0xfffff000) + i*PAGE_SIZE) | 0x103;
+        page_tables[virt >> 12] = entry;
         invlpg(virt);
     }
 

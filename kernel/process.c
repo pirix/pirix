@@ -31,8 +31,8 @@ process* process_new(addrspace* as) {
 process* process_create(void* entry, addrspace* as) {
     thread* new_thread = thread_new(entry);
 
-    memarea* stack = memarea_new(0, MEM_READ | MEM_WRITE | MEM_GROWDOWN);
-    stack->start = 0x7ffff000;
+    memarea* stack = memarea_new(&anon_backend, MEM_READ | MEM_WRITE | MEM_GROWDOWN);
+    stack->start = 0x7fff0000;
     stack->end = 0x80000000;
 
     addrspace_add_area(as, stack);
