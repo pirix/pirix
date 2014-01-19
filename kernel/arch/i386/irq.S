@@ -17,7 +17,7 @@ handle_irq:
     mov %eax, %esp
 
     // save %esp (which is also in %eax) to tss
-    add $64, %eax
+    add $68, %eax
     movl %eax, (tss+4)
 
     popl %gs
@@ -52,9 +52,9 @@ handle_syscall:
     call syscall
 
     // remove args from stack and save %esp to tss
-    add $44, %esp
+    add $48, %esp
     mov %esp, (tss+4)
-    sub $24, %esp
+    sub $28, %esp
 
     popl %gs
     pop %ebx
@@ -82,7 +82,7 @@ arch_switch_task:
     mov %eax, %esp
 
     // save %esp (which is also in %eax) to tss
-    add $28, %eax
+    add $68, %eax
     movl %eax, (tss+4)
 
     popl %gs

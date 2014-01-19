@@ -54,6 +54,7 @@ void addrspace_pagefault(addrspace* self, uintptr_t addr) {
         area->backend->pagefault(area, addr);
     }
     else {
+        panic("unresolvable page fault");
         while (1);
     }
 }

@@ -91,7 +91,7 @@ void paging_map(uintptr_t virt, uintptr_t phys, int access) {
     if (!(page_dir[pdidx] & 0x1)) {
         uintptr_t table = frame_alloc();
         page_dir[pdidx] = table | access | 0x3;
-        invlpg(&page_tables[0x400*pdidx]);
+        invlpg((uintptr_t)&page_tables[0x400*pdidx]);
         memset(&page_tables[0x400*pdidx], 0, PAGE_SIZE);
     }
 
