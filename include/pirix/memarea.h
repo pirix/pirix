@@ -1,6 +1,7 @@
 #pragma once
 
 #include <pirix/types.h>
+#include <pirix/paging.h>
 
 typedef struct membackend membackend;
 
@@ -35,7 +36,7 @@ typedef struct membackend {
     const char* name;
     void (*open)(memarea* area);
     void (*close)(memarea* area);
-    void (*pagefault)(memarea* area, uintptr_t addr);
+    pf_status (*pagefault)(memarea* area, uintptr_t addr, pf_type fault);
 } membackend;
 
 extern const membackend elf_backend;

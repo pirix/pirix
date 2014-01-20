@@ -3,6 +3,18 @@
 #include <pirix/types.h>
 #include <arch/paging.h>
 
+typedef enum {
+    PF_WRITE,
+    PF_READ,
+    PF_EXEC,
+    PF_OTHER
+} pf_type;
+
+typedef enum {
+    PF_RESOLVED,
+    PF_FAULT
+} pf_status;
+
 void paging_init();
 pagedir paging_create_pagedir();
 void paging_map(uintptr_t virt, uintptr_t phys, int access);

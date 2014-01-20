@@ -13,10 +13,11 @@ static void elf_close(memarea* area) {
     kprintf("elf_close\n");
 }
 
-static void elf_pagefault(memarea* area, uintptr_t addr) {
+static pf_status elf_pagefault(memarea* area, uintptr_t addr, pf_type fault) {
     kprintf("elf_pagefault\n");
     Elf32_Phdr* phdr = (Elf32_Phdr*)area->data.elf_segment;
     paging_map(addr & 0xfffff000, area->data.elf_addr & 0xfffff000, PAGE_PERM_USER);
+    return PF_RESOLVED;
 }
 
 const membackend elf_backend = {

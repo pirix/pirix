@@ -48,14 +48,15 @@ uintptr_t addrspace_sbrk(addrspace* self, int incr) {
     return self->heap.start;
 }
 
-void addrspace_pagefault(addrspace* self, uintptr_t addr) {
+void addrspace_pagefault(addrspace* self, uintptr_t addr, pf_type fault) {
     memarea* area = memarea_find(self->areas, addr);
+    pf_status status = PF_FAULT;
     if (area) {
-        area->backend->pagefault(area, addr);
+        status = area->backend->pagefault(area, addr, fault);
     }
-    else {
+
+    if (status != PF_RESOLVED) {
         panic("unresolvable page fault");
-        while (1);
     }
 }
 

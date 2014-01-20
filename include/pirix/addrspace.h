@@ -19,5 +19,5 @@ typedef struct addrspace {
 addrspace* addrspace_new();
 void addrspace_add_area(addrspace* self, memarea* area);
 uintptr_t addrspace_sbrk(addrspace* self, int incr);
-void addrspace_pagefault(addrspace* self, uintptr_t addr);
+void addrspace_pagefault(addrspace* self, uintptr_t addr, pf_type fault);
 void addrspace_delete(addrspace* self);

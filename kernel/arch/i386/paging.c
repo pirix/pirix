@@ -9,17 +9,39 @@
 #include <pirix/kernel.h>
 #include <pirix/string.h>
 
-uint32_t* page_dir = (uint32_t*)0xffbff000;
-uint32_t* page_tables = (uint32_t*)0xffc00000;
+static uint32_t* page_dir = (uint32_t*)0xffbff000;
+static uint32_t* page_tables = (uint32_t*)0xffc00000;
 
 static pagedir current_pagedir = NULL;
 
 registers* paging_fault(registers* regs) {
     uintptr_t addr;
     asm volatile("mov %%cr2, %0" : "=r"(addr));
-    kprintf("page fault at %p, eip: %p\n", addr, regs->eip);
+
+    kprintf("page fault at %p, eip: %p, ", addr, regs->eip);
+
+    int usermode = regs->err & (1 << 2);
+    int write = regs->err & (1 << 1);
+    int present = regs->err & 1;
+
+    if (!usermode) {
+        panic("kernel page fault");
+    }
+    else {
+        kprintf("user mode, ");
+    }
+
+    pf_type fault_type = write ? PF_WRITE : PF_READ;
+
+    if (write) kprintf("writing, ");
+    else kprintf("reading, ");
+
+    if (present) kprintf("page present\n");
+    else kprintf("page not present\n");
+
     process* proc = scheduler_current_process();
-    addrspace_pagefault(proc->as, addr);
+    addrspace_pagefault(proc->as, addr, fault_type);
+
     return regs;
 }
 
