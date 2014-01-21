@@ -6,7 +6,7 @@ env = target.Clone(
 
 env.Append(
     CFLAGS=["-Wall"],
-    LINKFLAGS=["-nostdlib"]
+    LINKFLAGS=[]
 )
 
 servers = []

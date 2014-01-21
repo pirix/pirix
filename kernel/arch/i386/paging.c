@@ -25,7 +25,7 @@ registers* paging_fault(registers* regs) {
     int present = regs->err & 1;
 
     if (!usermode) {
-        panic("kernel page fault");
+        kprintf("kernel mode, ");
     }
     else {
         kprintf("user mode, ");

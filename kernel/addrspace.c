@@ -12,6 +12,10 @@ addrspace* addrspace_new() {
 }
 
 void addrspace_add_area(addrspace* self, memarea* area) {
+    if (area->backend->open) {
+        area->backend->open(area);
+    }
+
     if (!self->areas) {
         area->next = 0;
         self->areas = area;
@@ -25,10 +29,6 @@ void addrspace_add_area(addrspace* self, memarea* area) {
 
         area->next = curr->next;
         curr->next = area;
-    }
-
-    if (area->backend->open) {
-        area->backend->open(area);
     }
 }
 
