@@ -6,6 +6,7 @@ static void elf_open(memarea* area) {
     Elf32_Phdr* phdr = (Elf32_Phdr*)area->data.elf_segment;
     area->start = phdr->p_vaddr;
     area->end = phdr->p_vaddr + phdr->p_memsz;
+    kprintf("open elf %p-%p (%p)\n", area->start, area->end, area);
 }
 
 static void elf_close(memarea* area) {
@@ -16,10 +17,13 @@ static pf_status elf_pagefault(memarea* area, uintptr_t addr, pf_type fault) {
     Elf32_Phdr* phdr = (Elf32_Phdr*)area->data.elf_segment;
 
     uintptr_t segment_addr = area->data.elf_addr + phdr->p_offset;
-    uintptr_t offset = addr - phdr->p_vaddr;
+    uintptr_t offset = addr - phdr->p_vaddr + phdr->p_offset;
     uintptr_t phys = segment_addr + offset;
 
     paging_map(addr & 0xfffff000, phys & 0xfffff000, PAGE_PERM_USER);
+
+    kprintf("pagefault elf %p (%p -> %p)\n", area, addr & 0xfffff000, phys & 0xfffff000);
+
     return PF_RESOLVED;
 }
 

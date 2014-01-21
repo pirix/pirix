@@ -4,7 +4,7 @@ set default=1
 menuentry "pirix" {
   multiboot /boot/kernel
   module /boot/system
-  module /boot/login
+#  module /boot/login
   boot
 }
 endef
