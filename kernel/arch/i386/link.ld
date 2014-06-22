@@ -32,8 +32,4 @@ SECTIONS {
     }
 
     kernel_end = . - KERNEL_VIRT;
-
-    /DISCARD/ : {
-       *(.eh_frame*)
-    }
 }

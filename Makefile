@@ -28,7 +28,7 @@ qemu: iso
 	qemu-system-i386 -cpu core2duo -serial file:serial.out -cdrom pirix.iso
 
 debug: iso
-	qemu-system-i386 -S -s -cdrom pirix.iso
+	qemu-system-i386 -monitor stdio -S -s -cdrom pirix.iso
 
 boot:
 	mkdir -p boot
