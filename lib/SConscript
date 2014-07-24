@@ -1,6 +1,0 @@
-Import("target")
-
-libs = []
-
-
-Return("libs")

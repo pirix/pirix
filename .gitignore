@@ -1,5 +1,2 @@
+boot/
 build/
-include/config.h
-doc/Doxyfile
-.sconf_temp/
-.sconsign.dblite
