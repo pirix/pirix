@@ -25,8 +25,6 @@ pub unsafe fn init() {
     // mask all IRQs
     io::outb(PIC1+1, 0xff);
     io::outb(PIC2+1, 0xff);
-
-    start();
 }
 
 fn find_pic(irq: u8) -> (u16, u8) {

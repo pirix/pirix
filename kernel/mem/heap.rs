@@ -1,59 +1,63 @@
 use mem;
+use core::prelude::*;
+use core::ptr;
 use core::mem::size_of;
-use core::intrinsics::offset;
 
-static BUCKET_COUNT: uint = 16;
-static mut buckets: [*mut Block, ..BUCKET_COUNT] = [0 as *mut Block, ..BUCKET_COUNT];
 
-struct Block {
-    next: *mut Block
+static sizes: &'static [uint] = &[4, 8, 12, 16, 24, 32, 48, 64, 96, 128,
+                                  192, 256, 384, 512, 768, 1024, 1536,
+                                  2048, 3072, 4092];
+
+static mut buckets: [*mut Slab, ..20] = [0 as *mut Slab, ..20];
+
+#[packed]
+struct Slab {
+    next: *mut Slab
 }
 
-fn find_bucket(size: uint) -> uint {
-    let mut bucket = BUCKET_COUNT;
+unsafe fn find_bucket(size: uint) -> uint {
     let mut i = 0;
-
-    while i < BUCKET_COUNT {
-        if size <= 4*(1 << i) {
-            bucket = i;
-            break;
-        }
+    while size > sizes[i] {
         i += 1;
     }
-
-    return bucket;
+    return i;
 }
 
-unsafe fn create_slab(bucket: uint) -> *mut Block {
-    let addr: uint = mem::frame::alloc();
-    let addrsize: uint = size_of::<uint>();
-    let slab: uint = addr; // mem::paging::map_kernel(addr, 0x1000);
-    let mut i: uint = 0;
-
-    while i < 0x1000/addrsize {
-        let entry: *uint = offset(slab as *uint, i as int);
-        free(entry, addrsize*(1 << bucket));
-        i += 1 << bucket;
-    }
-
-    return addr as *mut Block;
-}
-
-pub unsafe fn alloc(size: uint) -> *uint {
+unsafe fn new_bucket(size: uint) {
+    let addr: *mut Slab = mem::frame::alloc();
+    let slab = mem::paging::kernel_map(addr);
+    let data = (slab as uint) as *mut Slab;
     let bucket = find_bucket(size);
 
-    if buckets[bucket] as int == 0 {
-        buckets[bucket] = create_slab(bucket);
+    for i in range(0, 0x1000 / size) {
+        let index = (size / size_of::<Slab>()) * i;
+        let entry = data.offset(index as int);
+        (*entry).next = buckets[bucket];
+        buckets[bucket] = entry;
     }
-
-    let block = buckets[bucket];
-    buckets[bucket] = (*block).next;
-    return block as *uint;
 }
 
-pub unsafe fn free(addr: *uint, size: uint) {
+#[lang="exchange_malloc"]
+pub unsafe fn alloc(size: uint, align: uint) -> *mut u8 {
     let bucket = find_bucket(size);
-    let block = addr as *mut Block;
-    (*block).next = buckets[bucket];
-    buckets[bucket] = block;
+
+    if buckets[bucket].is_null() {
+        new_bucket(size);
+    }
+
+    let slab = buckets[bucket];
+    buckets[bucket] = (*slab).next;
+
+    println!("alloc {} in {}", slab, bucket);
+    return slab as *mut u8;
+}
+
+#[lang="exchange_free"]
+pub unsafe fn free(addr: *mut u8, size: uint, align: uint) {
+    let bucket = find_bucket(size);
+    let slab = addr as *mut Slab;
+    (*slab).next = buckets[bucket];
+    buckets[bucket] = slab;
+
+    println!("free {} in {}", slab, bucket);
 }

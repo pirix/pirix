@@ -63,18 +63,18 @@ impl FrameStack {
 static mut stack: FrameStack = FrameStack { top: 0 as *mut uint, pos: 0 };
 
 pub fn init() {
-    let mut addr = 0x500000;
+    let mut addr = 0x100000;
 
-    while addr < 0x100000 {
+    while addr < 0x1000000 {
         unsafe { stack.push(addr); }
         addr += 0x1000;
     }
 }
 
-pub fn alloc() -> uint {
-    unsafe { return stack.pop(); }
+pub fn alloc<T>() -> *mut T {
+    unsafe { stack.pop() as *mut T }
 }
 
-pub fn free(addr: uint) {
-    unsafe { stack.push(addr); }
+pub fn free<T>(ptr: *T) {
+    unsafe { stack.push(ptr as uint) }
 }

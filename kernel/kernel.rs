@@ -13,14 +13,16 @@ mod std {
     pub use core::option;
 }
 
-#[path = "../arch/i386/mod.rs"]
-pub mod arch;
-
+#[macro_escape]
 pub mod debug;
 pub mod irq;
 pub mod timer;
 pub mod mem;
 pub mod support;
+
+#[path = "../arch/i386/mod.rs"]
+pub mod arch;
+
 
 #[no_mangle]
 pub unsafe fn syscall() {
@@ -39,6 +41,7 @@ pub fn main() {
     mem::init();
     irq::init();
     timer::init();
+    irq::start();
     debug::println("Interrupts started");
 }
 
@@ -47,6 +50,8 @@ pub fn main() {
 #[lang = "eh_personality"] extern fn eh_personality() {}
 #[lang="begin_unwind"]
 unsafe extern "C" fn begin_unwind(fmt: &fmt::Arguments, file: &str, line: uint) -> ! {
-    debug::println("Problem!");
+    irq::stop();
+    println!("Problem at {}:{}:", file, line);
+    println!("{}", fmt);
     loop { };
 }

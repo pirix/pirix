@@ -1,5 +1,3 @@
-#![macro_escape]
-
 pub use arch::debug::init;
 pub use arch::debug::putchar;
 
