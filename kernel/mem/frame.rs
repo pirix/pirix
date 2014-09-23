@@ -1,5 +1,7 @@
+use core::prelude::*;
 use core::mem::size_of;
 use core::intrinsics::offset;
+use arch::paging;
 use arch;
 
 struct FrameStack {
@@ -62,17 +64,31 @@ impl FrameStack {
 
 static mut stack: FrameStack = FrameStack { top: 0 as *mut uint, pos: 0 };
 
-pub fn init() {
-    let mut addr = 0x100000;
+pub fn add_memory(base: uint, length: uint) {
+    let mut start = base & 0xfffff000;
+    let mut length = length;
 
-    while addr < 0x1000000 {
-        unsafe { stack.push(addr); }
-        addr += 0x1000;
+    if start < base {
+        start += 0x1000;
+        length -= start - base;
+    }
+
+    let pages = length / 0x1000;
+
+    for i in range(0, pages) {
+        let addr = (start + i*0x1000);
+        free(addr as *uint);
     }
 }
 
 pub fn alloc<T>() -> *mut T {
-    unsafe { stack.pop() as *mut T }
+    unsafe {
+        let addr = stack.pop();
+        if addr == 0 {
+            fail!("out of memory");
+        }
+        addr as *mut T
+    }
 }
 
 pub fn free<T>(ptr: *T) {

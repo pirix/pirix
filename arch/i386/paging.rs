@@ -7,10 +7,13 @@ use core::ptr::{zero_memory, copy_memory};
 #[packed] pub struct PageTable { entries: [uint, ..1024] }
 #[packed] pub struct PageDir { entries: [uint, ..1024] }
 
-static page_dir : *mut PageDir = 0xffbff000u as *mut PageDir;
-static page_tables : *mut uint = 0xffc00000u as *mut uint;
+static page_dir: *mut PageDir = 0xffbff000u as *mut PageDir;
+static page_tables: *mut uint = 0xffc00000u as *mut uint;
 
-extern { static mut boot_page_dir: PageDir; }
+extern {
+    static mut boot_page_dir: PageDir;
+    static mut kernel_page_tables: [PageTable, ..256];
+}
 
 impl PageDir {
     pub unsafe fn new() -> *mut PageDir {
@@ -75,11 +78,12 @@ impl PageTable {
 }
 
 pub unsafe fn init() {
-    let dir: *mut PageDir = &mut boot_page_dir;
+    let physdir: *mut PageDir = &mut boot_page_dir;
+    let dir = ((physdir as uint) + 0xc0000000) as *mut PageDir;
 
     // create kernel pages
     for i in range(768, 1023u) {
-        let table = PageTable::new();
+        let table = kernel_page_tables.get_mut(i-768).unwrap() as *mut PageTable;
         (*table).clear();
 
         if i == 768 {
@@ -91,12 +95,13 @@ pub unsafe fn init() {
             (*table).set(1023, dir as uint, 0x3);
         }
 
-        (*dir).set(i, table, 0x3);
+        let phystable = (table as uint - 0xc0000000) as *mut PageTable;
+        (*dir).set(i, phystable, 0x3);
     }
 
-    (*dir).set(1023, dir as *mut PageTable, 0x3);
+    (*dir).set(1023, physdir as *mut PageTable, 0x3);
 
-    activate_pagedir(dir);
+    activate_pagedir(physdir);
 }
 
 pub unsafe fn map(virt: uint, phys: uint, flags: uint) {
@@ -125,6 +130,18 @@ pub unsafe fn unmap(virt: uint) {
     (*table).set(ptidx, 0, 0);
 
     invlpg(virt);
+}
+
+pub unsafe fn getphys<T>(virt: *mut T) -> *mut T {
+    let virt = virt as uint;
+
+    let pdidx = virt >> 22;
+    let ptidx = (virt >> 12) & 0x3ff;
+
+    let table = PageTable::at(pdidx);
+    let entry = (*table).get(ptidx);
+
+    return ((entry & 0xfffff000) | (virt & 0xfff)) as *mut T;
 }
 
 fn calculate_page_count<T>(addr: *mut T) -> uint {

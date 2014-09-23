@@ -39,10 +39,10 @@ pub fn main() {
     debug::init();
     debug::println("Booting Pirix 0.1");
     mem::init();
+    arch::init();
     irq::init();
     timer::init();
     irq::start();
-    debug::println("Interrupts started");
 }
 
 

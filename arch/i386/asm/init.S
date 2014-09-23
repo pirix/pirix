@@ -6,15 +6,6 @@
 loader:
     cli
 
-    // enable SSE
-    movl %cr0, %eax
-    and $0xFFFB, %ax
-    or $0x2, %ax
-    mov %eax, %cr0
-    mov %cr4, %eax
-    or $(3 << 9), %ax
-    mov %eax, %cr4
-
     // set temporary page directory
     movl $boot_page_dir, %ecx
     movl %ecx, %cr3
@@ -29,16 +20,25 @@ loader:
     or $0x80000000, %ecx
     movl %ecx, %cr0
 
+    // save multiboot args
+    movl %eax, mb_magic
+    movl %ebx, mb_info
+
     // setup kernel stack
     movl $kernel_stack, %esp
-
-    // push multiboot args
-    push %ebx
-    push %eax
 
     // initialize gdt and idt
     call setup_gdt
     call setup_idt
+
+    // enable SSE
+    movl %cr0, %eax
+    and $0xfffb, %ax
+    or $0x2, %ax
+    mov %eax, %cr0
+    mov %cr4, %eax
+    or $(3 << 9), %ax
+    mov %eax, %cr4
 
     // jump to higher half
     ljmp $0x08, $init
@@ -71,12 +71,7 @@ boot_page_dir:
 
 .section .text
 init:
-    // remove multiboot args from stack
-    add $8, %esp
-
-    // pass boot_info to main
     movl $0, %gs:0x30
-    push %eax
     call main
 
 1:
@@ -89,9 +84,23 @@ idle:
     jmp idle
 
 .section .bss
+
+.align 4
+.global mb_magic
+mb_magic:
+    .long 0
+
+.align 4
+.global mb_info
+mb_info:
+    .long 0
+
+.align 4
+kernel_stack_end:
     .space 0x1000
 kernel_stack:
 
-.global __morestack
-__morestack:
-    jmp .
+.align 0x1000
+.global kernel_page_tables
+kernel_page_tables:
+    .space 0x100000

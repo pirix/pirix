@@ -8,7 +8,7 @@ struct DebugWriter;
 
 impl DebugWriter {
     fn write_fmt(&mut self, fmt: &fmt::Arguments) {
-        fmt::write(self, fmt);
+        let _ = fmt::write(self, fmt);
     }
 }
 
