@@ -1,14 +1,12 @@
 ARCH ?= i386
-TARGET = i686-unknown-linux-gnu
 
 AS = $(ARCH)-elf-pirix-as
-LD = $(ARCH)-elf-pirix-ld
 
-CLANG = clang
-CLANGFLAGS = -g -ffreestanding -target $(TARGET)
+LD = $(ARCH)-elf-pirix-ld
+LDFLAGS = -z max-page-size=0x1000 --gc-sections -T arch/$(ARCH)/link.ld
 
 RUSTC = rustc
-RUSTFLAGS = -g -Z no-landing-pads -Z lto --target=$(TARGET)
+RUSTFLAGS = -g -C opt-level=0 --target=arch/$(ARCH)/target.json
 
 ARCHOBJS = arch/i386/asm/init.o \
            arch/i386/asm/gdt.o \
@@ -16,17 +14,16 @@ ARCHOBJS = arch/i386/asm/init.o \
 
 all: build/kernel.elf
 
-build/kernel.elf: build/kernel.o $(ARCHOBJS)
-	$(LD) -T arch/$(ARCH)/link.ld -o $@ $^
+build/kernel.elf: build/kernel.o build/libcore.rlib $(ARCHOBJS)
+	$(LD) $(LDFLAGS) -o $@ $^
 
-build/kernel.o: build/kernel.bc
-	$(CLANG) $(CLANGFLAGS) -c -o $@ $<
+build/libcore.rlib: libcore/lib.rs
+	mkdir -p build
+	$(RUSTC) $(RUSTFLAGS) --out-dir build/ --crate-type=lib --emit=link,dep-info $<
 
-build/kernel.bc: kernel/kernel.rs build
-	$(RUSTC) $(RUSTFLAGS) --dep-info --emit bc $< -o $@
-
-build:
-	mkdir build
+build/kernel.o: kernel/kernel.rs build/libcore.rlib
+	mkdir -p build
+	$(RUSTC) $(RUSTFLAGS) --out-dir build/ --emit=obj,dep-info $< --extern core=build/libcore.rlib
 
 .S.o:
 	$(AS) -o $@ $<
@@ -34,9 +31,9 @@ build:
 .SUFFIXES: .o .S
 
 clean:
-	rm -f $(ARCHOBJS) build/kernel.elf build/kernel.bc build/kernel.o build/pirix.iso
+	rm -f $(ARCHOBJS) build/kernel.elf build/kernel.o build/pirix.iso
 
--include build/kernel.d
+-include build/kernel.d build/libcore.d
 
 #
 # QEMU
@@ -45,8 +42,11 @@ clean:
 qemu: iso
 	qemu-system-i386 -monitor stdio -cdrom build/pirix.iso
 
+qemu-serial: iso
+	qemu-system-i386 -serial stdio -cdrom build/pirix.iso
+
 qemu-log: iso
-	qemu-system-i386 -monitor stdio -cdrom build/pirix.iso -no-reboot -d in_asm
+	qemu-system-i386 -serial stdio -monitor stdio -cdrom build/pirix.iso -no-reboot -d in_asm
 
 debug: iso
 	tmux new-session -d -s pirix "qemu-system-i386 -monitor stdio \

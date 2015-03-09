@@ -1,4 +1,4 @@
-#[packed]
+#[repr(packed)]
 #[allow(dead_code)]
 pub struct State {
     gs: u32, ds: u32,

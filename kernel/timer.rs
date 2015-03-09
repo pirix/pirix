@@ -7,7 +7,7 @@ unsafe fn tick(_: &mut cpu::State) {
     ticks += 1;
 
     if ticks % 20 == 0 {
-        println!("tick {}", ticks);
+        log!("tick {}", ticks);
     }
 }
 

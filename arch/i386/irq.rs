@@ -39,23 +39,23 @@ fn find_pic(irq: u8) -> (u16, u8) {
     }
 }
 
-pub unsafe fn allow(irq: uint) {
+pub unsafe fn allow(irq: usize) {
     let (pic, base) = find_pic(irq as u8);
 
     if pic == 0 { return; }
 
     let mut mask: u8 = io::inb(pic+1);
-    mask &= !(1u8 << irq - (base as uint));
+    mask &= !(1u8 << irq - (base as usize));
     io::outb(pic+1, mask);
 }
 
-pub unsafe fn disallow(irq: uint) {
+pub unsafe fn disallow(irq: usize) {
     let (pic, base) = find_pic(irq as u8);
 
     if pic == 0 { return; }
 
     let mut mask: u8 = io::inb(pic+1);
-    mask |= 1u8 << irq - (base as uint);
+    mask |= 1u8 << irq - (base as usize);
     io::outb(pic+1, mask);
 }
 
@@ -69,7 +69,7 @@ pub unsafe fn stop() {
     asm!("cli");
 }
 
-pub unsafe fn clear(irq: uint) {
+pub unsafe fn clear(irq: usize) {
     let (pic, _) = find_pic(irq as u8);
 
     if pic != 0 {

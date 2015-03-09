@@ -2,11 +2,11 @@ mod video {
     use arch::io;
     use core::prelude::*;
 
-    static vmem : uint = 0xc00b8000;
-    static mut pos : (uint, uint) = (0, 0);
+    static vmem : usize = 0xc00b8000;
+    static mut pos : (usize, usize) = (0, 0);
 
     pub unsafe fn clear() {
-        for i in range(0u, 80*25) {
+        for i in range(0us, 80*25) {
             *((vmem + i*2) as *mut u16) = 0;
         }
     }
@@ -16,22 +16,22 @@ mod video {
     }
 
     unsafe fn scroll() {
-        for i in range(0u, 80u*24u) {
+        for i in range(0us, 80us*24us) {
             *((vmem + i*2) as *mut u16) = *((vmem + (i+80)*2) as *mut u16);
         }
-        for i in range(80u*24u, 80u*25u) {
+        for i in range(80us*24us, 80us*25us) {
             *((vmem + i*2) as *mut u16) = 0;
         }
     }
 
     unsafe fn cursor() {
         let (x, y) = pos;
-        let pos = y*80 + x;
+        let index = y*80 + x;
 
         io::outb(0x3d4, 14);
-        io::outb(0x3d5, (pos >> 8) as u8);
+        io::outb(0x3d5, (index >> 8) as u8);
         io::outb(0x3d4, 15);
-        io::outb(0x3d5, pos as u8);
+        io::outb(0x3d5, index as u8);
     }
 
     pub unsafe fn putchar(c: char) {

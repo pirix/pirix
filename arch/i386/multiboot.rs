@@ -1,8 +1,7 @@
-use core::prelude::*;
 use core::u32;
 use mem;
 
-#[packed]
+#[repr(packed)]
 #[allow(dead_code)]
 struct MultibootInfo {
     flags: u32,
@@ -11,13 +10,13 @@ struct MultibootInfo {
     boot_device: u32,
     cmdline: u32,
     mod_count: u32,
-    mods: *Module,
+    mods: *const Module,
     elf_num: u32,
     elf_size: u32,
     elf_addr: u32,
     elf_shndx: u32,
     mmap_length: u32,
-    mmap: *MmapEntry,
+    mmap: *const MmapEntry,
     drives_length: u32,
     drives_addr: u32,
     config_table: u32,
@@ -31,7 +30,7 @@ struct MultibootInfo {
     vbe_interface_len: u16
 }
 
-#[packed]
+#[repr(packed)]
 #[allow(dead_code)]
 struct MmapEntry {
     size: u32,
@@ -40,7 +39,7 @@ struct MmapEntry {
     mem_type: u32
 }
 
-#[packed]
+#[repr(packed)]
 #[allow(dead_code)]
 struct Module {
     start: u32,
@@ -51,14 +50,14 @@ struct Module {
 
 extern {
     static mb_magic: u32;
-    static mb_info: *MultibootInfo;
+    static mb_info: *const MultibootInfo;
 }
 
-unsafe fn read_mmap(mmap: *MmapEntry, mmap_length: uint) {
-    let mut entry: *MmapEntry = mmap;
-    let end = (mmap as uint) + mmap_length;
+unsafe fn read_mmap(mmap: *const MmapEntry, mmap_length: usize) {
+    let mut entry: *const MmapEntry = mmap;
+    let end = (mmap as usize) + mmap_length;
 
-    while (entry as uint) < end {
+    while (entry as usize) < end {
         let mut usable = true;
         let base = (*entry).base;
         let mut length = (*entry).length;
@@ -71,21 +70,19 @@ unsafe fn read_mmap(mmap: *MmapEntry, mmap_length: uint) {
         }
 
         if usable {
-            mem::frame::add_memory(base as uint, length as uint);
+            mem::frame::add_memory(base as usize, length as usize);
         }
 
-        entry = ((entry as u32) + (*entry).size + 4) as *MmapEntry;
+        entry = ((entry as u32) + (*entry).size + 4) as *const MmapEntry;
     }
 }
 
 pub fn init() {
     if mb_magic != 0x2badb002 {
-        fail!("invalid multiboot magic");
+        panic!("invalid multiboot magic");
     }
 
-    let info = unsafe { *mb_info };
-
-    unsafe {
-        read_mmap(info.mmap, info.mmap_length as uint);
+     unsafe {
+        read_mmap((*mb_info).mmap, (*mb_info).mmap_length as usize);
     }
 }

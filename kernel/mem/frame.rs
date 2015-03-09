@@ -5,35 +5,35 @@ use arch::paging;
 use arch;
 
 struct FrameStack {
-    top: *mut uint,
-    pos: uint
+    top: *mut usize,
+    pos: usize
 }
 
 impl FrameStack {
-    fn max_pos(&self) -> uint {
-        arch::PAGE_SIZE/size_of::<uint>()
+    fn max_pos(&self) -> usize {
+        arch::PAGE_SIZE/size_of::<usize>()
     }
 
-    fn get(&self, index: uint) -> uint {
-        let top = self.top as *uint;
+    fn get(&self, index: usize) -> usize {
+        let top = self.top as *const usize;
         unsafe {
-            let field = offset(top, index as int);
+            let field = offset(top, index as isize);
             return *field;
         }
     }
 
-    fn set(&mut self, index: uint, value: uint) {
-        let top = self.top as *uint;
+    fn set(&mut self, index: usize, value: usize) {
+        let top = self.top as *const usize;
         unsafe {
-            let field = offset(top, index as int) as *mut uint;
+            let field = offset(top, index as isize) as *mut usize;
             *field = value;
         }
     }
 
-    pub fn push(&mut self, addr: uint) {
+    pub fn push(&mut self, addr: usize) {
         if self.pos % self.max_pos() == 0 {
-            let last = self.top as uint;
-            self.top = addr as *mut uint;
+            let last = self.top as usize;
+            self.top = addr as *mut usize;
             self.set(0, last);
             self.pos = 1;
         }
@@ -44,13 +44,13 @@ impl FrameStack {
         }
     }
 
-    pub fn pop(&mut self) -> uint {
-        if self.top as uint == 0 {
+    pub fn pop(&mut self) -> usize {
+        if self.top as usize == 0 {
             return 0;
         }
-        else if self.pos as uint == 1 {
-            let addr = self.top as uint;
-            self.top = self.get(0) as *mut uint;
+        else if self.pos as usize == 1 {
+            let addr = self.top as usize;
+            self.top = self.get(0) as *mut usize;
             self.pos = self.max_pos() - 1;
             return addr;
         }
@@ -62,9 +62,9 @@ impl FrameStack {
     }
 }
 
-static mut stack: FrameStack = FrameStack { top: 0 as *mut uint, pos: 0 };
+static mut stack: FrameStack = FrameStack { top: 0 as *mut usize, pos: 0 };
 
-pub fn add_memory(base: uint, length: uint) {
+pub fn add_memory(base: usize, length: usize) {
     let mut start = base & 0xfffff000;
     let mut length = length;
 
@@ -76,8 +76,8 @@ pub fn add_memory(base: uint, length: uint) {
     let pages = length / 0x1000;
 
     for i in range(0, pages) {
-        let addr = (start + i*0x1000);
-        free(addr as *uint);
+        let addr = start + i*0x1000;
+        free(addr as *mut usize);
     }
 }
 
@@ -85,12 +85,12 @@ pub fn alloc<T>() -> *mut T {
     unsafe {
         let addr = stack.pop();
         if addr == 0 {
-            fail!("out of memory");
+            panic!("out of memory");
         }
         addr as *mut T
     }
 }
 
-pub fn free<T>(ptr: *T) {
-    unsafe { stack.push(ptr as uint) }
+pub fn free<T>(ptr: *mut T) {
+    unsafe { stack.push(ptr as usize) }
 }

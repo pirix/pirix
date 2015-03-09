@@ -1,10 +1,10 @@
-use core::option::{Option, Some, None};
+use core::option::Option;
 
 use arch;
 use arch::cpu;
 
 pub type IrqHandler = unsafe fn(&mut cpu::State);
-static mut handlers: [Option<IrqHandler>, ..255] = [None, ..255];
+static mut handlers: [Option<IrqHandler>; 255] = [Option::None; 255];
 
 pub fn init() {
     unsafe { arch::irq::init(); }
@@ -20,23 +20,23 @@ pub fn stop() {
     unsafe { arch::irq::stop(); }
 }
 
-pub fn register(irq: uint, handler: IrqHandler) {
+pub fn register(irq: usize, handler: IrqHandler) {
     unsafe {
-        handlers[irq] = Some(handler);
+        handlers[irq] = Option::Some(handler);
         arch::irq::allow(irq);
     }
 }
 
-pub fn unregister(irq: uint) {
+pub fn unregister(irq: usize) {
     unsafe {
-        handlers[irq] = None;
+        handlers[irq] = Option::None;
         arch::irq::disallow(irq);
     }
 }
 
 #[no_mangle]
 pub extern "C" fn irq_handle<'a>(state: &'a mut cpu::State) -> &'a mut cpu::State {
-    let irq = state.irq as uint;
+    let irq = state.irq as usize;
 
     unsafe {
         arch::irq::clear(irq);
@@ -45,7 +45,7 @@ pub extern "C" fn irq_handle<'a>(state: &'a mut cpu::State) -> &'a mut cpu::Stat
             handler(state);
         }
         else {
-            println!("unhandled interrupt {}", irq);
+            log!("unhandled interrupt {}", irq);
         }
     }
 

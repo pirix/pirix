@@ -4,15 +4,19 @@ use core::iter::range_step;
 use core::mem::size_of;
 use core::ptr::{zero_memory, copy_memory};
 
-#[packed] pub struct PageTable { entries: [uint, ..1024] }
-#[packed] pub struct PageDir { entries: [uint, ..1024] }
+#[repr(packed)] pub struct PageTable { entries: [usize; 1024] }
+#[repr(packed)] pub struct PageDir { entries: [usize; 1024] }
+#[repr(packed)] pub struct PageTableDir { entries: [usize; 1024*1024] }
 
-static page_dir: *mut PageDir = 0xffbff000u as *mut PageDir;
-static page_tables: *mut uint = 0xffc00000u as *mut uint;
+unsafe impl Sync for *mut PageDir {}
+unsafe impl Sync for *mut PageTableDir {}
+
+static page_dir: *mut PageDir = 0xffbff000us as *mut PageDir;
+static page_tables: *mut PageTableDir = 0xffc00000us as *mut PageTableDir;
 
 extern {
     static mut boot_page_dir: PageDir;
-    static mut kernel_page_tables: [PageTable, ..256];
+    static mut kernel_page_tables: [PageTable; 256];
 }
 
 impl PageDir {
@@ -26,9 +30,10 @@ impl PageDir {
         zero_memory(vtable, 1024);
         zero_memory(vdir, 768);
 
-        copy_memory(vdir.offset(768), page_dir.offset(768) as *PageDir, 256);
+        let kernel_tables = page_dir.offset(768) as *const PageDir;
+        copy_memory(vdir.offset(768), kernel_tables, 256);
 
-        (*vtable).set(1023, dir.to_uint(), 0x3);
+        (*vtable).set(1023, dir as usize, 0x3);
         (*vdir).set(1022, table, 0x3);
         (*vdir).set(1023, dir as *mut PageTable, 0x3);
 
@@ -38,15 +43,15 @@ impl PageDir {
         return dir;
     }
 
-    pub fn set(&mut self, index: uint, table: *mut PageTable, flags: uint) {
-        self.entries[index] = table.to_uint() | flags;
+    pub fn set(&mut self, index: usize, table: *mut PageTable, flags: usize) {
+        self.entries[index] = table as usize | flags;
     }
 
-    pub fn get(&self, index: uint) -> uint {
+    pub fn get(&self, index: usize) -> usize {
         self.entries[index]
     }
 
-    pub fn get_table(&self, index: uint) -> *mut PageTable {
+    pub fn get_table(&self, index: usize) -> *mut PageTable {
         (self.entries[index] & 0xfffff000) as *mut PageTable
     }
 }
@@ -56,46 +61,52 @@ impl PageTable {
         return frame::alloc();
     }
 
-    pub unsafe fn at(index: uint) -> *mut PageTable {
-        page_tables.offset((index*1024) as int) as *mut PageTable
+    pub unsafe fn at(index: usize) -> *mut PageTable {
+        page_tables.offset((index*1024) as isize) as *mut PageTable
     }
 
     pub unsafe fn clear(&mut self) {
         zero_memory(self.entries.as_mut_ptr(), 1024);
     }
 
-    pub fn set(&mut self, index: uint, page: uint, flags: uint) {
+    pub fn set(&mut self, index: usize, page: usize, flags: usize) {
         self.entries[index] = page | flags;
     }
 
-    pub fn get(&self, index: uint) -> uint {
+    pub fn get(&self, index: usize) -> usize {
         self.entries[index]
     }
 
-    pub fn get_page(&self, index: uint) -> uint {
+    pub fn get_page(&self, index: usize) -> usize {
         self.entries[index] & 0xfffff000
     }
 }
 
 pub unsafe fn init() {
     let physdir: *mut PageDir = &mut boot_page_dir;
-    let dir = ((physdir as uint) + 0xc0000000) as *mut PageDir;
+    let dir = ((physdir as usize) + 0xc0000000) as *mut PageDir;
 
     // create kernel pages
-    for i in range(768, 1023u) {
+    for i in range(768, 1023us) {
         let table = kernel_page_tables.get_mut(i-768).unwrap() as *mut PageTable;
+
+        loop {}
+
         (*table).clear();
 
         if i == 768 {
-            for j in range(0, 1024u) {
+            for j in range(0, 1024us) {
                 (*table).set(j, j*0x1000, 0x103);
             }
         }
         else if i == 1022 {
-            (*table).set(1023, dir as uint, 0x3);
+            (*table).set(1023, dir as usize, 0x3);
         }
 
-        let phystable = (table as uint - 0xc0000000) as *mut PageTable;
+        log!("Holding");
+        loop {}
+
+        let phystable = (table as usize - 0xc0000000) as *mut PageTable;
         (*dir).set(i, phystable, 0x3);
     }
 
@@ -104,7 +115,7 @@ pub unsafe fn init() {
     activate_pagedir(physdir);
 }
 
-pub unsafe fn map(virt: uint, phys: uint, flags: uint) {
+pub unsafe fn map(virt: usize, phys: usize, flags: usize) {
     let pdidx = virt >> 22;
     let ptidx = (virt >> 12) & 0x3ff;
 
@@ -112,7 +123,7 @@ pub unsafe fn map(virt: uint, phys: uint, flags: uint) {
         let table = PageTable::new();
         (*page_dir).set(pdidx, table, flags | 0x3);
         let vtable = PageTable::at(pdidx);
-        invlpg(vtable as uint);
+        invlpg(vtable as usize);
         (*vtable).clear();
     }
 
@@ -122,7 +133,7 @@ pub unsafe fn map(virt: uint, phys: uint, flags: uint) {
     invlpg(virt);
 }
 
-pub unsafe fn unmap(virt: uint) {
+pub unsafe fn unmap(virt: usize) {
     let pdidx = virt >> 22;
     let ptidx = (virt >> 12) & 0x3ff;
 
@@ -133,7 +144,7 @@ pub unsafe fn unmap(virt: uint) {
 }
 
 pub unsafe fn getphys<T>(virt: *mut T) -> *mut T {
-    let virt = virt as uint;
+    let virt = virt as usize;
 
     let pdidx = virt >> 22;
     let ptidx = (virt >> 12) & 0x3ff;
@@ -144,22 +155,22 @@ pub unsafe fn getphys<T>(virt: *mut T) -> *mut T {
     return ((entry & 0xfffff000) | (virt & 0xfff)) as *mut T;
 }
 
-fn calculate_page_count<T>(addr: *mut T) -> uint {
+fn calculate_page_count<T>(addr: *mut T) -> usize {
     let size = size_of::<T>();
     let mut page_count = (size+0x1000-1) / 0x1000;
 
-    if (addr.to_uint() % 0x1000) + size > 0x1000 {
+    if (addr as usize % 0x1000) + size > 0x1000 {
         page_count += 1;
     }
 
     return page_count;
 }
 
-unsafe fn find_mapping_area(page_count: uint) -> uint {
+unsafe fn find_mapping_area(page_count: usize) -> usize {
     let mut continous_start = 0;
     let mut continous_count = 0;
 
-    for virt in range_step(0xd0000000, 0xe0000000, 0x1000u) {
+    for virt in range_step(0xd0000000, 0xe0000000, 0x1000us) {
         let table = PageTable::at(virt >> 22);
         let index = virt >> 12 & 0x3ff;
 
@@ -189,15 +200,15 @@ pub unsafe fn kernel_map<T>(addr: *mut T) -> *mut T {
     let mapping_area = find_mapping_area(page_count);
 
     if mapping_area == 0 {
-        fail!("kernel mapping area full");
+        panic!("kernel mapping area full");
     }
 
-    for i in range (0, page_count) {
+    for i in range(0, page_count) {
         let virt = mapping_area + i*0x1000;
-        map(virt, addr.to_uint() + i*0x1000, 0x103);
+        map(virt, addr as usize + i*0x1000, 0x103);
     }
 
-    let vaddr = mapping_area + (addr.to_uint() & 0xfff);
+    let vaddr = mapping_area + (addr as usize & 0xfff);
 
     return vaddr as *mut T;
 }
@@ -205,8 +216,8 @@ pub unsafe fn kernel_map<T>(addr: *mut T) -> *mut T {
 pub unsafe fn kernel_unmap<T>(addr: *mut T) {
     let page_count = calculate_page_count(addr);
 
-    for i in range (0, page_count) {
-        let virt = (addr as uint) + i*0x1000;
+    for i in range(0, page_count) {
+        let virt = (addr as usize) + i*0x1000;
         unmap(virt);
     }
 }
@@ -215,6 +226,6 @@ pub unsafe fn activate_pagedir(dir: *mut PageDir) {
     asm!("mov $0, %cr3" :: "r"(dir));
 }
 
-unsafe fn invlpg(addr: uint) {
+unsafe fn invlpg(addr: usize) {
     asm!("invlpg [$0]" :: "r"(addr) : "memory" : "volatile", "intel");
 }
