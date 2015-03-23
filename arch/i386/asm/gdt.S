@@ -4,11 +4,11 @@ setup_gdt:
     // write tss address into gdt
     movl $gdt_tss, %eax
     movl $tss, %ebx
-    movw %bx, 2(%eax) // base 0:15
+    movw %bx, 2(%eax) # base 0:15
     shr $16, %ebx
-    movb %bl, 4(%eax) // base 16:23
+    movb %bl, 4(%eax) # base 16:23
     shr $8, %ebx
-    movb %bl, 7(%eax) // base 24:31
+    movb %bl, 7(%eax) # base 24:31
 
     // load gdt and set segment registers
     lgdt gdt_ptr
@@ -57,7 +57,7 @@ gdt_ptr:
 .global tss
 tss:
     .long 0x0
-    .long 0x0, 0x10 // esp0, ss0
-    .long 0x0, 0x0  // esp1, ss1
-    .long 0x0, 0x0  // esp2, ss2
+    .long 0x0, 0x10 # esp0, ss0
+    .long 0x0, 0x0  # esp1, ss1
+    .long 0x0, 0x0  # esp2, ss2
     .space 19*4

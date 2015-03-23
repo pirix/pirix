@@ -116,15 +116,15 @@ irq_stub_\nr:
 .endm
 
 .macro set_gate nr isr flags
-    movl $idt+\nr*8, %eax // idt offset
+    movl $idt+\nr*8, %eax # idt offset
     movl $\isr, %ebx
 
-    movw %bx, (%eax) // base 0-15
-    movw $0x08, 2(%eax) // selector
-    movb $0x00, 4(%eax) // zeros
-    movb $\flags, 5(%eax) // flags
+    movw %bx, (%eax) # base 0-15
+    movw $0x08, 2(%eax) # selector
+    movb $0x00, 4(%eax) # zeros
+    movb $\flags, 5(%eax) # flags
     shr $16, %ebx
-    movw %bx, 6(%eax) // base 16-31
+    movw %bx, 6(%eax) # base 16-31
 .endm
 
 .global setup_idt

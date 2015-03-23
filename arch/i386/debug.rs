@@ -1,13 +1,12 @@
 mod video {
     use arch::io;
-    use core::prelude::*;
 
-    static vmem : usize = 0xc00b8000;
+    static VMEM : usize = 0xc00b8000;
     static mut pos : (usize, usize) = (0, 0);
 
     pub unsafe fn clear() {
-        for i in range(0us, 80*25) {
-            *((vmem + i*2) as *mut u16) = 0;
+        for i in (0..80*25) {
+            *((VMEM + i*2) as *mut u16) = 0;
         }
     }
 
@@ -16,11 +15,11 @@ mod video {
     }
 
     unsafe fn scroll() {
-        for i in range(0us, 80us*24us) {
-            *((vmem + i*2) as *mut u16) = *((vmem + (i+80)*2) as *mut u16);
+        for i in (0..80*24) {
+            *((VMEM + i*2) as *mut u16) = *((VMEM + (i+80)*2) as *mut u16);
         }
-        for i in range(80us*24us, 80us*25us) {
-            *((vmem + i*2) as *mut u16) = 0;
+        for i in (80*24..80*25) {
+            *((VMEM + i*2) as *mut u16) = 0;
         }
     }
 
@@ -46,7 +45,7 @@ mod video {
                 x = 0;
             },
             _ => {
-                let addr = (vmem + (x + y*80)*2) as *mut u16;
+                let addr = (VMEM + (x + y*80)*2) as *mut u16;
                 *addr = 0x0f << 8 | (c as u16);
                 x += 1;
             }

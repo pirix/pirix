@@ -3,7 +3,6 @@
 
 #[macro_use]
 extern crate core;
-use core::str::StrExt;
 
 mod std {
     pub use core::fmt;
@@ -38,8 +37,6 @@ pub unsafe fn scheduler_schedule() {
 pub fn main() {
     debug::init();
     debug::println("Booting Pirix 0.1");
-    panic!("AArgh!");
-    loop {};
     mem::init();
     arch::init();
     irq::init();
@@ -48,8 +45,7 @@ pub fn main() {
 }
 
 #[lang="panic_fmt"]
-#[no_mangle]
-pub fn rust_begin_unwind(args: &std::fmt::Arguments, file: &str, line: usize) -> ! {
+pub extern fn rust_begin_unwind(args: core::fmt::Arguments, file: &'static str, line: usize) -> ! {
     irq::stop();
     log!("Problem at {}:{}: {}", file, line, args);
     loop { };
@@ -65,10 +61,4 @@ pub fn __morestack() -> ! {
 #[no_mangle]
 pub fn rust_eh_personality() -> ! {
   loop {}
-}
-
-#[no_mangle]
-#[allow(non_snake_case)]
-pub fn _Unwind_Resume() {
-    loop {}
 }

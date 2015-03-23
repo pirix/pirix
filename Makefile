@@ -1,8 +1,8 @@
 ARCH ?= i386
 
-AS = $(ARCH)-elf-pirix-as
+AS = as --32 #$(ARCH)-elf-pirix-as
 
-LD = $(ARCH)-elf-pirix-ld
+LD = ld -melf_i386 #$(ARCH)-elf-pirix-ld
 LDFLAGS = -z max-page-size=0x1000 --gc-sections -T arch/$(ARCH)/link.ld
 
 RUSTC = rustc

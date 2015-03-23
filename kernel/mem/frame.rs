@@ -75,7 +75,7 @@ pub fn add_memory(base: usize, length: usize) {
 
     let pages = length / 0x1000;
 
-    for i in range(0, pages) {
+    for i in (0..pages) {
         let addr = start + i*0x1000;
         free(addr as *mut usize);
     }

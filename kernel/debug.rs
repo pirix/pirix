@@ -5,7 +5,7 @@ use core::prelude::*;
 
 pub struct DebugWriter;
 
-impl fmt::Writer for DebugWriter {
+impl fmt::Write for DebugWriter {
     fn write_str(&mut self, text: &str) -> fmt::Result {
         print(text);
         Ok(())
@@ -25,7 +25,7 @@ pub fn print(text: &str) {
 
 macro_rules! log {
     ($($arg:tt)*) => ({
-        use core::fmt::Writer;
+        use core::fmt::Write;
         let _ = writeln!(&mut ::debug::DebugWriter, "{}", format_args!($($arg)*));
     })
 }

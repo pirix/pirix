@@ -46,7 +46,7 @@ loader:
 .align 0x4
 multiboot:
     .long 0x1BADB002
-    .long 0x3 // Flags: Module Page Align, Memory Information
+    .long 0x3 # Flags: Module Page Align, Memory Information
     .long -(0x1BADB002 + 0x3)
 
 /*
@@ -97,7 +97,7 @@ mb_info:
 
 .align 4
 kernel_stack_end:
-    .space 0x1000
+    .space 0x4000
 kernel_stack:
 
 .align 0x1000

@@ -3,7 +3,7 @@ use arch;
 use core::prelude::*;
 use core::mem::size_of;
 
-static sizes: &'static [usize] = &[4, 8, 12, 16, 24, 32, 48, 64, 96, 128,
+static SIZES: &'static [usize] = &[4, 8, 12, 16, 24, 32, 48, 64, 96, 128,
                                   192, 256, 384, 512, 768, 1024, 1536,
                                   2048, 3072, 4092];
 
@@ -16,7 +16,7 @@ struct Slab {
 
 unsafe fn find_bucket(size: usize) -> usize {
     let mut i = 0;
-    while size > sizes[i] {
+    while size > SIZES[i] {
         i += 1;
     }
     return i;
@@ -28,7 +28,7 @@ unsafe fn new_bucket(size: usize) {
     let data = (slab as usize) as *mut Slab;
     let bucket = find_bucket(size);
 
-    for i in range(0, arch::PAGE_SIZE / size) {
+    for i in (0..(arch::PAGE_SIZE / size)) {
         let index = (size / size_of::<Slab>()) * i;
         let entry = data.offset(index as isize);
         (*entry).next = buckets[bucket];
