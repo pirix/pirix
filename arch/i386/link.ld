@@ -5,7 +5,7 @@ ENTRY(loader)
 
 SECTIONS {
     . = KERNEL_PHYS;
-    kernel_start = .;
+    _kernel_start = .;
 
     .init : ALIGN(0x1000) {
         *(.init*)
@@ -31,5 +31,5 @@ SECTIONS {
         __bss_end__ = .;
     }
 
-    kernel_end = . - KERNEL_VIRT;
+    _kernel_end = . - KERNEL_VIRT;
 }

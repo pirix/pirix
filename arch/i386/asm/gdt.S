@@ -15,11 +15,11 @@ setup_gdt:
     jmp $0x08, $Lret
 Lret:
     mov $0x10, %ax
-	mov %ax, %ds
-	mov %ax, %es
-	mov %ax, %fs
-	mov %ax, %gs
-	mov %ax, %ss
+    mov %ax, %ds
+    mov %ax, %es
+    mov %ax, %fs
+    mov %ax, %gs
+    mov %ax, %ss
 
     // load tss
     mov $(0x28 | 0x3), %ax

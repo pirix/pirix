@@ -45,7 +45,7 @@ pub extern "C" fn irq_handle<'a>(state: &'a mut cpu::State) -> &'a mut cpu::Stat
             handler(state);
         }
         else {
-            log!("unhandled interrupt {}", irq);
+            panic!("unhandled interrupt {}", irq);
         }
     }
 

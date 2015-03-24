@@ -3,8 +3,8 @@ pub struct Process {
 }
 
 impl Process {
-    pub fn new() -> &Process {
-
+    pub fn new() -> Process {
+        
     }
 
     pub fn exit(&self, retval: u8) {

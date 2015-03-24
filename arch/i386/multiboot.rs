@@ -1,7 +1,8 @@
 use core::u32;
+use core::cmp::{max, min};
 use mem;
 
-#[repr(packed)]
+#[repr(C, packed)]
 #[allow(dead_code)]
 struct MultibootInfo {
     flags: u32,
@@ -30,7 +31,7 @@ struct MultibootInfo {
     vbe_interface_len: u16
 }
 
-#[repr(packed)]
+#[repr(C, packed)]
 #[allow(dead_code)]
 struct MmapEntry {
     size: u32,
@@ -39,7 +40,7 @@ struct MmapEntry {
     mem_type: u32
 }
 
-#[repr(packed)]
+#[repr(C, packed)]
 #[allow(dead_code)]
 struct Module {
     start: u32,
@@ -51,9 +52,14 @@ struct Module {
 extern {
     static mb_magic: u32;
     static mb_info: *const MultibootInfo;
+    static _kernel_start: usize;
+    static _kernel_end: usize;
 }
 
 unsafe fn read_mmap(mmap: *const MmapEntry, mmap_length: usize) {
+    let kstart: usize = (&_kernel_start as *const usize) as usize;
+    let kend: usize = (&_kernel_end as *const usize) as usize;
+
     let mut entry: *const MmapEntry = mmap;
     let end = (mmap as usize) + mmap_length;
 
@@ -61,6 +67,9 @@ unsafe fn read_mmap(mmap: *const MmapEntry, mmap_length: usize) {
         let mut usable = true;
         let base = (*entry).base;
         let mut length = (*entry).length;
+
+        let start: usize = base as usize;
+        let end: usize = (base + length) as usize;
 
         if base > u32::MAX as u64 {
             usable = false;
@@ -70,7 +79,18 @@ unsafe fn read_mmap(mmap: *const MmapEntry, mmap_length: usize) {
         }
 
         if usable {
-            mem::frame::add_memory(base as usize, length as usize);
+            // if the memory segment collides with the kernel try to split the segment up
+            if max(start, kstart) <= min(end, kend) {
+                if start < kstart {
+                    mem::frame::add_memory(start, kstart-start as usize);
+                }
+                if end > kend {
+                    mem::frame::add_memory(kend, end-kend as usize);
+                }
+            }
+            else {
+                mem::frame::add_memory(base as usize, length as usize);
+            }
         }
 
         entry = ((entry as u32) + (*entry).size + 4) as *const MmapEntry;
@@ -82,7 +102,7 @@ pub fn init() {
         panic!("invalid multiboot magic");
     }
 
-     unsafe {
+    unsafe {
         read_mmap((*mb_info).mmap, (*mb_info).mmap_length as usize);
     }
 }

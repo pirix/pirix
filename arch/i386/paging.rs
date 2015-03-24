@@ -5,7 +5,6 @@ use core::ptr::{zero_memory, copy_memory};
 
 #[repr(packed)] pub struct PageTable { entries: [usize; 1024] }
 #[repr(packed)] pub struct PageDir { entries: [usize; 1024] }
-#[repr(packed)] pub struct PageTableDir { entries: [usize; 1024*1024] }
 
 extern {
     static mut boot_page_dir: PageDir;
@@ -14,14 +13,14 @@ extern {
 
 pub struct MappedTables {
     page_dir: *mut PageDir,
-    page_tables: *mut PageTableDir
+    page_tables: *mut PageTable
 }
 
 unsafe impl Sync for MappedTables {}
 
 static mapped: MappedTables = MappedTables {
-    page_dir: 0xffbff000 as *mut PageDir,
-    page_tables: 0xffc00000 as *mut PageTableDir
+    page_dir: 0xfffff000 as *mut PageDir,
+    page_tables: 0xffc00000 as *mut PageTable
 };
 
 impl PageDir {
@@ -48,16 +47,16 @@ impl PageDir {
         return dir;
     }
 
+    pub unsafe fn mapped() -> *mut PageDir {
+        mapped.page_dir as *mut PageDir
+    }
+
     pub fn set(&mut self, index: usize, table: *mut PageTable, flags: usize) {
         self.entries[index] = table as usize | flags;
     }
 
     pub fn get(&self, index: usize) -> usize {
         self.entries[index]
-    }
-
-    pub fn get_table(&self, index: usize) -> *mut PageTable {
-        (self.entries[index] & 0xfffff000) as *mut PageTable
     }
 }
 
@@ -67,7 +66,7 @@ impl PageTable {
     }
 
     pub unsafe fn at(index: usize) -> *mut PageTable {
-        mapped.page_tables.offset((index*1024) as isize) as *mut PageTable
+        mapped.page_tables.offset(index as isize) as *mut PageTable
     }
 
     pub unsafe fn clear(&mut self) {
@@ -80,10 +79,6 @@ impl PageTable {
 
     pub fn get(&self, index: usize) -> usize {
         self.entries[index]
-    }
-
-    pub fn get_page(&self, index: usize) -> usize {
-        self.entries[index] & 0xfffff000
     }
 }
 
@@ -116,12 +111,13 @@ pub unsafe fn init() {
 }
 
 pub unsafe fn map(virt: usize, phys: usize, flags: usize) {
+    let dir = PageDir::mapped();
     let pdidx = virt >> 22;
     let ptidx = (virt >> 12) & 0x3ff;
 
-    if (*mapped.page_dir).get(pdidx) & 0x1 == 0 {
+    if (*dir).get(pdidx) & 0x1 == 0 {
         let table = PageTable::new();
-        (*mapped.page_dir).set(pdidx, table, flags | 0x3);
+        (*dir).set(pdidx, table, flags | 0x3);
         let vtable = PageTable::at(pdidx);
         invlpg(vtable as usize);
         (*vtable).clear();
@@ -172,7 +168,7 @@ unsafe fn find_mapping_area(page_count: usize) -> usize {
 
     for virt in (0xd0000000..0xe0000000).step_by(0x1000) {
         let table = PageTable::at(virt >> 22);
-        let index = virt >> 12 & 0x3ff;
+        let index = (virt >> 12) & 0x3ff;
 
         if (*table).get(index) & 0x1 == 0x1 {
             continous_start = 0;

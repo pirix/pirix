@@ -38,6 +38,7 @@ unsafe fn new_bucket(size: usize) {
 
 #[lang="exchange_malloc"]
 pub unsafe fn alloc(size: usize, align: usize) -> *mut u8 {
+    log!("alloc!!! {} % {}", size, align);
     let bucket = find_bucket(size);
 
     if buckets[bucket].is_null() {
