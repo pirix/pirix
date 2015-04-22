@@ -1,7 +1,7 @@
 use mem::frame;
 use core::prelude::*;
 use core::mem::size_of;
-use core::ptr::{zero_memory, copy_memory};
+use core::ptr::{write_bytes, copy};
 
 #[repr(packed)] pub struct PageTable { entries: [usize; 1024] }
 #[repr(packed)] pub struct PageDir { entries: [usize; 1024] }
@@ -31,11 +31,11 @@ impl PageDir {
         let table: *mut PageTable = frame::alloc();
         let vtable = kernel_map(table);
 
-        zero_memory(vtable, 1024);
-        zero_memory(vdir, 768);
+        write_bytes(vtable, 0, 1024);
+        write_bytes(vdir, 0, 768);
 
         let kernel_tables = mapped.page_dir.offset(768) as *const PageDir;
-        copy_memory(vdir.offset(768), kernel_tables, 256);
+        copy(vdir.offset(768), kernel_tables, 256);
 
         (*vtable).set(1023, dir as usize, 0x3);
         (*vdir).set(1022, table, 0x3);
@@ -70,7 +70,7 @@ impl PageTable {
     }
 
     pub unsafe fn clear(&mut self) {
-        zero_memory(self.entries.as_mut_ptr(), 1024);
+        write_bytes(self.entries.as_mut_ptr(), 0, 1024);
     }
 
     pub fn set(&mut self, index: usize, page: usize, flags: usize) {

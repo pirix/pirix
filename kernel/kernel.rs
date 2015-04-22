@@ -1,4 +1,4 @@
-#![feature(no_std, lang_items, asm, core, intrinsics)]
+#![feature(no_std, lang_items, asm, core, intrinsics, step_by)]
 #![no_std]
 
 #[macro_use]
