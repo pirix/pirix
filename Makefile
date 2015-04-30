@@ -14,8 +14,13 @@ ARCHOBJS = arch/i386/asm/init.o \
 
 all: build/kernel.elf
 
-build/kernel.elf: build/kernel.o build/libcore.rlib $(ARCHOBJS)
+build/kernel.elf: build/kernel.o $(ARCHOBJS) build/libcore.rlib
 	$(LD) $(LDFLAGS) -o $@ $^
+
+#build/liballoc.rlib: liballoc/lib.rs libcore/lib.rs
+#	mkdir -p build
+#	$(RUSTC) $(RUSTFLAGS) --out-dir build/ --crate-type=lib --emit=link,dep-info liballoc/lib.rs\
+#	    --cfg 'feature="external_funcs"' --extern core=build/libcore.rlib
 
 build/libcore.rlib: libcore/lib.rs
 	mkdir -p build
@@ -23,7 +28,8 @@ build/libcore.rlib: libcore/lib.rs
 
 build/kernel.o: kernel/kernel.rs build/libcore.rlib
 	mkdir -p build
-	$(RUSTC) $(RUSTFLAGS) --out-dir build/ --emit=obj,dep-info $< --extern core=build/libcore.rlib
+	$(RUSTC) $(RUSTFLAGS) --out-dir build/ --emit=obj,dep-info kernel/kernel.rs \
+	                      --extern core=build/libcore.rlib
 
 .S.o:
 	$(AS) -o $@ $<

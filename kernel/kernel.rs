@@ -62,3 +62,10 @@ pub fn __morestack() -> ! {
 pub fn rust_eh_personality() -> ! {
   loop {}
 }
+
+#[no_mangle]
+#[allow(non_snake_case)]
+pub fn _Unwind_Resume()
+{
+	loop{}
+}

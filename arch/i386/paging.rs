@@ -34,7 +34,7 @@ impl PageDir {
         write_bytes(vtable, 0, 1024);
         write_bytes(vdir, 0, 768);
 
-        let kernel_tables = mapped.page_dir.offset(768) as *const PageDir;
+        let kernel_tables = mapped.page_dir.offset(768) as *mut PageDir;
         copy(vdir.offset(768), kernel_tables, 256);
 
         (*vtable).set(1023, dir as usize, 0x3);
