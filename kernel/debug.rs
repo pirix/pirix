@@ -1,7 +1,6 @@
 pub use arch::debug::{init, putchar};
 
 use core::fmt;
-use core::prelude::*;
 
 pub struct DebugWriter;
 

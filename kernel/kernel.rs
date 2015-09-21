@@ -1,8 +1,5 @@
-#![feature(no_std, lang_items, asm, core, intrinsics, step_by)]
+#![feature(no_std, lang_items, asm, intrinsics, step_by, core_str_ext, core_slice_ext)]
 #![no_std]
-
-#[macro_use]
-extern crate core;
 
 mod std {
     pub use core::fmt;

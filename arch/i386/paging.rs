@@ -3,15 +3,17 @@ use core::prelude::*;
 use core::mem::size_of;
 use core::ptr::{write_bytes, copy};
 
-#[repr(packed)] pub struct PageTable { entries: [usize; 1024] }
-#[repr(packed)] pub struct PageDir { entries: [usize; 1024] }
+#[repr(packed)] struct PageTable { entries: [usize; 1024] }
+#[repr(packed)] struct PageDir { entries: [usize; 1024] }
+
+pub struct PagingContext(*mut PageDir);
 
 extern {
     static mut boot_page_dir: PageDir;
     static mut kernel_page_tables: [PageTable; 256];
 }
 
-pub struct MappedTables {
+struct MappedTables {
     page_dir: *mut PageDir,
     page_tables: *mut PageTable
 }
@@ -218,7 +220,19 @@ pub unsafe fn kernel_unmap<T>(addr: *mut T) {
     }
 }
 
-pub unsafe fn activate_pagedir(dir: *mut PageDir) {
+impl PagingContext {
+    pub fn new() -> PagingContext {
+        PagingContext(unsafe { PageDir::new() })
+    }
+
+    pub fn activate(&self) {
+        match *self {
+            PagingContext(dir) => unsafe { activate_pagedir(dir) }
+        }
+    }
+}
+
+unsafe fn activate_pagedir(dir: *mut PageDir) {
     asm!("mov $0, %cr3" :: "r"(dir));
 }
 

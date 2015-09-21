@@ -1,6 +1,5 @@
 use mem;
 use arch;
-use core::prelude::*;
 use core::mem::size_of;
 
 static SIZES: &'static [usize] = &[4, 8, 12, 16, 24, 32, 48, 64, 96, 128,
