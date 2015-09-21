@@ -17,11 +17,6 @@ all: build/kernel.elf
 build/kernel.elf: build/kernel.o $(ARCHOBJS) build/libcore.rlib
 	$(LD) $(LDFLAGS) -o $@ $^
 
-#build/liballoc.rlib: liballoc/lib.rs libcore/lib.rs
-#	mkdir -p build
-#	$(RUSTC) $(RUSTFLAGS) --out-dir build/ --crate-type=lib --emit=link,dep-info liballoc/lib.rs\
-#	    --cfg 'feature="external_funcs"' --extern core=build/libcore.rlib
-
 build/libcore.rlib: libcore/lib.rs
 	mkdir -p build
 	$(RUSTC) $(RUSTFLAGS) --out-dir build/ --crate-type=lib --emit=link,dep-info $<

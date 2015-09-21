@@ -21,13 +21,13 @@ unsafe fn find_bucket(size: usize) -> usize {
     return i;
 }
 
-unsafe fn new_bucket(size: usize) {
+unsafe fn new_bucket(bucket: usize) {
     let addr: *mut Slab = mem::frame::alloc();
     let slab = mem::paging::kernel_map(addr);
     let data = (slab as usize) as *mut Slab;
-    let bucket = find_bucket(size);
+    let size = SIZES[bucket];
 
-    for i in (0..(arch::PAGE_SIZE / size)) {
+    for i in 0..(arch::PAGE_SIZE / size) {
         let index = (size / size_of::<Slab>()) * i;
         let entry = data.offset(index as isize);
         (*entry).next = buckets[bucket];
@@ -37,17 +37,16 @@ unsafe fn new_bucket(size: usize) {
 
 #[lang="exchange_malloc"]
 pub unsafe fn alloc(size: usize, align: usize) -> *mut u8 {
-    log!("alloc!!! {} % {}", size, align);
     let bucket = find_bucket(size);
 
     if buckets[bucket].is_null() {
-        new_bucket(size);
+        new_bucket(bucket);
     }
 
     let slab = buckets[bucket];
     buckets[bucket] = (*slab).next;
 
-    log!("alloc {:p} in {}", slab, bucket);
+    log!("alloc {}: {:x} in {}", size, slab as usize, bucket);
     return slab as *mut u8;
 }
 

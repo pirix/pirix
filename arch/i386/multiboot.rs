@@ -64,7 +64,7 @@ unsafe fn read_mmap(mmap: *const MmapEntry, mmap_length: usize) {
     let end = (mmap as usize) + mmap_length;
 
     while (entry as usize) < end {
-        let mut usable = true;
+        let mut usable = (*entry).mem_type == 1;
         let base = (*entry).base;
         let mut length = (*entry).length;
 

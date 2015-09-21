@@ -1,4 +1,4 @@
-#![feature(no_std, lang_items, asm, intrinsics, step_by, core_str_ext, core_slice_ext)]
+#![feature(no_std, lang_items, asm, intrinsics, step_by, core_str_ext, core_slice_ext, box_syntax)]
 #![no_std]
 
 mod std {
@@ -62,7 +62,6 @@ pub fn rust_eh_personality() -> ! {
 
 #[no_mangle]
 #[allow(non_snake_case)]
-pub fn _Unwind_Resume()
-{
+pub fn _Unwind_Resume() -> ! {
 	loop{}
 }

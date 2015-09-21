@@ -4,7 +4,7 @@ use arch;
 use arch::cpu;
 
 pub type IrqHandler = unsafe fn(&mut cpu::State);
-static mut handlers: [Option<IrqHandler>; 255] = [Option::None; 255];
+static mut handlers: [Option<IrqHandler>; arch::IRQ_COUNT] = [Option::None; arch::IRQ_COUNT];
 
 pub fn init() {
     unsafe { arch::irq::init(); }
