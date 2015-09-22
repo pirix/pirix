@@ -16,6 +16,7 @@ pub mod irq;
 pub mod timer;
 pub mod mem;
 pub mod support;
+pub mod process;
 
 #[path = "../arch/i386/mod.rs"]
 pub mod arch;
@@ -38,6 +39,10 @@ pub fn main() {
     arch::init();
     irq::init();
     timer::init();
+
+
+    let process = process::Process::new();
+
     irq::start();
 }
 

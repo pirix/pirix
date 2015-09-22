@@ -1,3 +1,5 @@
+use irq;
+use arch::cpu;
 use mem::frame;
 use core::prelude::*;
 use core::mem::size_of;
@@ -33,11 +35,14 @@ impl PageDir {
         let table: *mut PageTable = frame::alloc();
         let vtable = kernel_map(table);
 
-        write_bytes(vtable, 0, 1024);
-        write_bytes(vdir, 0, 768);
+        (*vtable).clear();
+        (*vdir).clear();
 
-        let kernel_tables = mapped.page_dir.offset(768) as *mut PageDir;
-        copy(vdir.offset(768), kernel_tables, 256);
+        // copy kernel pages
+        for i in 768..1024 {
+            let entry = (*mapped.page_dir).get(i);
+            (*vdir).set(i, entry.0, entry.1);
+        }
 
         (*vtable).set(1023, dir as usize, 0x3);
         (*vdir).set(1022, table, 0x3);
@@ -53,12 +58,17 @@ impl PageDir {
         mapped.page_dir as *mut PageDir
     }
 
+    pub unsafe fn clear(&mut self) {
+        write_bytes(self.entries.as_mut_ptr(), 0, 1024);
+    }
+
     pub fn set(&mut self, index: usize, table: *mut PageTable, flags: usize) {
         self.entries[index] = table as usize | flags;
     }
 
-    pub fn get(&self, index: usize) -> usize {
-        self.entries[index]
+    pub fn get(&self, index: usize) -> (*mut PageTable, usize) {
+        ((self.entries[index] as usize & 0xfffff000) as *mut PageTable,
+         self.entries[index] as usize & 0xfff)
     }
 }
 
@@ -84,7 +94,28 @@ impl PageTable {
     }
 }
 
+fn page_fault(state: &mut cpu::State) {
+    let mut addr: u32 = 0;
+    unsafe { asm!("mov %cr2, $0" : "=r"(addr)); }
+
+    log!("page fault at 0x{:x}:", addr);
+    if state.err & 1 == 1 { log!(" - protection violation"); }
+    else { log!(" - page does not exist"); }
+
+    if state.err & 2 == 2 { log!(" - error writing"); }
+    else { log!(" - error reading"); }
+
+    if state.err & 4 == 4 { log!(" - occured in user mode"); }
+    else { log!(" - occured in supervisor mode"); }
+
+    if state.err & 16 == 16 { log!(" - caused by instruction fetch"); }
+
+    panic!("unhandled page fault!");
+}
+
 pub unsafe fn init() {
+    irq::register(0x0E, page_fault);
+
     let physdir: *mut PageDir = &mut boot_page_dir;
     let dir = ((physdir as usize) + 0xc0000000) as *mut PageDir;
 
@@ -117,7 +148,7 @@ pub unsafe fn map(virt: usize, phys: usize, flags: usize) {
     let pdidx = virt >> 22;
     let ptidx = (virt >> 12) & 0x3ff;
 
-    if (*dir).get(pdidx) & 0x1 == 0 {
+    if (*dir).get(pdidx).1 & 0x1 == 0 {
         let table = PageTable::new();
         (*dir).set(pdidx, table, flags | 0x3);
         let vtable = PageTable::at(pdidx);

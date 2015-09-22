@@ -3,7 +3,7 @@ use core::option::Option;
 use arch;
 use arch::cpu;
 
-pub type IrqHandler = unsafe fn(&mut cpu::State);
+pub type IrqHandler = fn(&mut cpu::State);
 static mut handlers: [Option<IrqHandler>; arch::IRQ_COUNT] = [Option::None; arch::IRQ_COUNT];
 
 pub fn init() {
@@ -35,18 +35,17 @@ pub fn unregister(irq: usize) {
 }
 
 #[no_mangle]
-pub extern "C" fn irq_handle<'a>(state: &'a mut cpu::State) -> &'a mut cpu::State {
+pub unsafe extern "C" fn irq_handle<'a>(state: &'a mut cpu::State) -> &'a mut cpu::State {
     let irq = state.irq as usize;
 
-    unsafe {
-        arch::irq::clear(irq);
-        if handlers[irq].is_some() {
-            let handler = handlers[irq].unwrap();
-            handler(state);
-        }
-        else {
-            panic!("unhandled interrupt {}", irq);
-        }
+    arch::irq::clear(irq);
+
+    if handlers[irq].is_some() {
+        let handler = handlers[irq].unwrap();
+        handler(state);
+    }
+    else {
+        panic!("unhandled interrupt {}", irq);
     }
 
     return state;

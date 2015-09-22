@@ -1,5 +1,6 @@
 #[repr(packed)]
 #[allow(dead_code)]
+#[derive(Debug)]
 pub struct State {
     gs: u32, ds: u32,
     edi: u32, esi: u32, ebp: u32, esp: u32,
