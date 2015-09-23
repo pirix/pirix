@@ -34,6 +34,9 @@ build/kernel.o: kernel/kernel.rs build/libcore.rlib
 clean:
 	rm -f $(ARCHOBJS) build/kernel.elf build/kernel.o build/pirix.iso
 
+doc:
+	rustdoc -o build/doc kernel/kernel.rs
+
 -include build/kernel.d build/libcore.d
 
 #
@@ -88,4 +91,4 @@ iso: build/kernel.elf boot/eltorito.img boot/grub.cfg
          boot/=boot/ \
          boot/kernel=build/kernel.elf
 
-.PHONY: boot/grub.cfg
+.PHONY: boot/grub.cfg doc clean all

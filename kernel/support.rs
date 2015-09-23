@@ -37,3 +37,22 @@ pub unsafe extern fn memset(s: *mut u8, c: i32, n: usize) -> *mut u8 {
     }
     return s;
 }
+
+
+#[lang="stack_exhausted"]
+#[no_mangle]
+pub fn __morestack() -> ! {
+    loop {}
+}
+
+#[lang="eh_personality"]
+#[no_mangle]
+pub fn rust_eh_personality() -> ! {
+  loop {}
+}
+
+#[no_mangle]
+#[allow(non_snake_case)]
+pub fn _Unwind_Resume() -> ! {
+	loop{}
+}

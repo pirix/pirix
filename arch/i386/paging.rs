@@ -1,9 +1,8 @@
 use irq;
 use arch::cpu;
 use mem::frame;
-use core::prelude::*;
 use core::mem::size_of;
-use core::ptr::{write_bytes, copy};
+use core::ptr::write_bytes;
 
 #[repr(packed)] struct PageTable { entries: [usize; 1024] }
 #[repr(packed)] struct PageDir { entries: [usize; 1024] }
@@ -95,7 +94,7 @@ impl PageTable {
 }
 
 fn page_fault(state: &mut cpu::State) {
-    let mut addr: u32 = 0;
+    let addr: u32;
     unsafe { asm!("mov %cr2, $0" : "=r"(addr)); }
 
     log!("page fault at 0x{:x}:", addr);

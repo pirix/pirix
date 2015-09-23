@@ -1,4 +1,5 @@
 #![feature(no_std, lang_items, asm, intrinsics, step_by, core_str_ext, core_slice_ext, box_syntax)]
+#![allow(unused_variables, dead_code)]
 #![no_std]
 
 mod std {
@@ -17,19 +18,12 @@ pub mod timer;
 pub mod mem;
 pub mod support;
 pub mod process;
+pub mod thread;
+pub mod scheduler;
+pub mod syscall;
 
 #[path = "../arch/i386/mod.rs"]
 pub mod arch;
-
-#[no_mangle]
-pub unsafe fn syscall() {
-
-}
-
-#[no_mangle]
-pub unsafe fn scheduler_schedule() {
-
-}
 
 #[no_mangle]
 pub fn main() {
@@ -42,6 +36,10 @@ pub fn main() {
 
 
     let process = process::Process::new();
+    let x = process.borrow_mut();
+    let y = process.borrow_mut();
+    x.exit(42);
+    y.exit(43);
 
     irq::start();
 }
@@ -51,22 +49,4 @@ pub extern fn rust_begin_unwind(args: core::fmt::Arguments, file: &'static str, 
     irq::stop();
     log!("Problem at {}:{}: {}", file, line, args);
     loop { };
-}
-
-#[lang="stack_exhausted"]
-#[no_mangle]
-pub fn __morestack() -> ! {
-    loop {}
-}
-
-#[lang="eh_personality"]
-#[no_mangle]
-pub fn rust_eh_personality() -> ! {
-  loop {}
-}
-
-#[no_mangle]
-#[allow(non_snake_case)]
-pub fn _Unwind_Resume() -> ! {
-	loop{}
 }
