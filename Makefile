@@ -6,7 +6,9 @@ LD = ld -melf_i386 #$(ARCH)-elf-pirix-ld
 LDFLAGS = -z max-page-size=0x1000 --gc-sections -T arch/$(ARCH)/link.ld
 
 RUSTC = rustc
-RUSTFLAGS = -g -C opt-level=0 --target=arch/$(ARCH)/target.json
+RUSTFLAGS = -g -L build -C opt-level=0 --target=arch/$(ARCH)/target.json --out-dir build/
+
+RUSTSRC ?= ../rust/src
 
 ARCHOBJS = arch/i386/asm/init.o \
            arch/i386/asm/gdt.o \
@@ -14,17 +16,27 @@ ARCHOBJS = arch/i386/asm/init.o \
 
 all: build/kernel.elf
 
-build/kernel.elf: build/kernel.o $(ARCHOBJS) build/libcore.rlib
+build/kernel.elf: build/kernel.o $(ARCHOBJS) build/libcore.rlib build/liballoc.rlib build/liballoc_system.rlib build/libcollections.rlib
 	$(LD) $(LDFLAGS) -o $@ $^
 
-build/libcore.rlib: libcore/lib.rs
+build/libcore.rlib: $(RUSTSRC)/libcore/lib.rs
 	mkdir -p build
-	$(RUSTC) $(RUSTFLAGS) --out-dir build/ --crate-type=lib --emit=link,dep-info $<
+	$(RUSTC) $(RUSTFLAGS) --emit=link,dep-info $<
 
-build/kernel.o: kernel/kernel.rs build/libcore.rlib
-	mkdir -p build
-	$(RUSTC) $(RUSTFLAGS) --out-dir build/ --emit=obj,dep-info kernel/kernel.rs \
-	                      --extern core=build/libcore.rlib
+build/librustc_unicode.rlib: $(RUSTSRC)/librustc_unicode/lib.rs build/libcore.rlib
+	$(RUSTC) $(RUSTFLAGS) --emit=link,dep-info $<
+
+build/libcollections.rlib: $(RUSTSRC)/libcollections/lib.rs build/libcore.rlib build/liballoc.rlib build/librustc_unicode.rlib
+	$(RUSTC) $(RUSTFLAGS) --emit=link,dep-info $<
+
+build/liballoc.rlib: $(RUSTSRC)/liballoc/lib.rs build/libcore.rlib
+	$(RUSTC) $(RUSTFLAGS) --emit=link,dep-info $<
+
+build/liballoc_system.rlib: lib/alloc_system/lib.rs build/libcore.rlib
+	$(RUSTC) $(RUSTFLAGS) --emit=link,dep-info $<
+
+build/kernel.o: kernel/kernel.rs build/libcore.rlib build/liballoc.rlib build/liballoc_system.rlib build/libcollections.rlib
+	$(RUSTC) $(RUSTFLAGS) --emit=obj,dep-info kernel/kernel.rs
 
 .S.o:
 	$(AS) -o $@ $<

@@ -35,7 +35,6 @@ unsafe fn new_bucket(bucket: usize) {
     }
 }
 
-#[lang="exchange_malloc"]
 pub unsafe fn alloc(size: usize, align: usize) -> *mut u8 {
     let bucket = find_bucket(size);
 
@@ -50,7 +49,6 @@ pub unsafe fn alloc(size: usize, align: usize) -> *mut u8 {
     return slab as *mut u8;
 }
 
-#[lang="exchange_free"]
 pub unsafe fn free(addr: *mut u8, size: usize, align: usize) {
     let bucket = find_bucket(size);
     let slab = addr as *mut Slab;

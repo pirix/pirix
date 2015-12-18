@@ -86,7 +86,7 @@ pub fn add_memory(base: usize, length: usize) {
 
     let pages = length / arch::PAGE_SIZE;
 
-    for i in (0..pages) {
+    for i in 0..pages {
         let addr = start + i*arch::PAGE_SIZE;
         free(addr as *mut usize);
     }

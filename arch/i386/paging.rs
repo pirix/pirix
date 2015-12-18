@@ -119,13 +119,13 @@ pub unsafe fn init() {
     let dir = ((physdir as usize) + 0xc0000000) as *mut PageDir;
 
     // create kernel pages
-    for i in (768..1023) {
+    for i in 768..1023 {
         let table = kernel_page_tables.get_mut(i-768).unwrap() as *mut PageTable;
 
         (*table).clear();
 
         if i == 768 {
-            for j in (0..1024) {
+            for j in 0..1024 {
                 (*table).set(j, j*0x1000, 0x103);
             }
         }
@@ -231,7 +231,7 @@ pub unsafe fn kernel_map<T>(addr: *mut T) -> *mut T {
         panic!("kernel mapping area full");
     }
 
-    for i in (0..page_count) {
+    for i in 0..page_count {
         let virt = mapping_area + i*0x1000;
         map(virt, addr as usize + i*0x1000, 0x103);
     }
@@ -244,7 +244,7 @@ pub unsafe fn kernel_map<T>(addr: *mut T) -> *mut T {
 pub unsafe fn kernel_unmap<T>(addr: *mut T) {
     let page_count = calculate_page_count(addr);
 
-    for i in (0..page_count) {
+    for i in 0..page_count {
         let virt = (addr as usize) + i*0x1000;
         unmap(virt);
     }

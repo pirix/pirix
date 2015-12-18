@@ -5,7 +5,7 @@ mod video {
     static mut pos : (usize, usize) = (0, 0);
 
     pub unsafe fn clear() {
-        for i in (0..80*25) {
+        for i in 0..80*25 {
             *((VMEM + i*2) as *mut u16) = 0;
         }
     }
@@ -15,10 +15,10 @@ mod video {
     }
 
     unsafe fn scroll() {
-        for i in (0..80*24) {
+        for i in 0..80*24 {
             *((VMEM + i*2) as *mut u16) = *((VMEM + (i+80)*2) as *mut u16);
         }
-        for i in (80*24..80*25) {
+        for i in 80*24..80*25 {
             *((VMEM + i*2) as *mut u16) = 0;
         }
     }

@@ -1,6 +1,10 @@
-#![feature(no_std, lang_items, asm, intrinsics, step_by, core_str_ext, core_slice_ext, box_syntax)]
+#![feature(no_std, lang_items, asm, intrinsics, step_by)]
+#![feature(box_syntax, alloc, collections)]
 #![allow(unused_variables, dead_code)]
 #![no_std]
+
+extern crate alloc;
+extern crate collections;
 
 mod std {
     pub use core::fmt;
@@ -37,9 +41,7 @@ pub fn main() {
 
     let process = process::Process::new();
     let x = process.borrow_mut();
-    let y = process.borrow_mut();
-    x.exit(42);
-    y.exit(43);
+    x.exit(43);
 
     irq::start();
 }

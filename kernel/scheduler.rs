@@ -1,5 +1,12 @@
+use collections::vec_deque::VecDeque;
+use process::ProcessRef;
+
 pub struct Scheduler {
-    test: i16
+    queue: VecDeque<ProcessRef>
+}
+
+impl Scheduler {
+    
 }
 
 #[no_mangle]
