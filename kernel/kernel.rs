@@ -1,4 +1,4 @@
-#![feature(no_std, lang_items, asm, intrinsics, step_by)]
+#![feature(lang_items, asm, intrinsics)]
 #![feature(box_syntax, alloc, collections)]
 #![allow(unused_variables, dead_code)]
 #![no_std]
@@ -17,16 +17,20 @@ mod std {
 
 #[macro_use]
 pub mod debug;
-pub mod irq;
-pub mod timer;
+//pub mod irq;
+//pub mod timer;
 pub mod mem;
 pub mod support;
-pub mod process;
-pub mod thread;
-pub mod scheduler;
-pub mod syscall;
+//pub mod process;
+//pub mod thread;
+//pub mod scheduler;
+//pub mod syscall;
 
-#[path = "../arch/i386/mod.rs"]
+//#[path = "../arch/i386/mod.rs"]
+//#[cfg(target_arch = "i386")]
+//pub mod arch;
+
+#[path = "../arch/x86_64/mod.rs"]
 pub mod arch;
 
 #[no_mangle]
@@ -35,20 +39,21 @@ pub fn main() {
     debug::println("Booting Pirix 0.1");
     mem::init();
     arch::init();
-    irq::init();
-    timer::init();
+    loop {}
+    //irq::init();
+    //timer::init();
 
 
-    let process = process::Process::new();
-    let x = process.borrow_mut();
-    x.exit(43);
+    //let process = process::Process::new();
+    //let x = process.borrow_mut();
+    //x.exit(43);
 
-    irq::start();
+    //irq::start();
 }
 
 #[lang="panic_fmt"]
 pub extern fn rust_begin_unwind(args: core::fmt::Arguments, file: &'static str, line: usize) -> ! {
-    irq::stop();
+    //irq::stop();
     log!("Problem at {}:{}: {}", file, line, args);
     loop { };
 }

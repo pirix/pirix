@@ -1,22 +1,22 @@
-ARCH ?= i386
+ARCH ?= x86_64
 
-AS = as --32 #$(ARCH)-elf-pirix-as
+AS = as --64 #$(ARCH)-elf-pirix-as
 
-LD = ld -melf_i386 #$(ARCH)-elf-pirix-ld
+LD = ld -melf_x86_64 #$(ARCH)-elf-pirix-ld
 LDFLAGS = -z max-page-size=0x1000 --gc-sections -T arch/$(ARCH)/link.ld
 
 RUSTC = rustc
 RUSTFLAGS = -g -L build -C opt-level=0 --target=arch/$(ARCH)/target.json --out-dir build/
 
-RUSTSRC ?= ../rust/src
+RUSTSRC ?= ./rust/src
 
-ARCHOBJS = arch/i386/asm/init.o \
-           arch/i386/asm/gdt.o \
-           arch/i386/asm/irq.o
+ARCHOBJS = arch/$(ARCH)/asm/init.o \
+           arch/$(ARCH)/asm/irq.o
 
 all: build/kernel.elf
 
-build/kernel.elf: build/kernel.o $(ARCHOBJS) build/libcore.rlib build/liballoc.rlib build/liballoc_system.rlib build/libcollections.rlib
+build/kernel.elf: build/kernel.o $(ARCHOBJS) build/libcore.rlib \
+	                build/liballoc.rlib build/liballoc_system.rlib build/libcollections.rlib
 	$(LD) $(LDFLAGS) -o $@ $^
 
 build/libcore.rlib: $(RUSTSRC)/libcore/lib.rs
@@ -26,7 +26,8 @@ build/libcore.rlib: $(RUSTSRC)/libcore/lib.rs
 build/librustc_unicode.rlib: $(RUSTSRC)/librustc_unicode/lib.rs build/libcore.rlib
 	$(RUSTC) $(RUSTFLAGS) --emit=link,dep-info $<
 
-build/libcollections.rlib: $(RUSTSRC)/libcollections/lib.rs build/libcore.rlib build/liballoc.rlib build/librustc_unicode.rlib
+build/libcollections.rlib: $(RUSTSRC)/libcollections/lib.rs build/libcore.rlib \
+	                         build/liballoc.rlib build/librustc_unicode.rlib
 	$(RUSTC) $(RUSTFLAGS) --emit=link,dep-info $<
 
 build/liballoc.rlib: $(RUSTSRC)/liballoc/lib.rs build/libcore.rlib
@@ -35,7 +36,8 @@ build/liballoc.rlib: $(RUSTSRC)/liballoc/lib.rs build/libcore.rlib
 build/liballoc_system.rlib: lib/alloc_system/lib.rs build/libcore.rlib
 	$(RUSTC) $(RUSTFLAGS) --emit=link,dep-info $<
 
-build/kernel.o: kernel/kernel.rs build/libcore.rlib build/liballoc.rlib build/liballoc_system.rlib build/libcollections.rlib
+build/kernel.o: kernel/kernel.rs build/liballoc_system.rlib build/libcore.rlib \
+	              build/liballoc.rlib build/libcollections.rlib
 	$(RUSTC) $(RUSTFLAGS) --emit=obj,dep-info kernel/kernel.rs
 
 .S.o:
@@ -44,7 +46,7 @@ build/kernel.o: kernel/kernel.rs build/libcore.rlib build/liballoc.rlib build/li
 .SUFFIXES: .o .S
 
 clean:
-	rm -f $(ARCHOBJS) build/kernel.elf build/kernel.o build/pirix.iso
+	rm -f $(ARCHOBJS)  build/kernel.elf build/kernel.o build/pirix.iso
 
 doc:
 	rustdoc -o build/doc kernel/kernel.rs
@@ -56,16 +58,16 @@ doc:
 #
 
 qemu: iso
-	qemu-system-i386 -monitor stdio -cdrom build/pirix.iso
+	qemu-system-$(ARCH) -monitor stdio -cdrom build/pirix.iso
 
 qemu-serial: iso
-	qemu-system-i386 -serial stdio -cdrom build/pirix.iso
+	qemu-system-$(ARCH) -serial stdio -cdrom build/pirix.iso
 
 qemu-log: iso
-	qemu-system-i386 -serial stdio -monitor stdio -cdrom build/pirix.iso -no-reboot -d in_asm
+	qemu-system-$(ARCH) -serial stdio -monitor stdio -cdrom build/pirix.iso -no-reboot -d in_asm
 
 debug: iso
-	tmux new-session -d -s pirix "qemu-system-i386 -monitor stdio \
+	tmux new-session -d -s pirix "qemu-system-$(ARCH) -monitor stdio \
                                  -S -s -cdrom build/pirix.iso"
 	tmux new-window -t pirix:1 "gdb -ex kernel -ex connect"
 	tmux a -t pirix
@@ -79,7 +81,7 @@ define GRUB_CFG
 set timeout=0
 set default=1
 menuentry "pirix" {
-  multiboot /boot/kernel
+  multiboot2 /boot/kernel
   boot
 }
 endef
@@ -93,7 +95,7 @@ boot/grub.cfg: boot
 
 boot/eltorito.img: boot
 	grub-mkimage -p /boot -o boot/tmp_core.img -O i386-pc biosdisk iso9660 \
-                                                  multiboot normal ls cat help
+                                                  multiboot2 normal ls cat help
 	cat /usr/lib/grub/i386-pc/cdboot.img boot/tmp_core.img > boot/eltorito.img
 	rm -f boot/tmp_core.img
 

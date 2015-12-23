@@ -75,10 +75,10 @@ impl FrameStack {
 static mut stack: FrameStack = FrameStack { top: 0 as *mut usize, pos: 0 };
 
 pub fn add_memory(base: usize, length: usize) {
-    log!("add free memory {:x}-{:x} ({} bytes)", base, base+length, length);
     let mut start = base & arch::PAGE_MASK;
     let mut length = length;
 
+    // align to page size
     if start < base || base == 0 {
         start += arch::PAGE_SIZE;
         length -= start - base;
