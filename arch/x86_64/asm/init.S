@@ -1,11 +1,26 @@
-.equ KERNEL_OFFSET, 0xfffffff800000000
+.equ KERNEL_OFFSET, 0xffffff7800000000
 
 .code32
 .section .init
 
+.global loader
 .extern __kernel_start
 .extern __kernel_end
-.global loader
+
+.align 0x8
+start:
+    jmp loader
+
+.align 0x8
+multiboot_start:
+    .long 0xe85250d6
+    .long 0
+    .long multiboot_end - multiboot_start
+    .long 0x100000000 - (0xe85250d6 + 0 + (multiboot_end - multiboot_start))
+    .long 0
+    .long 8
+multiboot_end:
+
 loader:
     cli
 
@@ -25,24 +40,25 @@ loader:
     movl $p4, %edi
     movl %edi, %cr3
 
+    // recursive mapping
+    movl $p4, 0xff8(%edi)
+    orl $0b11, 0xff8(%edi)
+
     // add p3 tables to p4 table
-    movl $p4, %edi
-
     movl $p3.low, (%edi)
-    orl $0b111, (%edi)
+    orl $0b11, (%edi)
 
-    movl $p3.high, 0xff8(%edi)
-    orl $0b111, 0xff8(%edi)
+    movl $p3.high, 0xff0(%edi)
+    orl $0b11, 0xff0(%edi)
 
-    // identity map the first gigabyte
+    // add p2 table to the p3 tables
     movl $p3.low, %edi
-    movl $0, (%edi)
-    orl  $0b10000111, (%edi)
+    movl $p2, (%edi)
+    orl  $0b11, (%edi)
 
-    // map the first gigabyte to 0xfffffff800000000
     movl $p3.high, %edi
-    movl $0, 0xf00(%edi)
-    orl  $0b10000111, 0xf00(%edi)
+    movl $p2, 0xf00(%edi)
+    orl  $0b11, 0xf00(%edi)
 
     // enable physical address extension
     mov %cr4, %eax
@@ -60,6 +76,15 @@ loader:
     orl $(1 << 31), %eax
     movl %eax, %cr0
 
+    // enable SSE
+    movl %cr0, %eax
+    and $0xfffb, %ax
+    or $0x2, %ax
+    movl %eax, %cr0
+    movl %cr4, %eax
+    or $(0b11 << 9), %ax
+    movl %eax, %cr4
+
     // complete tss gdt entry
     movl $tss, %eax
     movw %ax, (gdt.tss+2)
@@ -69,18 +94,7 @@ loader:
 
     // load the gdt
     lgdt (gdt.pointer)
-
     ljmp $0x08, $loader64
-
-.align 0x4
-multiboot_start:
-    .long 0xe85250d6
-    .long 0
-    .long multiboot_end - multiboot_start
-    .long 0x100000000 - (0xe85250d6 + 0 + (multiboot_end - multiboot_start))
-    .long 0
-    .long 8
-multiboot_end:
 
 .align 0x1000
 p4:
@@ -89,6 +103,12 @@ p3.low:
     .space 8*512
 p3.high:
     .space 8*512
+p2:
+    .equ addr, 0
+    .rept 512
+        .quad addr | 0b10000011
+        .equ addr, addr + 0x200000
+    .endr
 
 .align 8
 gdt:
@@ -134,24 +154,24 @@ loader64:
 .extern main
 .section .text
 init:
-  // clear the segment registers
-  xor %ax, %ax
-  movw %ax, %ds
-  movw %ax, %es
-  movw %ax, %fs
-  movw %ax, %gs
-  movw %ax, %ss
+    // clear the segment registers
+    xor %ax, %ax
+    movw %ax, %ds
+    movw %ax, %es
+    movw %ax, %fs
+    movw %ax, %gs
+    movw %ax, %ss
 
-  movabs $kernel_stack_start, %rsp
+    movabs $kernel_stack_start, %rsp
 
-  call main
+    call main
 
-  cli
-  hlt
+    cli
+    hlt
 
 .section .bss
 kernel_stack_end:
-    .space 8*4096
+    .space 32*4096
 kernel_stack_start:
 
 .align 8

@@ -22,7 +22,7 @@ unsafe fn find_bucket(size: usize) -> usize {
 }
 
 unsafe fn new_bucket(bucket: usize) {
-    let addr: *mut Slab = mem::frame::alloc();
+    let addr: *mut Slab = mem::frame::alloc().addr as *mut Slab;
     let slab = mem::paging::kernel_map(addr);
     let data = (slab as usize) as *mut Slab;
     let size = SIZES[bucket];

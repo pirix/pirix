@@ -1,6 +1,11 @@
 use core::mem::size_of;
+use mem::zone;
 use arch::paging;
 use arch;
+
+pub struct Frame {
+    pub addr: usize
+}
 
 struct FrameStack {
     top: *mut usize,
@@ -31,7 +36,7 @@ impl FrameStack {
             self.top = paging::kernel_map(addr as *mut usize);
 
             // save the physical address of the current frame at position 0
-            // and the pyhsical address of the last frame at position 1
+            // and the physical address of the last frame at position 1
             self.set(0, addr);
             self.set(1, last);
 
@@ -74,30 +79,17 @@ impl FrameStack {
 
 static mut stack: FrameStack = FrameStack { top: 0 as *mut usize, pos: 0 };
 
-pub fn add_memory(base: usize, length: usize) {
-    let mut start = base & arch::PAGE_MASK;
-    let mut length = length;
-
-    // align to page size
-    if start < base || base == 0 {
-        start += arch::PAGE_SIZE;
-        length -= start - base;
+pub fn alloc() -> Frame {
+    let mut addr = unsafe { stack.pop() };
+    if addr == 0 {
+        if let Some(frame_addr) = unsafe { zone::alloc(arch::PAGE_SIZE, arch::PAGE_SIZE) } {
+            addr = frame_addr;
+        }
+        else { panic!("out of memory"); }
     }
-
-    let pages = length / arch::PAGE_SIZE;
-
-    for i in 0..pages {
-        let addr = start + i*arch::PAGE_SIZE;
-        free(addr as *mut usize);
-    }
+    Frame { addr: addr }
 }
 
-pub fn alloc<T>() -> *mut T {
-    let addr = unsafe { stack.pop() };
-    if addr == 0 { panic!("out of memory"); }
-    addr as *mut T
-}
-
-pub fn free<T>(ptr: *mut T) {
-    unsafe { stack.push(ptr as usize) }
+pub fn free(frame: Frame) {
+    unsafe { stack.push(frame.addr) }
 }

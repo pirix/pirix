@@ -1,8 +1,8 @@
 mod video {
     use arch::io;
 
-    static VMEM : usize = 0xfffffff8000b8000;
-    static mut pos : (usize, usize) = (0, 0);
+    static VMEM: usize = 0xffffff78000b8000;
+    static mut pos: (usize, usize) = (0, 0);
 
     pub unsafe fn clear() {
         for i in 0..80*25 {

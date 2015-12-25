@@ -3,6 +3,7 @@
 #![allow(unused_variables, dead_code)]
 #![no_std]
 
+extern crate rlibc;
 extern crate alloc;
 extern crate collections;
 
@@ -20,7 +21,6 @@ pub mod debug;
 //pub mod irq;
 //pub mod timer;
 pub mod mem;
-pub mod support;
 //pub mod process;
 //pub mod thread;
 //pub mod scheduler;
@@ -37,8 +37,9 @@ pub mod arch;
 pub fn main() {
     debug::init();
     debug::println("Booting Pirix 0.1");
-    mem::init();
     arch::init();
+    mem::init();
+
     loop {}
     //irq::init();
     //timer::init();
@@ -57,3 +58,6 @@ pub extern fn rust_begin_unwind(args: core::fmt::Arguments, file: &'static str, 
     log!("Problem at {}:{}: {}", file, line, args);
     loop { };
 }
+
+#[lang="eh_personality"]
+pub fn rust_eh_personality() { }

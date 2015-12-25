@@ -1,44 +1,26 @@
 ARCH ?= x86_64
+TARGET = $(ARCH)-unknown-linux-gnu
 
-AS = as --64 #$(ARCH)-elf-pirix-as
+AS = as --64
 
-LD = ld -melf_x86_64 #$(ARCH)-elf-pirix-ld
-LDFLAGS = -z max-page-size=0x1000 --gc-sections -T arch/$(ARCH)/link.ld
+LD = ld -melf_$(ARCH)
+LDFLAGS = -n --gc-sections -T arch/$(ARCH)/link.ld
 
-RUSTC = rustc
-RUSTFLAGS = -g -L build -C opt-level=0 --target=arch/$(ARCH)/target.json --out-dir build/
-
-RUSTSRC ?= ./rust/src
+RUSTCFLAGS = -g -Z no-landing-pads -C no-stack-check -C no-redzone=on
+CARGOFLAGS = --target $(TARGET)
 
 ARCHOBJS = arch/$(ARCH)/asm/init.o \
            arch/$(ARCH)/asm/irq.o
 
 all: build/kernel.elf
 
-build/kernel.elf: build/kernel.o $(ARCHOBJS) build/libcore.rlib \
-	                build/liballoc.rlib build/liballoc_system.rlib build/libcollections.rlib
+build/kernel.elf: $(ARCHOBJS) target/$(TARGET)/debug/libkernel.a
 	$(LD) $(LDFLAGS) -o $@ $^
 
-build/libcore.rlib: $(RUSTSRC)/libcore/lib.rs
-	mkdir -p build
-	$(RUSTC) $(RUSTFLAGS) --emit=link,dep-info $<
+target/$(TARGET)/debug/libkernel.a:
+	cargo rustc $(CARGOFLAGS) -- $(RUSTCFLAGS)
 
-build/librustc_unicode.rlib: $(RUSTSRC)/librustc_unicode/lib.rs build/libcore.rlib
-	$(RUSTC) $(RUSTFLAGS) --emit=link,dep-info $<
-
-build/libcollections.rlib: $(RUSTSRC)/libcollections/lib.rs build/libcore.rlib \
-	                         build/liballoc.rlib build/librustc_unicode.rlib
-	$(RUSTC) $(RUSTFLAGS) --emit=link,dep-info $<
-
-build/liballoc.rlib: $(RUSTSRC)/liballoc/lib.rs build/libcore.rlib
-	$(RUSTC) $(RUSTFLAGS) --emit=link,dep-info $<
-
-build/liballoc_system.rlib: lib/alloc_system/lib.rs build/libcore.rlib
-	$(RUSTC) $(RUSTFLAGS) --emit=link,dep-info $<
-
-build/kernel.o: kernel/kernel.rs build/liballoc_system.rlib build/libcore.rlib \
-	              build/liballoc.rlib build/libcollections.rlib
-	$(RUSTC) $(RUSTFLAGS) --emit=obj,dep-info kernel/kernel.rs
+.PHONY: target/$(TARGET)/debug/libkernel.a
 
 .S.o:
 	$(AS) -o $@ $<
@@ -46,7 +28,8 @@ build/kernel.o: kernel/kernel.rs build/liballoc_system.rlib build/libcore.rlib \
 .SUFFIXES: .o .S
 
 clean:
-	rm -f $(ARCHOBJS)  build/kernel.elf build/kernel.o build/pirix.iso
+	cargo clean
+	rm -f $(ARCHOBJS)  build/kernel.elf build/pirix.iso
 
 doc:
 	rustdoc -o build/doc kernel/kernel.rs
@@ -81,7 +64,7 @@ define GRUB_CFG
 set timeout=0
 set default=1
 menuentry "pirix" {
-  multiboot2 /boot/kernel
+  multiboot2 /boot/kernel.elf
   boot
 }
 endef
@@ -103,6 +86,6 @@ iso: build/kernel.elf boot/eltorito.img boot/grub.cfg
 	mkisofs -graft-points -R -b boot/eltorito.img -no-emul-boot \
         -boot-load-size 4 -boot-info-table -o build/pirix.iso \
          boot/=boot/ \
-         boot/kernel=build/kernel.elf
+         boot/kernel.elf=build/kernel.elf
 
 .PHONY: boot/grub.cfg doc clean all
