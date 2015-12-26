@@ -19,7 +19,7 @@ mod std {
 
 #[macro_use]
 pub mod debug;
-//pub mod irq;
+pub mod irq;
 //pub mod timer;
 pub mod mem;
 //pub mod process;
@@ -34,15 +34,20 @@ pub mod mem;
 #[path = "../arch/x86_64/mod.rs"]
 pub mod arch;
 
+pub fn ping(state: &mut arch::cpu::State) {
+    log!("ping 0x{:x}", arch::io::inb(0x60));
+}
+
 #[no_mangle]
 pub fn main() {
     debug::init();
     debug::println("Booting Pirix 0.1");
     arch::init();
+    irq::init();
     mem::init();
-
+    irq::register(33, ping);
+    irq::start();
     loop {}
-    //irq::init();
     //timer::init();
 
 
@@ -62,3 +67,9 @@ pub extern fn rust_begin_unwind(args: core::fmt::Arguments, file: &'static str, 
 
 #[lang="eh_personality"]
 pub fn rust_eh_personality() { }
+
+#[no_mangle]
+#[allow(non_snake_case)]
+pub fn _Unwind_Resume() -> ! {
+	loop { }
+}

@@ -1,0 +1,9 @@
+[submodule "rust"]
+	path = rust
+	url = https://github.com/rust-lang/rust
+[submodule "lib/rlibc"]
+	path = lib/rlibc
+	url = https://github.com/alexcrichton/rlibc
+[submodule "lib/spin"]
+	path = lib/spin
+	url = https://github.com/mvdnes/spinlock-rs

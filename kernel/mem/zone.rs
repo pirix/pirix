@@ -39,6 +39,8 @@ pub fn add(base: usize, length: usize) {
         }
     }
 
+    log!("memory zone: 0x{:x}-0x{:x} ({} MiB)", base, base+length, length/1024/1024);
+
     let mut zones = ZONES.lock();
     for i in 0..zones.len() {
         if zones[i].is_none() {

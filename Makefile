@@ -6,21 +6,51 @@ AS = as --64
 LD = ld -melf_$(ARCH)
 LDFLAGS = -n --gc-sections -T arch/$(ARCH)/link.ld
 
-RUSTCFLAGS = -g -Z no-landing-pads -C no-stack-check -C no-redzone=on
-CARGOFLAGS = --target $(TARGET)
+RUSTC ?= rustc
+RUSTCFLAGS = -L build/ -g --target=arch/$(ARCH)/target.json --out-dir build/
+RUSTSRC ?= ./rust/src
 
 ARCHOBJS = arch/$(ARCH)/asm/init.o \
            arch/$(ARCH)/asm/irq.o
 
+KERNELDEPS = build/librlibc.rlib \
+			 build/libcore.rlib \
+	         build/liballoc.rlib \
+			 build/liballoc_system.rlib \
+			 build/libcollections.rlib \
+			 build/librustc_unicode.rlib \
+		     build/libspin.rlib
+
 all: build/kernel.elf
 
-build/kernel.elf: $(ARCHOBJS) target/$(TARGET)/debug/libkernel.a
+build/kernel.elf: build/kernel.o $(KERNELDEPS) $(ARCHOBJS)
 	$(LD) $(LDFLAGS) -o $@ $^
 
-target/$(TARGET)/debug/libkernel.a:
-	cargo rustc $(CARGOFLAGS) -- $(RUSTCFLAGS)
+build/libcore.rlib: $(RUSTSRC)/libcore/lib.rs
+	mkdir -p build
+	$(RUSTC) $(RUSTCFLAGS) --emit=link,dep-info $<
 
-.PHONY: target/$(TARGET)/debug/libkernel.a
+build/librustc_unicode.rlib: $(RUSTSRC)/librustc_unicode/lib.rs build/libcore.rlib
+	$(RUSTC) $(RUSTCFLAGS) --emit=link,dep-info $<
+
+build/libcollections.rlib: $(RUSTSRC)/libcollections/lib.rs build/libcore.rlib \
+	                         build/liballoc.rlib build/librustc_unicode.rlib
+	$(RUSTC) $(RUSTCFLAGS) --emit=link,dep-info $<
+
+build/liballoc.rlib: $(RUSTSRC)/liballoc/lib.rs build/libcore.rlib
+	$(RUSTC) $(RUSTCFLAGS) --emit=link,dep-info $<
+
+build/liballoc_system.rlib: lib/alloc_system/lib.rs build/libcore.rlib
+	$(RUSTC) $(RUSTCFLAGS) --emit=link,dep-info $<
+
+build/librlibc.rlib: lib/rlibc/src/lib.rs build/libcore.rlib
+	$(RUSTC) $(RUSTCFLAGS) --emit=link,dep-info --crate-type=lib --crate-name=rlibc $<
+
+build/libspin.rlib: lib/spin/src/lib.rs build/libcore.rlib
+	$(RUSTC) $(RUSTCFLAGS) --emit=link,dep-info --crate-type=lib --crate-name=spin $<
+
+build/kernel.o: kernel/kernel.rs $(KERNELDEPS)
+	$(RUSTC) $(RUSTCFLAGS) --emit=obj,dep-info kernel/kernel.rs
 
 .S.o:
 	$(AS) -o $@ $<
@@ -29,12 +59,12 @@ target/$(TARGET)/debug/libkernel.a:
 
 clean:
 	cargo clean
-	rm -f $(ARCHOBJS)  build/kernel.elf build/pirix.iso
+	rm -f $(ARCHOBJS) $(KERNELDEPS) build/kernel.elf build/pirix.iso
 
 doc:
 	rustdoc -o build/doc kernel/kernel.rs
 
--include build/kernel.d build/libcore.d
+-include build/kernel.d
 
 #
 # QEMU
@@ -51,8 +81,8 @@ qemu-log: iso
 
 debug: iso
 	tmux new-session -d -s pirix "qemu-system-$(ARCH) -monitor stdio \
-                                 -S -s -cdrom build/pirix.iso"
-	tmux new-window -t pirix:1 "gdb -ex kernel -ex connect"
+                                 -s -cdrom build/pirix.iso"
+	tmux new-window -t pirix:1 "sleep 5; gdb -ex kernel -ex connect"
 	tmux a -t pirix
 	tmux kill-session -t pirix
 

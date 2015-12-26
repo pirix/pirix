@@ -147,13 +147,8 @@ tss:
     .space 8*65
 
 .code64
+.extern init_irq
 loader64:
-    movabs $init, %rax
-    jmp *%rax
-
-.extern main
-.section .text
-init:
     // clear the segment registers
     xor %ax, %ax
     movw %ax, %ds
@@ -163,9 +158,15 @@ init:
     movw %ax, %ss
 
     movabs $kernel_stack_start, %rsp
+    call init_irq
 
+    movabs $init, %rax
+    jmp *%rax
+
+.extern main
+.section .text
+init:
     call main
-
     cli
     hlt
 
