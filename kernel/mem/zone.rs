@@ -1,3 +1,5 @@
+use spin::Mutex;
+
 #[derive(Clone, Copy, Debug)]
 struct Zone {
     start: usize,
@@ -20,9 +22,9 @@ impl Zone {
     }
 }
 
-static mut zones: [Option<Zone>; 20] = [Option::None; 20];
+static ZONES: Mutex<[Option<Zone>; 20]> = Mutex::new([Option::None; 20]);
 
-pub unsafe fn add(base: usize, length: usize) {
+pub fn add(base: usize, length: usize) {
     let mut base = base;
     let mut length = length;
 
@@ -37,6 +39,7 @@ pub unsafe fn add(base: usize, length: usize) {
         }
     }
 
+    let mut zones = ZONES.lock();
     for i in 0..zones.len() {
         if zones[i].is_none() {
             zones[i] = Some(Zone {
@@ -49,7 +52,7 @@ pub unsafe fn add(base: usize, length: usize) {
 }
 
 pub unsafe fn alloc(size: usize, align: usize) -> Option<usize> {
-    for zone in zones.iter_mut() {
+    for zone in ZONES.lock().iter_mut() {
         if let &mut Some(ref mut zone) = zone {
             if let Some(addr) = zone.alloc(size, align) {
                 return Some(addr);

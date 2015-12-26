@@ -1,9 +1,10 @@
-#![feature(lang_items, asm, intrinsics)]
+#![feature(lang_items, asm, intrinsics, const_fn)]
 #![feature(box_syntax, alloc, collections)]
 #![allow(unused_variables, dead_code)]
 #![no_std]
 
 extern crate rlibc;
+extern crate spin;
 extern crate alloc;
 extern crate collections;
 

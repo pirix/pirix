@@ -126,14 +126,14 @@ fn read_memory_map(memory_map: &MemoryMapTag) {
 
         if max(start, _kernel_start) <= min(end, _kernel_end) {
             if start < _kernel_start {
-                unsafe { mem::zone::add(start as usize, (_kernel_start - start) as usize); }
+                mem::zone::add(start as usize, (_kernel_start - start) as usize);
             }
             if end > _kernel_end {
-                unsafe { mem::zone::add(_kernel_end as usize, (end - _kernel_end) as usize); }
+                mem::zone::add(_kernel_end as usize, (end - _kernel_end) as usize);
             }
         }
         else {
-            unsafe { mem::zone::add(area.base_addr as usize, area.length as usize); }
+            mem::zone::add(area.base_addr as usize, area.length as usize);
         }
     }
 }

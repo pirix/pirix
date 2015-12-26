@@ -1,5 +1,6 @@
 use core::mem::size_of;
 use mem::zone;
+use spin::Mutex;
 use arch::paging;
 use arch;
 
@@ -28,7 +29,7 @@ impl FrameStack {
     pub unsafe fn push(&mut self, addr: usize) {
         // check if the current frame does not exist or if it is full
         if self.pos % self.max_pos() == 0 {
-            // get the phyiscal address of the current frame or set it to 0
+            // get the physical address of the current frame or set it to 0
             let last = if self.top.is_null() { 0 } else { self.get(0) };
 
             // unmap the old top and map the provided addr as new top
@@ -77,10 +78,10 @@ impl FrameStack {
     }
 }
 
-static mut stack: FrameStack = FrameStack { top: 0 as *mut usize, pos: 0 };
+static STACK: Mutex<FrameStack> = Mutex::new(FrameStack { top: 0 as *mut usize, pos: 0 });
 
 pub fn alloc() -> Frame {
-    let mut addr = unsafe { stack.pop() };
+    let mut addr = unsafe { STACK.lock().pop() };
     if addr == 0 {
         if let Some(frame_addr) = unsafe { zone::alloc(arch::PAGE_SIZE, arch::PAGE_SIZE) } {
             addr = frame_addr;
@@ -91,5 +92,5 @@ pub fn alloc() -> Frame {
 }
 
 pub fn free(frame: Frame) {
-    unsafe { stack.push(frame.addr) }
+    unsafe { STACK.lock().push(frame.addr) }
 }

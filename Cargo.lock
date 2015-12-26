@@ -4,6 +4,7 @@ version = "0.1.0"
 dependencies = [
  "alloc_system 0.1.0",
  "rlibc 0.1.4 (registry+https://github.com/rust-lang/crates.io-index)",
+ "spin 0.3.4 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -13,5 +14,10 @@ version = "0.1.0"
 [[package]]
 name = "rlibc"
 version = "0.1.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "spin"
+version = "0.3.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
