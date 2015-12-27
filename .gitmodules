@@ -7,3 +7,7 @@
 [submodule "lib/spin"]
 	path = lib/spin
 	url = https://github.com/mvdnes/spinlock-rs
+[submodule "lib/bitflags"]
+	path = lib/bitflags
+	url = https://github.com/phil-opp/bitflags.git
+	branch = no_std

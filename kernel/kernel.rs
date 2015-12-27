@@ -8,6 +8,9 @@ extern crate spin;
 extern crate alloc;
 extern crate collections;
 
+#[macro_use]
+extern crate bitflags;
+
 mod std {
     pub use core::fmt;
     pub use core::cmp;
@@ -47,6 +50,8 @@ pub fn main() {
     mem::init();
     irq::register(33, ping);
     irq::start();
+
+    arch::paging::map(mem::Page { addr: 0x5000000 }, mem::Frame { addr: 0x2000 }, arch::paging::entry::WRITABLE);
     loop {}
     //timer::init();
 

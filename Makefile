@@ -1,8 +1,6 @@
 ARCH ?= x86_64
-TARGET = $(ARCH)-unknown-linux-gnu
 
 AS = as --64
-
 LD = ld -melf_$(ARCH)
 LDFLAGS = -n --gc-sections -T arch/$(ARCH)/link.ld
 
@@ -19,7 +17,8 @@ KERNELDEPS = build/librlibc.rlib \
 			 build/liballoc_system.rlib \
 			 build/libcollections.rlib \
 			 build/librustc_unicode.rlib \
-		     build/libspin.rlib
+		     build/libspin.rlib \
+			 build/libbitflags.rlib
 
 all: build/kernel.elf
 
@@ -48,6 +47,9 @@ build/librlibc.rlib: lib/rlibc/src/lib.rs build/libcore.rlib
 
 build/libspin.rlib: lib/spin/src/lib.rs build/libcore.rlib
 	$(RUSTC) $(RUSTCFLAGS) --emit=link,dep-info --crate-type=lib --crate-name=spin $<
+
+build/libbitflags.rlib: lib/bitflags/src/lib.rs build/libcore.rlib
+	$(RUSTC) $(RUSTCFLAGS) --emit=link,dep-info --crate-type=lib --crate-name=bitflags $<
 
 build/kernel.o: kernel/kernel.rs $(KERNELDEPS)
 	$(RUSTC) $(RUSTCFLAGS) --emit=obj,dep-info kernel/kernel.rs
