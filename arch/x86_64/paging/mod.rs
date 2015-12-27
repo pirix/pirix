@@ -10,19 +10,19 @@ type Context = *mut Table<Level4>;
 
 impl Page {
     pub fn p4_index(&self) -> usize {
-        (self.addr >> 27) & 0o777
+        (self.addr >> 39) & 0o777
     }
 
     pub fn p3_index(&self) -> usize {
-        (self.addr >> 18) & 0o777
+        (self.addr >> 30) & 0o777
     }
 
     pub fn p2_index(&self) -> usize {
-        (self.addr >> 9) & 0o777
+        (self.addr >> 21) & 0o777
     }
 
     pub fn p1_index(&self) -> usize {
-        (self.addr >> 0) & 0o777
+        (self.addr >> 12) & 0o777
     }
 }
 

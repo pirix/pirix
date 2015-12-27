@@ -51,7 +51,7 @@ pub fn main() {
     irq::register(33, ping);
     irq::start();
 
-    arch::paging::map(mem::Page { addr: 0x5000000 }, mem::Frame { addr: 0x2000 }, arch::paging::entry::WRITABLE);
+    arch::paging::map(mem::Page { addr: 0x500000000 }, mem::Frame { addr: 0x2000 }, arch::paging::entry::WRITABLE);
     loop {}
     //timer::init();
 
